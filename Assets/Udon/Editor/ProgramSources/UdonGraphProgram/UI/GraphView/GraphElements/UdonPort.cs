@@ -66,18 +66,20 @@ namespace VRC.Udon.Editor.ProgramSources.UdonGraphProgram.UI.GraphView
                 return;
             }
 
-            var value = TryGetValueObject(out object result);
-            var field = UdonFieldFactory.CreateField(
-                portType,
-                result,
-                newValue => SetNewValue(newValue)
-            );
-            
-            if(field != null)
+            if (TryGetValueObject(out object result, portType))
             {
-                SetupField(field);
-            }
+                var field = UdonFieldFactory.CreateField(
+                    portType,
+                    result,
+                    newValue => SetNewValue(newValue)
+                );
             
+                if(field != null)
+                {
+                    SetupField(field);
+                }
+            }
+
             if (_udonNodeData.fullName.StartsWith("Const"))
             {
                 RemoveConnector();
@@ -359,11 +361,11 @@ namespace VRC.Udon.Editor.ProgramSources.UdonGraphProgram.UI.GraphView
             }
         }
 
-        private bool TryGetValueObject(out object result)
+        private bool TryGetValueObject(out object result, Type type = null)
         {
             // Initialize out object
             result = null;
-            
+
             // get container from node values
             SerializableObjectContainer container = _udonNodeData.nodeValues[_nodeValueIndex];
             
@@ -373,11 +375,20 @@ namespace VRC.Udon.Editor.ProgramSources.UdonGraphProgram.UI.GraphView
             
             // Deserialize into result, return failure on null
             result = container.Deserialize();
-            if(result == null)
-                return false;
-            
+
+            // Strings will deserialize as null, that's ok
+            if (type == null || type == typeof(string))
+            {
+                return true;
+            }
+            // any other type is not ok to be null
+            else if (result == null)
+            {
+                return false;   
+            }
+
             // Success - return true
-            return true;
+            return type.IsInstanceOfType(result);
         }
 
         private void SetNewValue(object newValue)

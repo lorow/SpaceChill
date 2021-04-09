@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4f11136daadff0b44ac2278a314682ab, type: 3}
   m_Name: ButtonSyncOwner
   m_EditorClassIdentifier: 
-  serializedUdonProgramAsset: {fileID: 11400000, guid: 2e151f93fb6689642b9cc45381abdaad,
+  serializedUdonProgramAsset: {fileID: 11400000, guid: 7d229a687abaff449b80293753402498,
     type: 2}
   udonAssembly: ".data_start\r\n\r\n    .export uiText\r\n    .export clickCount\r\n
     \   .sync clickCount, none\r\n    \r\n    Boolean_0: %SystemBoolean, null\r\n
@@ -24,15 +24,13 @@ MonoBehaviour:
     %SystemInt32, null\r\n\r\n.data_end\r\n\r\n.code_start\r\n\r\n    .export OnClick\r\n
     \   \r\n    OnClick:\r\n    \r\n        PUSH, obj_0\r\n        PUSH, Boolean_0\r\n
     \       EXTERN, \"VRCSDKBaseNetworking.__IsOwner__UnityEngineGameObject__SystemBoolean\"\r\n
-    \       PUSH, Boolean_0\r\n        JUMP_IF_FALSE, 0x000000BC\r\n        PUSH,
-    clickCount\r\n        PUSH, Int32_1\r\n        PUSH, clickCount\r\n        EXTERN,
-    \"SystemInt32.__op_Addition__SystemInt32_SystemInt32__SystemInt32\"\r\n        PUSH,
-    clickCount\r\n        PUSH, clickCount\r\n        COPY\r\n        PUSH, uiText\r\n
-    \       PUSH, instance_0\r\n        COPY\r\n        PUSH, clickCount\r\n        PUSH,
-    instance_1\r\n        COPY\r\n        PUSH, clickCount\r\n        PUSH, value_0\r\n
-    \       EXTERN, \"SystemInt32.__ToString__SystemString\"\r\n        PUSH, instance_0\r\n
-    \       PUSH, value_0\r\n        EXTERN, \"UnityEngineUIText.__set_text__SystemString__SystemVoid\"\r\n
-    \       JUMP, 0x000000BC\r\n        JUMP, 0xFFFFFFFC\r\n    \r\n    .export _onDeserialization\r\n
+    \       PUSH, Boolean_0\r\n        JUMP_IF_FALSE, 0x0000A8\r\n        PUSH, clickCount\r\n
+    \       PUSH, Int32_1\r\n        PUSH, clickCount\r\n        EXTERN, \"SystemInt32.__op_Addition__SystemInt32_SystemInt32__SystemInt32\"\r\n
+    \       PUSH, uiText\r\n        PUSH, instance_0\r\n        COPY\r\n        PUSH,
+    clickCount\r\n        PUSH, instance_1\r\n        COPY\r\n        PUSH, clickCount\r\n
+    \       PUSH, value_0\r\n        EXTERN, \"SystemInt32.__ToString__SystemString\"\r\n
+    \       PUSH, instance_0\r\n        PUSH, value_0\r\n        EXTERN, \"UnityEngineUIText.__set_text__SystemString__SystemVoid\"\r\n
+    \       JUMP, 0x0000A8\r\n        JUMP, 0xFFFFFFFC\r\n    \r\n    .export _onDeserialization\r\n
     \   \r\n    _onDeserialization:\r\n    \r\n        PUSH, uiText\r\n        PUSH,
     instance_2\r\n        COPY\r\n        PUSH, clickCount\r\n        PUSH, value_1\r\n
     \       EXTERN, \"SystemInt32.__ToString__SystemString\"\r\n        PUSH, instance_2\r\n
@@ -209,7 +207,6 @@ MonoBehaviour:
       flowUIDs:
       - 4b420ac5-0590-4ed1-b0c0-6c7136ddef8b
       nodeValues: []
-    updateOrder: 0
   graphElementData:
   - type: 2
     uid: 1e5e4bad-4245-446a-9a2d-60da0b040c87
@@ -228,8 +225,4 @@ MonoBehaviour:
     uid: 6d8100ed-ed44-4f98-9bc5-2276e764a4b9
     jsonData: '{"uid":"6d8100ed-ed44-4f98-9bc5-2276e764a4b9","layout":{"serializedVersion":"2","x":-96.1375732421875,"y":58.6796875,"width":195.0,"height":113.0},"title":"This
       event runs on everyone EXCEPT the Owner.","layer":0,"elementTypeColor":{"r":0.0,"g":0.0,"b":0.0,"a":0.0}}'
-  viewTransform:
-    position: {x: 0, y: 0}
-    scale: 1
-  version: 1.0.0
   showAssembly: 1

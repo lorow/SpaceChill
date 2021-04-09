@@ -13,7 +13,7 @@ namespace VRC.Udon.Editor {
         public static string[] requiredPackages =
         {
             "com.unity.cinemachine@2.6.1",
-            "com.unity.postprocessing@2.3.0",
+            "com.unity.postprocessing@3.0.3",
             "com.unity.textmeshpro@1.5.1",
         };
         

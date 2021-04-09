@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4f11136daadff0b44ac2278a314682ab, type: 3}
   m_Name: SliderSync
   m_EditorClassIdentifier: 
-  serializedUdonProgramAsset: {fileID: 11400000, guid: f7fc7a57fcd25e14fbf1f5f6938276f2,
+  serializedUdonProgramAsset: {fileID: 11400000, guid: ae0a3672e9e834b4e97bfc1537876407,
     type: 2}
   udonAssembly: ".data_start\r\n\r\n    .export uiSlider\r\n    .export uiText\r\n
     \   .sync sliderValue, none\r\n    \r\n    instance_0: %UnityEngineUISlider, null\r\n
@@ -31,14 +31,13 @@ MonoBehaviour:
     \       PUSH, instance_1\r\n        PUSH, value_1\r\n        EXTERN, \"UnityEngineUIText.__set_text__SystemString__SystemVoid\"\r\n
     \       JUMP, 0xFFFFFFFC\r\n    \r\n    .export OnValueChanged\r\n    \r\n    OnValueChanged:\r\n
     \   \r\n        PUSH, obj_0\r\n        PUSH, Boolean_0\r\n        EXTERN, \"VRCSDKBaseNetworking.__IsOwner__UnityEngineGameObject__SystemBoolean\"\r\n
-    \       PUSH, Boolean_0\r\n        JUMP_IF_FALSE, 0x0000012C\r\n        PUSH,
-    uiSlider\r\n        PUSH, instance_3\r\n        COPY\r\n        PUSH, instance_3\r\n
-    \       PUSH, sliderValue\r\n        EXTERN, \"UnityEngineUISlider.__get_value__SystemSingle\"\r\n
-    \       PUSH, sliderValue\r\n        PUSH, sliderValue\r\n        COPY\r\n        PUSH,
-    uiText\r\n        PUSH, instance_4\r\n        COPY\r\n        PUSH, sliderValue\r\n
-    \       PUSH, value_2\r\n        EXTERN, \"SystemSingle.__ToString__SystemString\"\r\n
+    \       PUSH, Boolean_0\r\n        JUMP_IF_FALSE, 0x000118\r\n        PUSH, uiSlider\r\n
+    \       PUSH, instance_3\r\n        COPY\r\n        PUSH, instance_3\r\n        PUSH,
+    sliderValue\r\n        EXTERN, \"UnityEngineUISlider.__get_value__SystemSingle\"\r\n
+    \       PUSH, uiText\r\n        PUSH, instance_4\r\n        COPY\r\n        PUSH,
+    sliderValue\r\n        PUSH, value_2\r\n        EXTERN, \"SystemSingle.__ToString__SystemString\"\r\n
     \       PUSH, instance_4\r\n        PUSH, value_2\r\n        EXTERN, \"UnityEngineUIText.__set_text__SystemString__SystemVoid\"\r\n
-    \       JUMP, 0x0000012C\r\n        JUMP, 0xFFFFFFFC\r\n    \r\n\r\n.code_end\r\n"
+    \       JUMP, 0x000118\r\n        JUMP, 0xFFFFFFFC\r\n    \r\n\r\n.code_end\r\n"
   assemblyError: 
   graphData:
     name: 
@@ -257,7 +256,6 @@ MonoBehaviour:
       nodeValues:
       - unityObjectValue: {fileID: 0}
         stringValue: System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089|681f688f-6b05-479f-b350-84415532656d
-    updateOrder: 0
   graphElementData:
   - type: 2
     uid: 6a0871a6-97af-462f-868e-423ad3ffbeaa
@@ -277,8 +275,4 @@ MonoBehaviour:
     jsonData: '{"uid":"01ff7ac5-acdd-4207-a8e8-d4953ab13349","layout":{"serializedVersion":"2","x":102.05235290527344,"y":446.74249267578127,"width":600.0555419921875,"height":62.926856994628909},"title":"The
       sliderValue is a float, which means it''s a number with a decimal. We can turn
       this into text using Float To string","layer":0,"elementTypeColor":{"r":0.0,"g":0.0,"b":0.0,"a":0.0}}'
-  viewTransform:
-    position: {x: 0, y: 0}
-    scale: 1
-  version: 1.0.0
   showAssembly: 1

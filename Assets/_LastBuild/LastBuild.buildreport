@@ -1,0 +1,2013 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1125 &1
+BuildReport:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: LastBuild
+  m_Summary:
+    buildStartTime:
+      serializedVersion: 2
+      ticks: 637504110873543025
+    buildGUID: 00000000000000000000000000000000
+    platformName: Win64
+    platformGroupName: Standalone
+    options: 16
+    assetBundleOptions: 32
+    outputPath: C:/Users/lorow/AppData/Local/Temp/DefaultCompany/SpaceChill/scene-standalonewindows64-testing.vrcw
+    crc: 840326047
+    totalSize: 5103925
+    totalTimeTicks: 558593095
+    totalErrors: 0
+    totalWarnings: 0
+    buildType: 1
+    buildResult: 1
+  m_Files:
+  - path: G:/SpaceChill/scene-standalonewindows64-testing.vrcw/BuildPlayer-testing
+    role: Scene
+    id: 0
+    totalSize: 642160
+  - path: G:/SpaceChill/scene-standalonewindows64-testing.vrcw/BuildPlayer-testing.sharedAssets
+    role: SharedAssets
+    id: 1
+    totalSize: 33526600
+  - path: G:/SpaceChill/scene-standalonewindows64-testing.vrcw/BuildPlayer-testing.resource
+    role: StreamingResourceFile
+    id: 2
+    totalSize: 536512
+  - path: G:/SpaceChill/scene-standalonewindows64-testing.vrcw
+    role: AssetBundle
+    id: 3
+    totalSize: 5097788
+  - path: G:/SpaceChill/scene-standalonewindows64-testing.vrcw.manifest
+    role: AssetBundleTextManifest
+    id: 4
+    totalSize: 4939
+  - path: G:/SpaceChill/SpaceChill/CAB-637781cd697a97b6f6da317da2fbda5d
+    role: ResourcesFile
+    id: 5
+    totalSize: 4308
+  - path: G:/SpaceChill/SpaceChill
+    role: ManifestAssetBundle
+    id: 6
+    totalSize: 1032
+  - path: G:/SpaceChill/SpaceChill.manifest
+    role: AssetBundleTextManifest
+    id: 7
+    totalSize: 166
+  m_BuildSteps:
+  - stepName: Build Asset Bundles
+    durationTicks: 558593095
+    depth: 0
+    messages: []
+  - stepName: Calculate asset bundles to be built
+    durationTicks: 326231
+    depth: 1
+    messages: []
+  - stepName: Compile scripts
+    durationTicks: 61788864
+    depth: 1
+    messages: []
+  - stepName: Build player
+    durationTicks: 304841842
+    depth: 1
+    messages: []
+  - stepName: Prepare assets for target platform
+    durationTicks: 114666
+    depth: 2
+    messages: []
+  - stepName: Prepare splash screen
+    durationTicks: 8
+    depth: 2
+    messages: []
+  - stepName: Building scenes
+    durationTicks: 158532282
+    depth: 2
+    messages: []
+  - stepName: Building scene Assets/testing.unity
+    durationTicks: 158532249
+    depth: 3
+    messages: []
+  - stepName: Writing asset files
+    durationTicks: 57074858
+    depth: 2
+    messages: []
+  - stepName: Packaging assets - archive:/BuildPlayer-testing/BuildPlayer-testing.sharedAssets
+    durationTicks: 57041816
+    depth: 3
+    messages: []
+  - stepName: Creating compressed player package
+    durationTicks: 73856203
+    depth: 2
+    messages: []
+  - stepName: Postprocess built player
+    durationTicks: 104482
+    depth: 2
+    messages: []
+  m_Appendices:
+  - {fileID: 4282348396156308030}
+  - {fileID: 1126744187431782196}
+  - {fileID: 1126782090351637416}
+  - {fileID: 3324437309900704106}
+  - {fileID: 4190729890186106846}
+  - {fileID: 1126711988554044872}
+--- !u!1126 &1126711988554044872
+PackedAssets:
+  m_File: 5
+  m_ShortPath: CAB-637781cd697a97b6f6da317da2fbda5d
+  m_Overhead: 4096
+  m_Contents:
+  - fileID: 1
+    classID: 142
+    packedSize: 104
+    sourceAssetGUID: 00000000000000000000000000000000
+    buildTimeAssetPath: AssetBundle Object
+  - fileID: 2
+    classID: 290
+    packedSize: 108
+    sourceAssetGUID: 00000000000000000000000000000000
+    buildTimeAssetPath: 'Built-in AssetBundleManifest: AssetBundleManifest'
+--- !u!1126 &1126744187431782196
+PackedAssets:
+  m_File: 1
+  m_ShortPath: BuildPlayer-testing.sharedAssets
+  m_Overhead: 88279
+  m_Contents:
+  - fileID: 1
+    classID: 150
+    packedSize: 145
+    sourceAssetGUID: 00000000000000000000000000000000
+    buildTimeAssetPath: 
+  - fileID: 2
+    classID: 142
+    packedSize: 144
+    sourceAssetGUID: 00000000000000000000000000000000
+    buildTimeAssetPath: 
+  - fileID: 3
+    classID: 21
+    packedSize: 1096
+    sourceAssetGUID: 0000000000000000f000000000000000
+    buildTimeAssetPath: Resources/unity_builtin_extra
+  - fileID: 4
+    classID: 21
+    packedSize: 1064
+    sourceAssetGUID: 0000000000000000f000000000000000
+    buildTimeAssetPath: Resources/unity_builtin_extra
+  - fileID: 5
+    classID: 21
+    packedSize: 572
+    sourceAssetGUID: dfa3df02074a4a244bdae8f939beccbe
+    buildTimeAssetPath: Assets/USharpVideo/Materials/RTGrabMaterial.mat
+  - fileID: 6
+    classID: 21
+    packedSize: 680
+    sourceAssetGUID: 5f9bbf478c2b961468f0472188c111fb
+    buildTimeAssetPath: Assets/USharpVideo/Materials/UIMaterial.mat
+  - fileID: 7
+    classID: 21
+    packedSize: 1008
+    sourceAssetGUID: f9f0ca4e1c93d7c449df855cc90deab0
+    buildTimeAssetPath: Assets/USharpVideo/Materials/VideoScreen.mat
+  - fileID: 8
+    classID: 21
+    packedSize: 1140
+    sourceAssetGUID: c815f7613a04b724089c206857e57c6a
+    buildTimeAssetPath: Assets/VRCSDK/Sample Assets/Materials/MirrorReflection.mat
+  - fileID: 9
+    classID: 21
+    packedSize: 892
+    sourceAssetGUID: 99f7ea0146bcbb64d97a8468253bb347
+    buildTimeAssetPath: Assets/VRChat Examples/Materials/CubeMat2.mat
+  - fileID: 10
+    classID: 21
+    packedSize: 532
+    sourceAssetGUID: 219b8b6950b888f40b189f45cb13f02a
+    buildTimeAssetPath: Assets/VRChat Examples/Materials/TriggerAreaMat.mat
+  - fileID: 11
+    classID: 21
+    packedSize: 920
+    sourceAssetGUID: cba30de4550b90f4f8ef7bc7d94faf95
+    buildTimeAssetPath: Assets/VRChat Examples/Materials/UnityVideoPlayerScreen.mat
+  - fileID: 12
+    classID: 21
+    packedSize: 900
+    sourceAssetGUID: fd20e45036ef323459e8286e9c23c02c
+    buildTimeAssetPath: Assets/VRChat Examples/SampleAssetsSet/Materials/GridFloor_udon.mat
+  - fileID: 13
+    classID: 21
+    packedSize: 680
+    sourceAssetGUID: 21221da753878694b9b9518a540dda85
+    buildTimeAssetPath: Assets/VRChat Examples/SampleAssetsSet/Materials/SKY_UdonLab.mat
+  - fileID: 14
+    classID: 21
+    packedSize: 932
+    sourceAssetGUID: 1c987494452b85f4ab4cac3322415907
+    buildTimeAssetPath: Assets/VRChat Examples/SampleAssetsSet/Materials/SampleAssets_matte.mat
+  - fileID: 15
+    classID: 21
+    packedSize: 936
+    sourceAssetGUID: f32dd500294c1d048bf0629cf0c69be5
+    buildTimeAssetPath: Assets/VRChat Examples/SampleAssetsSet/Materials/SampleAssets_matte_blue.mat
+  - fileID: 16
+    classID: 21
+    packedSize: 936
+    sourceAssetGUID: a6c1d9564b56ecd47b82dfa7a8f11cbe
+    buildTimeAssetPath: Assets/VRChat Examples/SampleAssetsSet/Materials/SampleAssets_matte_green.mat
+  - fileID: 17
+    classID: 21
+    packedSize: 936
+    sourceAssetGUID: 3b420fd445c370647be21f178917127d
+    buildTimeAssetPath: Assets/VRChat Examples/SampleAssetsSet/Materials/SampleAssets_matte_red.mat
+  - fileID: 18
+    classID: 21
+    packedSize: 936
+    sourceAssetGUID: 1e2cef468006db345aef0ff70a68e96f
+    buildTimeAssetPath: Assets/VRChat Examples/SampleAssetsSet/Materials/SampleAssets_mixed_green.mat
+  - fileID: 19
+    classID: 21
+    packedSize: 936
+    sourceAssetGUID: 3fc341313acf6ac48af69958cf612904
+    buildTimeAssetPath: Assets/VRChat Examples/SampleAssetsSet/Materials/SampleAssets_mixed_red.mat
+  - fileID: 20
+    classID: 21
+    packedSize: 936
+    sourceAssetGUID: 5461c3b904b45cb4b932e10263cb3c88
+    buildTimeAssetPath: Assets/VRChat Examples/SampleAssetsSet/Materials/SampleAssets_shine_blue.mat
+  - fileID: 21
+    classID: 21
+    packedSize: 936
+    sourceAssetGUID: 2d24fc897d87d8d4a80a06e5684c2eb7
+    buildTimeAssetPath: Assets/VRChat Examples/SampleAssetsSet/Materials/SampleAssets_shine_green.mat
+  - fileID: 22
+    classID: 21
+    packedSize: 936
+    sourceAssetGUID: d419d3432b8a0a24b986e614c57c2039
+    buildTimeAssetPath: Assets/VRChat Examples/SampleAssetsSet/Materials/SampleAssets_shine_red.mat
+  - fileID: 23
+    classID: 21
+    packedSize: 532
+    sourceAssetGUID: e44af93d9fc79e24da143d600f218c90
+    buildTimeAssetPath: Assets/harry_t/ht8b_desktop/mdesktopassets.mat
+  - fileID: 24
+    classID: 21
+    packedSize: 552
+    sourceAssetGUID: c808bff9ed7cc1941ad808943fab244c
+    buildTimeAssetPath: Assets/harry_t/ht8b_desktop/mdesktope.mat
+  - fileID: 25
+    classID: 21
+    packedSize: 520
+    sourceAssetGUID: 78cc3a8a8c61b3146a997ac097bba3b5
+    buildTimeAssetPath: Assets/harry_t/ht8b_desktop/mdesktopwhiteou.mat
+  - fileID: 26
+    classID: 21
+    packedSize: 528
+    sourceAssetGUID: 479e934fcc125b74582e455c144e400c
+    buildTimeAssetPath: Assets/harry_t/ht8b_desktop/mgameview.mat
+  - fileID: 27
+    classID: 21
+    packedSize: 892
+    sourceAssetGUID: 397c2fcfe58ef54439ec7bed699754a9
+    buildTimeAssetPath: Assets/harry_t/ht8b_materials/mballs.mat
+  - fileID: 28
+    classID: 21
+    packedSize: 532
+    sourceAssetGUID: 6a2dd6f6c7ee9fa4ea19fd3f7547cc3a
+    buildTimeAssetPath: Assets/harry_t/ht8b_materials/mcontactshadow.mat
+  - fileID: 29
+    classID: 21
+    packedSize: 656
+    sourceAssetGUID: feb1219745a919e4f8b190c48a579b75
+    buildTimeAssetPath: Assets/harry_t/ht8b_materials/mcuecenter_0.mat
+  - fileID: 30
+    classID: 21
+    packedSize: 656
+    sourceAssetGUID: a20d4cbf460866441adc19feb467abc9
+    buildTimeAssetPath: Assets/harry_t/ht8b_materials/mcuecenter_1.mat
+  - fileID: 31
+    classID: 21
+    packedSize: 604
+    sourceAssetGUID: 08449cb337aa5154eb9776a96efd80e4
+    buildTimeAssetPath: Assets/harry_t/ht8b_materials/mcuegrip_0.mat
+  - fileID: 32
+    classID: 21
+    packedSize: 604
+    sourceAssetGUID: 61dcb852d7161f74c8a5e8dcc64de8e9
+    buildTimeAssetPath: Assets/harry_t/ht8b_materials/mcuegrip_1.mat
+  - fileID: 33
+    classID: 21
+    packedSize: 588
+    sourceAssetGUID: c124011a1754a804780db881a598a17e
+    buildTimeAssetPath: Assets/harry_t/ht8b_materials/mcueguideline.mat
+  - fileID: 34
+    classID: 21
+    packedSize: 604
+    sourceAssetGUID: f1a07ab15fecaa84eab2e47b3bfaaff9
+    buildTimeAssetPath: Assets/harry_t/ht8b_materials/mcuehitpos.mat
+  - fileID: 35
+    classID: 21
+    packedSize: 920
+    sourceAssetGUID: 6be31ec5303b1a44b92374eed50d4e48
+    buildTimeAssetPath: Assets/harry_t/ht8b_materials/mcuestick.mat
+  - fileID: 36
+    classID: 21
+    packedSize: 528
+    sourceAssetGUID: 295f9c00aee761045aaffdf49da4dffc
+    buildTimeAssetPath: Assets/harry_t/ht8b_materials/minfo_add.mat
+  - fileID: 37
+    classID: 21
+    packedSize: 528
+    sourceAssetGUID: 2ba0cc9df10229148ba45ca99764d762
+    buildTimeAssetPath: Assets/harry_t/ht8b_materials/minfo_reset.mat
+  - fileID: 38
+    classID: 21
+    packedSize: 896
+    sourceAssetGUID: 652ff64e0a288604092b14a93109ef87
+    buildTimeAssetPath: Assets/harry_t/ht8b_materials/minteractive.mat
+  - fileID: 39
+    classID: 21
+    packedSize: 600
+    sourceAssetGUID: bf223c28f40d06c45abf56baaefaffa6
+    buildTimeAssetPath: Assets/harry_t/ht8b_materials/mmarker.mat
+  - fileID: 40
+    classID: 21
+    packedSize: 644
+    sourceAssetGUID: ee13a05fb7336594bb73ec86150f2852
+    buildTimeAssetPath: Assets/harry_t/ht8b_materials/mrepositionico.mat
+  - fileID: 41
+    classID: 21
+    packedSize: 612
+    sourceAssetGUID: a6f828c93cc83274f99b7dfed5e5d3c3
+    buildTimeAssetPath: Assets/harry_t/ht8b_materials/mscorecard.mat
+  - fileID: 42
+    classID: 21
+    packedSize: 708
+    sourceAssetGUID: 28231051462747445b616dc8ecdd10f0
+    buildTimeAssetPath: Assets/harry_t/ht8b_materials/mtable.mat
+  - fileID: 43
+    classID: 21
+    packedSize: 680
+    sourceAssetGUID: 6e4cb6f8b73683c408dc0d0ce9f7d9e8
+    buildTimeAssetPath: Assets/harry_t/ht8b_materials/mtext_strong.mat
+  - fileID: 44
+    classID: 21
+    packedSize: 520
+    sourceAssetGUID: 2f33cec77e6be55488e6a614c288fce1
+    buildTimeAssetPath: Assets/harry_t/ht8b_materials/mui.mat
+  - fileID: 45
+    classID: 21
+    packedSize: 528
+    sourceAssetGUID: 786128f13534cfe488a3ef6dce80e5ef
+    buildTimeAssetPath: Assets/harry_t/ht8b_materials/mui_additive.mat
+  - fileID: 46
+    classID: 21
+    packedSize: 896
+    sourceAssetGUID: 48877f65efef46f43b35bae5852d98c8
+    buildTimeAssetPath: Assets/materials/bentLight.mat
+  - fileID: 47
+    classID: 21
+    packedSize: 912
+    sourceAssetGUID: ac1e6d6a59ee13f4fa02fc13cd05c66c
+    buildTimeAssetPath: Assets/materials/bentLightLight.mat
+  - fileID: 48
+    classID: 21
+    packedSize: 992
+    sourceAssetGUID: 48965e8316ecd0b4286e1ee59f21aef5
+    buildTimeAssetPath: Assets/materials/glass.mat
+  - fileID: 49
+    classID: 21
+    packedSize: 800
+    sourceAssetGUID: c22777d6e868e4f2fb421913386b154e
+    buildTimeAssetPath: Packages/com.unity.probuilder/Content/Resources/Materials/ProBuilderDefault.mat
+  - fileID: 50
+    classID: 21
+    packedSize: 136
+    sourceAssetGUID: 452f7d8d1a7418943b69d2df35655ebe
+    buildTimeAssetPath: Assets/Udon/ReferenceDocs/_static/fonts/Inconsolata-Bold.ttf
+  - fileID: 51
+    classID: 21
+    packedSize: 892
+    sourceAssetGUID: 890d97c7ad6d49e45bbca6edac6590f2
+    buildTimeAssetPath: Assets/modelsGame/pillow.fbx
+  - fileID: 52
+    classID: 21
+    packedSize: 892
+    sourceAssetGUID: 8c18b8d05490d024eaee619e623caa99
+    buildTimeAssetPath: Assets/modelsGame/sit1.fbx
+  - fileID: 53
+    classID: 21
+    packedSize: 136
+    sourceAssetGUID: 98baae691215eb546a697ff7d942a5bb
+    buildTimeAssetPath: Assets/Udon/ReferenceDocs/_static/fonts/Lato-Regular.ttf
+  - fileID: 54
+    classID: 21
+    packedSize: 896
+    sourceAssetGUID: acbfb614e60c35d489e6e91574f2924f
+    buildTimeAssetPath: Assets/modelsGame/table.fbx
+  - fileID: 55
+    classID: 21
+    packedSize: 136
+    sourceAssetGUID: d8a7948bc83b01f45ab5078c10dd8e04
+    buildTimeAssetPath: Assets/Udon/ReferenceDocs/_static/fonts/Lato-Bold.ttf
+  - fileID: 56
+    classID: 21
+    packedSize: 136
+    sourceAssetGUID: e3027d149d2f75647b130d9ed7f7014c
+    buildTimeAssetPath: Assets/Udon/ReferenceDocs/_static/fonts/Inconsolata-Regular.ttf
+  - fileID: 57
+    classID: 21
+    packedSize: 888
+    sourceAssetGUID: e40b409d4d8d6064fae29f72d7403a3c
+    buildTimeAssetPath: Assets/modelsGame/bench.fbx
+  - fileID: 58
+    classID: 21
+    packedSize: 888
+    sourceAssetGUID: acbfb614e60c35d489e6e91574f2924f
+    buildTimeAssetPath: Assets/modelsGame/table.fbx
+  - fileID: 59
+    classID: 21
+    packedSize: 892
+    sourceAssetGUID: acbfb614e60c35d489e6e91574f2924f
+    buildTimeAssetPath: Assets/modelsGame/table.fbx
+  - fileID: 60
+    classID: 21
+    packedSize: 892
+    sourceAssetGUID: acbfb614e60c35d489e6e91574f2924f
+    buildTimeAssetPath: Assets/modelsGame/table.fbx
+  - fileID: 61
+    classID: 21
+    packedSize: 896
+    sourceAssetGUID: acbfb614e60c35d489e6e91574f2924f
+    buildTimeAssetPath: Assets/modelsGame/table.fbx
+  - fileID: 62
+    classID: 28
+    packedSize: 21964
+    sourceAssetGUID: 0000000000000000f000000000000000
+    buildTimeAssetPath: Resources/unity_builtin_extra
+  - fileID: 63
+    classID: 28
+    packedSize: 21952
+    sourceAssetGUID: 0000000000000000f000000000000000
+    buildTimeAssetPath: Resources/unity_builtin_extra
+  - fileID: 64
+    classID: 28
+    packedSize: 5564
+    sourceAssetGUID: 0000000000000000f000000000000000
+    buildTimeAssetPath: Resources/unity_builtin_extra
+  - fileID: 65
+    classID: 28
+    packedSize: 5568
+    sourceAssetGUID: 0000000000000000f000000000000000
+    buildTimeAssetPath: Resources/unity_builtin_extra
+  - fileID: 66
+    classID: 28
+    packedSize: 5576
+    sourceAssetGUID: 0000000000000000f000000000000000
+    buildTimeAssetPath: Resources/unity_builtin_extra
+  - fileID: 67
+    classID: 28
+    packedSize: 21956
+    sourceAssetGUID: 0000000000000000f000000000000000
+    buildTimeAssetPath: Resources/unity_builtin_extra
+  - fileID: 68
+    classID: 28
+    packedSize: 5564
+    sourceAssetGUID: 0000000000000000f000000000000000
+    buildTimeAssetPath: Resources/unity_builtin_extra
+  - fileID: 69
+    classID: 28
+    packedSize: 16456
+    sourceAssetGUID: 130f7511613c1f34e8024ac96e80f728
+    buildTimeAssetPath: Assets/harry_t/ht8b_materials/tballs_US.psd
+  - fileID: 70
+    classID: 28
+    packedSize: 14044
+    sourceAssetGUID: 20df9beb425d16b4da715ba708d399a8
+    buildTimeAssetPath: Assets/harry_t/ht8b_materials/tballs_HT_0.psd
+  - fileID: 71
+    classID: 28
+    packedSize: 1398256
+    sourceAssetGUID: 252675587bd0e5841aa3c82a5098201c
+    buildTimeAssetPath: Assets/VRChat Examples/SampleAssetsSet/Textures/textures_shine/SampleAssetsSet_V1_phong1_Normal.png
+  - fileID: 72
+    classID: 28
+    packedSize: 109832
+    sourceAssetGUID: 2abb007c2a2a4f542ae8a6988eec659b
+    buildTimeAssetPath: Assets/harry_t/ht8b_materials/ttable_stuff.tga
+  - fileID: 73
+    classID: 28
+    packedSize: 699180
+    sourceAssetGUID: 3cae02495b88d2d4fbf19382b7993691
+    buildTimeAssetPath: Assets/VRCSDK/Sample Assets/Prototyping/Textures/prototype_blue_dff.png
+  - fileID: 74
+    classID: 28
+    packedSize: 87520
+    sourceAssetGUID: 3d8579bba8b7da04e9dda290b1c4b69d
+    buildTimeAssetPath: Assets/USharpVideo/UI/VolumeOffIcon.png
+  - fileID: 75
+    classID: 28
+    packedSize: 108
+    sourceAssetGUID: 452f7d8d1a7418943b69d2df35655ebe
+    buildTimeAssetPath: Assets/Udon/ReferenceDocs/_static/fonts/Inconsolata-Bold.ttf
+  - fileID: 76
+    classID: 28
+    packedSize: 1398268
+    sourceAssetGUID: 4ba9f24739c8721499ae85110ba2157d
+    buildTimeAssetPath: Assets/VRChat Examples/SampleAssetsSet/Textures/texture_matte/SampleAssetsSet_V1_phong1_MetallicSmoothness.png
+  - fileID: 77
+    classID: 28
+    packedSize: 1398256
+    sourceAssetGUID: 559d1fda9b459bc43a0b78d7fbe50b00
+    buildTimeAssetPath: Assets/VRChat Examples/SampleAssetsSet/Textures/textures_mixed/SampleAssetsSet_V1_phong1_Normal.png
+  - fileID: 78
+    classID: 28
+    packedSize: 2796324
+    sourceAssetGUID: 55ed150a45ead9d4d90afea6965d5880
+    buildTimeAssetPath: Assets/harry_t/ht8b_materials/tui_basis.psd
+  - fileID: 79
+    classID: 28
+    packedSize: 1398256
+    sourceAssetGUID: 5e07d6e71c9ed3f409237935b1c7a96e
+    buildTimeAssetPath: Assets/VRChat Examples/SampleAssetsSet/Textures/texture_matte/SampleAssetsSet_V1_phong1_Normal.png
+  - fileID: 80
+    classID: 28
+    packedSize: 174888
+    sourceAssetGUID: 6344bf96fbda94141a525046d088fb23
+    buildTimeAssetPath: Packages/com.unity.probuilder/Content/Resources/Textures/GridBox_Default.png
+  - fileID: 81
+    classID: 28
+    packedSize: 174876
+    sourceAssetGUID: 698db877e39193947a4be69bbb6acd30
+    buildTimeAssetPath: Assets/harry_t/ht8b_materials/tcue.psd
+  - fileID: 82
+    classID: 28
+    packedSize: 87516
+    sourceAssetGUID: 6cd63d5dffe834d48bf7d6d21886191d
+    buildTimeAssetPath: Assets/USharpVideo/UI/VolumeUpIcon.png
+  - fileID: 83
+    classID: 28
+    packedSize: 2796356
+    sourceAssetGUID: 6d3a4716a21ee164eb4b89e692a0c95c
+    buildTimeAssetPath: Assets/VRChat Examples/SampleAssetsSet/Textures/textures_mixed/SampleAssetsSet_V1_phong1_AlbedoTransparency.png
+  - fileID: 84
+    classID: 28
+    packedSize: 87516
+    sourceAssetGUID: 72ed45fa65deb2e47946aecb14641080
+    buildTimeAssetPath: Assets/USharpVideo/UI/LockedIcon.png
+  - fileID: 85
+    classID: 28
+    packedSize: 804
+    sourceAssetGUID: 76020b57b9bf38f428183a0f6e098c25
+    buildTimeAssetPath: Assets/harry_t/ht8b_materials/tguideline.psd
+  - fileID: 86
+    classID: 28
+    packedSize: 87516
+    sourceAssetGUID: 9167dd3d2e3ef014b8f654bc2ed65bc8
+    buildTimeAssetPath: Assets/USharpVideo/UI/UnlockedIcon.png
+  - fileID: 87
+    classID: 28
+    packedSize: 2796356
+    sourceAssetGUID: 95687c795811ccb4e940f7c5f0864b08
+    buildTimeAssetPath: Assets/VRChat Examples/SampleAssetsSet/Textures/textures_shine/SampleAssetsSet_V1_phong1_AlbedoTransparency.png
+  - fileID: 88
+    classID: 28
+    packedSize: 349664
+    sourceAssetGUID: 9615134357d7a10408ab2e0b449cb57a
+    buildTimeAssetPath: Assets/harry_t/ht8b_materials/tdesktop_stuff.psd
+  - fileID: 89
+    classID: 28
+    packedSize: 108
+    sourceAssetGUID: 98baae691215eb546a697ff7d942a5bb
+    buildTimeAssetPath: Assets/Udon/ReferenceDocs/_static/fonts/Lato-Regular.ttf
+  - fileID: 90
+    classID: 28
+    packedSize: 87512
+    sourceAssetGUID: 9e343bf2817053b4f80db9cb7cb0674c
+    buildTimeAssetPath: Assets/USharpVideo/UI/PlayIcon.png
+  - fileID: 91
+    classID: 28
+    packedSize: 87512
+    sourceAssetGUID: a6c247f1521b4e24680bea4451d79f37
+    buildTimeAssetPath: Assets/USharpVideo/UI/StopIcon.png
+  - fileID: 92
+    classID: 28
+    packedSize: 2796356
+    sourceAssetGUID: ab4e1feb84159f146bd1666598bad003
+    buildTimeAssetPath: Assets/VRChat Examples/SampleAssetsSet/Textures/texture_matte/SampleAssetsSet_V1_phong1_AlbedoTransparency.png
+  - fileID: 93
+    classID: 28
+    packedSize: 87544
+    sourceAssetGUID: af95e516afc1ea14091f1dcc6ef69390
+    buildTimeAssetPath: Assets/harry_t/ht8b_materials/tscorecard_4ball.psd
+  - fileID: 94
+    classID: 28
+    packedSize: 699176
+    sourceAssetGUID: b2c2c1a52cdb75943958a408093dee04
+    buildTimeAssetPath: Assets/VRChat Examples/SampleAssetsSet/Textures/GridFloor_udon.png
+  - fileID: 95
+    classID: 28
+    packedSize: 1398268
+    sourceAssetGUID: b82ab2397d1e79e47a6f85d50ed6fa8f
+    buildTimeAssetPath: Assets/VRChat Examples/SampleAssetsSet/Textures/textures_mixed/SampleAssetsSet_V1_phong1_MetallicSmoothness.png
+  - fileID: 96
+    classID: 28
+    packedSize: 14372
+    sourceAssetGUID: c2b3398cb65291c448c1eef062db0ccf
+    buildTimeAssetPath: Assets/harry_t/ht8b_materials/tballs_HT.psd
+  - fileID: 97
+    classID: 28
+    packedSize: 5584
+    sourceAssetGUID: c4047c738e1573e43912306df8c71140
+    buildTimeAssetPath: Assets/harry_t/ht8b_materials/t2fmove.psd
+  - fileID: 98
+    classID: 28
+    packedSize: 174972
+    sourceAssetGUID: c45132a92234b6148bd206788965b1b1
+    buildTimeAssetPath: Assets/harry_t/ht8b_materials/tscorecard.psd
+  - fileID: 99
+    classID: 28
+    packedSize: 2796320
+    sourceAssetGUID: c4649672f54466c438b2bd2383032031
+    buildTimeAssetPath: Assets/harry_t/ht8b_materials/ttable_d.tga
+  - fileID: 100
+    classID: 28
+    packedSize: 1398268
+    sourceAssetGUID: c9a5a786a2a781d4fae92d02de3b610f
+    buildTimeAssetPath: Assets/VRChat Examples/SampleAssetsSet/Textures/textures_shine/SampleAssetsSet_V1_phong1_MetallicSmoothness.png
+  - fileID: 101
+    classID: 28
+    packedSize: 2852
+    sourceAssetGUID: cd1787dc915969f44b58223b1e5d5bbf
+    buildTimeAssetPath: Assets/harry_t/ht8b_materials/ttrigatan2.png
+  - fileID: 102
+    classID: 28
+    packedSize: 2696
+    sourceAssetGUID: d622afb673497b4438cff6fb082249f2
+    buildTimeAssetPath: Assets/harry_t/ht8b_materials/tballs_UK.psd
+  - fileID: 103
+    classID: 28
+    packedSize: 87516
+    sourceAssetGUID: d715aac9a5d4a7143b47cb9b5816dc9d
+    buildTimeAssetPath: Assets/USharpVideo/UI/PauseIcon.png
+  - fileID: 104
+    classID: 28
+    packedSize: 87520
+    sourceAssetGUID: d845cc7962eac99449448e125acc8e8f
+    buildTimeAssetPath: Assets/USharpVideo/UI/InfoCircleIcon.png
+  - fileID: 105
+    classID: 28
+    packedSize: 108
+    sourceAssetGUID: d8a7948bc83b01f45ab5078c10dd8e04
+    buildTimeAssetPath: Assets/Udon/ReferenceDocs/_static/fonts/Lato-Bold.ttf
+  - fileID: 106
+    classID: 28
+    packedSize: 87520
+    sourceAssetGUID: d9d7a1911407b2347a1803b105012b18
+    buildTimeAssetPath: Assets/USharpVideo/UI/VolumeDownIcon.png
+  - fileID: 107
+    classID: 28
+    packedSize: 21956
+    sourceAssetGUID: e1d9d075ee6ad8b46bf3eb881985a448
+    buildTimeAssetPath: Assets/harry_t/ht8b_materials/tcontactshadow.png
+  - fileID: 108
+    classID: 28
+    packedSize: 108
+    sourceAssetGUID: e3027d149d2f75647b130d9ed7f7014c
+    buildTimeAssetPath: Assets/Udon/ReferenceDocs/_static/fonts/Inconsolata-Regular.ttf
+  - fileID: 109
+    classID: 28
+    packedSize: 87512
+    sourceAssetGUID: ed50b66f4596dd54f8ea61eb10bb6b2a
+    buildTimeAssetPath: Assets/USharpVideo/UI/MuteIcon.png
+  - fileID: 110
+    classID: 28
+    packedSize: 5584
+    sourceAssetGUID: f5ce505fb00b3db47b430a43d0d003ba
+    buildTimeAssetPath: Assets/harry_t/ht8b_materials/t2freset.psd
+  - fileID: 111
+    classID: 43
+    packedSize: 484
+    sourceAssetGUID: 4389421b940df2a45842e3b4a1e5bfd7
+    buildTimeAssetPath: Assets/harry_t/ht8b_geo/desktop_stuff.fbx
+  - fileID: 112
+    classID: 43
+    packedSize: 38696
+    sourceAssetGUID: 5cc7e57194e7d0d4b9981ffa83f160a3
+    buildTimeAssetPath: Assets/harry_t/ht8b_geo/cue.fbx
+  - fileID: 113
+    classID: 43
+    packedSize: 484
+    sourceAssetGUID: 6103d4b006c84024b9867f7984693862
+    buildTimeAssetPath: Assets/harry_t/ht8b_geo/4ball_points.fbx
+  - fileID: 114
+    classID: 43
+    packedSize: 148860
+    sourceAssetGUID: 7b7b6ba498f0ffc479212ee6e0c15a50
+    buildTimeAssetPath: Assets/modelsGame/lamp.fbx
+  - fileID: 115
+    classID: 43
+    packedSize: 91448
+    sourceAssetGUID: 8c18b8d05490d024eaee619e623caa99
+    buildTimeAssetPath: Assets/modelsGame/sit1.fbx
+  - fileID: 116
+    classID: 43
+    packedSize: 210540
+    sourceAssetGUID: acbfb614e60c35d489e6e91574f2924f
+    buildTimeAssetPath: Assets/modelsGame/table.fbx
+  - fileID: 117
+    classID: 43
+    packedSize: 26852
+    sourceAssetGUID: acdf19b331d91db4c8a26185f36cf089
+    buildTimeAssetPath: Assets/harry_t/ht8b_geo/balls.fbx
+  - fileID: 118
+    classID: 43
+    packedSize: 5084
+    sourceAssetGUID: bea4b1ea6a796be4a981770ef46ddc67
+    buildTimeAssetPath: Assets/harry_t/ht8b_geo/marker.fbx
+  - fileID: 119
+    classID: 43
+    packedSize: 7236
+    sourceAssetGUID: d3f824417e611664ab3b878fe3fe6f9e
+    buildTimeAssetPath: Assets/harry_t/ht8b_geo/icosphere.fbx
+  - fileID: 120
+    classID: 43
+    packedSize: 36464
+    sourceAssetGUID: e40b409d4d8d6064fae29f72d7403a3c
+    buildTimeAssetPath: Assets/modelsGame/bench.fbx
+  - fileID: 121
+    classID: 43
+    packedSize: 596
+    sourceAssetGUID: 6103d4b006c84024b9867f7984693862
+    buildTimeAssetPath: Assets/harry_t/ht8b_geo/4ball_points.fbx
+  - fileID: 122
+    classID: 43
+    packedSize: 16872
+    sourceAssetGUID: 86f5c0efe4048654fba4f0f4053b12f8
+    buildTimeAssetPath: Assets/harry_t/ht8b_geo/ht_ui.fbx
+  - fileID: 123
+    classID: 43
+    packedSize: 242460
+    sourceAssetGUID: 890d97c7ad6d49e45bbca6edac6590f2
+    buildTimeAssetPath: Assets/modelsGame/pillow.fbx
+  - fileID: 124
+    classID: 43
+    packedSize: 26852
+    sourceAssetGUID: acdf19b331d91db4c8a26185f36cf089
+    buildTimeAssetPath: Assets/harry_t/ht8b_geo/balls.fbx
+  - fileID: 125
+    classID: 43
+    packedSize: 576
+    sourceAssetGUID: 4389421b940df2a45842e3b4a1e5bfd7
+    buildTimeAssetPath: Assets/harry_t/ht8b_geo/desktop_stuff.fbx
+  - fileID: 126
+    classID: 43
+    packedSize: 796
+    sourceAssetGUID: 6dd7e1dfa1ab62f4ab1ce6c9f7d335cd
+    buildTimeAssetPath: Assets/harry_t/ht8b_geo/9ball_target.fbx
+  - fileID: 127
+    classID: 43
+    packedSize: 14488
+    sourceAssetGUID: 70108d78e82c2ec488d6b504865508e0
+    buildTimeAssetPath: Assets/VRChat Examples/SampleAssetsSet/SampleAssetsSet_V1.fbx
+  - fileID: 128
+    classID: 43
+    packedSize: 2264
+    sourceAssetGUID: 86f5c0efe4048654fba4f0f4053b12f8
+    buildTimeAssetPath: Assets/harry_t/ht8b_geo/ht_ui.fbx
+  - fileID: 129
+    classID: 43
+    packedSize: 26852
+    sourceAssetGUID: acdf19b331d91db4c8a26185f36cf089
+    buildTimeAssetPath: Assets/harry_t/ht8b_geo/balls.fbx
+  - fileID: 130
+    classID: 43
+    packedSize: 976
+    sourceAssetGUID: cd9f7b171b747f647a0f23da7dc73e27
+    buildTimeAssetPath: Assets/harry_t/ht8b_geo/table_col.fbx
+  - fileID: 131
+    classID: 43
+    packedSize: 231216
+    sourceAssetGUID: f32bdb482be829146b6d7fe31dbf7bba
+    buildTimeAssetPath: Assets/harry_t/ht8b_geo/tabletop.fbx
+  - fileID: 132
+    classID: 43
+    packedSize: 484
+    sourceAssetGUID: 4389421b940df2a45842e3b4a1e5bfd7
+    buildTimeAssetPath: Assets/harry_t/ht8b_geo/desktop_stuff.fbx
+  - fileID: 133
+    classID: 43
+    packedSize: 22576
+    sourceAssetGUID: 70108d78e82c2ec488d6b504865508e0
+    buildTimeAssetPath: Assets/VRChat Examples/SampleAssetsSet/SampleAssetsSet_V1.fbx
+  - fileID: 134
+    classID: 43
+    packedSize: 2264
+    sourceAssetGUID: 86f5c0efe4048654fba4f0f4053b12f8
+    buildTimeAssetPath: Assets/harry_t/ht8b_geo/ht_ui.fbx
+  - fileID: 135
+    classID: 43
+    packedSize: 26852
+    sourceAssetGUID: acdf19b331d91db4c8a26185f36cf089
+    buildTimeAssetPath: Assets/harry_t/ht8b_geo/balls.fbx
+  - fileID: 136
+    classID: 43
+    packedSize: 856
+    sourceAssetGUID: cd9f7b171b747f647a0f23da7dc73e27
+    buildTimeAssetPath: Assets/harry_t/ht8b_geo/table_col.fbx
+  - fileID: 137
+    classID: 43
+    packedSize: 484
+    sourceAssetGUID: f32bdb482be829146b6d7fe31dbf7bba
+    buildTimeAssetPath: Assets/harry_t/ht8b_geo/tabletop.fbx
+  - fileID: 138
+    classID: 43
+    packedSize: 488
+    sourceAssetGUID: 4389421b940df2a45842e3b4a1e5bfd7
+    buildTimeAssetPath: Assets/harry_t/ht8b_geo/desktop_stuff.fbx
+  - fileID: 139
+    classID: 43
+    packedSize: 23412
+    sourceAssetGUID: 70108d78e82c2ec488d6b504865508e0
+    buildTimeAssetPath: Assets/VRChat Examples/SampleAssetsSet/SampleAssetsSet_V1.fbx
+  - fileID: 140
+    classID: 43
+    packedSize: 2264
+    sourceAssetGUID: 86f5c0efe4048654fba4f0f4053b12f8
+    buildTimeAssetPath: Assets/harry_t/ht8b_geo/ht_ui.fbx
+  - fileID: 141
+    classID: 43
+    packedSize: 26852
+    sourceAssetGUID: acdf19b331d91db4c8a26185f36cf089
+    buildTimeAssetPath: Assets/harry_t/ht8b_geo/balls.fbx
+  - fileID: 142
+    classID: 43
+    packedSize: 856
+    sourceAssetGUID: cd9f7b171b747f647a0f23da7dc73e27
+    buildTimeAssetPath: Assets/harry_t/ht8b_geo/table_col.fbx
+  - fileID: 143
+    classID: 43
+    packedSize: 33348
+    sourceAssetGUID: f32bdb482be829146b6d7fe31dbf7bba
+    buildTimeAssetPath: Assets/harry_t/ht8b_geo/tabletop.fbx
+  - fileID: 144
+    classID: 43
+    packedSize: 492
+    sourceAssetGUID: 4389421b940df2a45842e3b4a1e5bfd7
+    buildTimeAssetPath: Assets/harry_t/ht8b_geo/desktop_stuff.fbx
+  - fileID: 145
+    classID: 43
+    packedSize: 30804
+    sourceAssetGUID: 70108d78e82c2ec488d6b504865508e0
+    buildTimeAssetPath: Assets/VRChat Examples/SampleAssetsSet/SampleAssetsSet_V1.fbx
+  - fileID: 146
+    classID: 43
+    packedSize: 2268
+    sourceAssetGUID: 86f5c0efe4048654fba4f0f4053b12f8
+    buildTimeAssetPath: Assets/harry_t/ht8b_geo/ht_ui.fbx
+  - fileID: 147
+    classID: 43
+    packedSize: 26852
+    sourceAssetGUID: acdf19b331d91db4c8a26185f36cf089
+    buildTimeAssetPath: Assets/harry_t/ht8b_geo/balls.fbx
+  - fileID: 148
+    classID: 43
+    packedSize: 856
+    sourceAssetGUID: cd9f7b171b747f647a0f23da7dc73e27
+    buildTimeAssetPath: Assets/harry_t/ht8b_geo/table_col.fbx
+  - fileID: 149
+    classID: 43
+    packedSize: 496
+    sourceAssetGUID: 4389421b940df2a45842e3b4a1e5bfd7
+    buildTimeAssetPath: Assets/harry_t/ht8b_geo/desktop_stuff.fbx
+  - fileID: 150
+    classID: 43
+    packedSize: 14484
+    sourceAssetGUID: 70108d78e82c2ec488d6b504865508e0
+    buildTimeAssetPath: Assets/VRChat Examples/SampleAssetsSet/SampleAssetsSet_V1.fbx
+  - fileID: 151
+    classID: 43
+    packedSize: 2268
+    sourceAssetGUID: 86f5c0efe4048654fba4f0f4053b12f8
+    buildTimeAssetPath: Assets/harry_t/ht8b_geo/ht_ui.fbx
+  - fileID: 152
+    classID: 43
+    packedSize: 26852
+    sourceAssetGUID: acdf19b331d91db4c8a26185f36cf089
+    buildTimeAssetPath: Assets/harry_t/ht8b_geo/balls.fbx
+  - fileID: 153
+    classID: 43
+    packedSize: 856
+    sourceAssetGUID: cd9f7b171b747f647a0f23da7dc73e27
+    buildTimeAssetPath: Assets/harry_t/ht8b_geo/table_col.fbx
+  - fileID: 154
+    classID: 43
+    packedSize: 480
+    sourceAssetGUID: 4389421b940df2a45842e3b4a1e5bfd7
+    buildTimeAssetPath: Assets/harry_t/ht8b_geo/desktop_stuff.fbx
+  - fileID: 155
+    classID: 43
+    packedSize: 2268
+    sourceAssetGUID: 86f5c0efe4048654fba4f0f4053b12f8
+    buildTimeAssetPath: Assets/harry_t/ht8b_geo/ht_ui.fbx
+  - fileID: 156
+    classID: 43
+    packedSize: 28388
+    sourceAssetGUID: acdf19b331d91db4c8a26185f36cf089
+    buildTimeAssetPath: Assets/harry_t/ht8b_geo/balls.fbx
+  - fileID: 157
+    classID: 43
+    packedSize: 2424
+    sourceAssetGUID: 86f5c0efe4048654fba4f0f4053b12f8
+    buildTimeAssetPath: Assets/harry_t/ht8b_geo/ht_ui.fbx
+  - fileID: 158
+    classID: 43
+    packedSize: 26852
+    sourceAssetGUID: acdf19b331d91db4c8a26185f36cf089
+    buildTimeAssetPath: Assets/harry_t/ht8b_geo/balls.fbx
+  - fileID: 159
+    classID: 43
+    packedSize: 976
+    sourceAssetGUID: cd9f7b171b747f647a0f23da7dc73e27
+    buildTimeAssetPath: Assets/harry_t/ht8b_geo/table_col.fbx
+  - fileID: 160
+    classID: 43
+    packedSize: 26852
+    sourceAssetGUID: acdf19b331d91db4c8a26185f36cf089
+    buildTimeAssetPath: Assets/harry_t/ht8b_geo/balls.fbx
+  - fileID: 161
+    classID: 43
+    packedSize: 856
+    sourceAssetGUID: cd9f7b171b747f647a0f23da7dc73e27
+    buildTimeAssetPath: Assets/harry_t/ht8b_geo/table_col.fbx
+  - fileID: 162
+    classID: 43
+    packedSize: 26852
+    sourceAssetGUID: acdf19b331d91db4c8a26185f36cf089
+    buildTimeAssetPath: Assets/harry_t/ht8b_geo/balls.fbx
+  - fileID: 163
+    classID: 43
+    packedSize: 856
+    sourceAssetGUID: cd9f7b171b747f647a0f23da7dc73e27
+    buildTimeAssetPath: Assets/harry_t/ht8b_geo/table_col.fbx
+  - fileID: 164
+    classID: 43
+    packedSize: 26852
+    sourceAssetGUID: acdf19b331d91db4c8a26185f36cf089
+    buildTimeAssetPath: Assets/harry_t/ht8b_geo/balls.fbx
+  - fileID: 165
+    classID: 43
+    packedSize: 856
+    sourceAssetGUID: cd9f7b171b747f647a0f23da7dc73e27
+    buildTimeAssetPath: Assets/harry_t/ht8b_geo/table_col.fbx
+  - fileID: 166
+    classID: 43
+    packedSize: 26852
+    sourceAssetGUID: acdf19b331d91db4c8a26185f36cf089
+    buildTimeAssetPath: Assets/harry_t/ht8b_geo/balls.fbx
+  - fileID: 167
+    classID: 43
+    packedSize: 856
+    sourceAssetGUID: cd9f7b171b747f647a0f23da7dc73e27
+    buildTimeAssetPath: Assets/harry_t/ht8b_geo/table_col.fbx
+  - fileID: 168
+    classID: 43
+    packedSize: 2280
+    sourceAssetGUID: 86f5c0efe4048654fba4f0f4053b12f8
+    buildTimeAssetPath: Assets/harry_t/ht8b_geo/ht_ui.fbx
+  - fileID: 169
+    classID: 43
+    packedSize: 26852
+    sourceAssetGUID: acdf19b331d91db4c8a26185f36cf089
+    buildTimeAssetPath: Assets/harry_t/ht8b_geo/balls.fbx
+  - fileID: 170
+    classID: 43
+    packedSize: 1776
+    sourceAssetGUID: 86f5c0efe4048654fba4f0f4053b12f8
+    buildTimeAssetPath: Assets/harry_t/ht8b_geo/ht_ui.fbx
+  - fileID: 171
+    classID: 43
+    packedSize: 26852
+    sourceAssetGUID: acdf19b331d91db4c8a26185f36cf089
+    buildTimeAssetPath: Assets/harry_t/ht8b_geo/balls.fbx
+  - fileID: 172
+    classID: 43
+    packedSize: 856
+    sourceAssetGUID: cd9f7b171b747f647a0f23da7dc73e27
+    buildTimeAssetPath: Assets/harry_t/ht8b_geo/table_col.fbx
+  - fileID: 173
+    classID: 43
+    packedSize: 2284
+    sourceAssetGUID: 86f5c0efe4048654fba4f0f4053b12f8
+    buildTimeAssetPath: Assets/harry_t/ht8b_geo/ht_ui.fbx
+  - fileID: 174
+    classID: 43
+    packedSize: 26852
+    sourceAssetGUID: acdf19b331d91db4c8a26185f36cf089
+    buildTimeAssetPath: Assets/harry_t/ht8b_geo/balls.fbx
+  - fileID: 175
+    classID: 43
+    packedSize: 976
+    sourceAssetGUID: cd9f7b171b747f647a0f23da7dc73e27
+    buildTimeAssetPath: Assets/harry_t/ht8b_geo/table_col.fbx
+  - fileID: 176
+    classID: 43
+    packedSize: 1880
+    sourceAssetGUID: 86f5c0efe4048654fba4f0f4053b12f8
+    buildTimeAssetPath: Assets/harry_t/ht8b_geo/ht_ui.fbx
+  - fileID: 177
+    classID: 43
+    packedSize: 28388
+    sourceAssetGUID: acdf19b331d91db4c8a26185f36cf089
+    buildTimeAssetPath: Assets/harry_t/ht8b_geo/balls.fbx
+  - fileID: 178
+    classID: 43
+    packedSize: 856
+    sourceAssetGUID: cd9f7b171b747f647a0f23da7dc73e27
+    buildTimeAssetPath: Assets/harry_t/ht8b_geo/table_col.fbx
+  - fileID: 179
+    classID: 43
+    packedSize: 1884
+    sourceAssetGUID: 86f5c0efe4048654fba4f0f4053b12f8
+    buildTimeAssetPath: Assets/harry_t/ht8b_geo/ht_ui.fbx
+  - fileID: 180
+    classID: 43
+    packedSize: 856
+    sourceAssetGUID: cd9f7b171b747f647a0f23da7dc73e27
+    buildTimeAssetPath: Assets/harry_t/ht8b_geo/table_col.fbx
+  - fileID: 181
+    classID: 43
+    packedSize: 2284
+    sourceAssetGUID: 86f5c0efe4048654fba4f0f4053b12f8
+    buildTimeAssetPath: Assets/harry_t/ht8b_geo/ht_ui.fbx
+  - fileID: 182
+    classID: 43
+    packedSize: 856
+    sourceAssetGUID: cd9f7b171b747f647a0f23da7dc73e27
+    buildTimeAssetPath: Assets/harry_t/ht8b_geo/table_col.fbx
+  - fileID: 183
+    classID: 43
+    packedSize: 2284
+    sourceAssetGUID: 86f5c0efe4048654fba4f0f4053b12f8
+    buildTimeAssetPath: Assets/harry_t/ht8b_geo/ht_ui.fbx
+  - fileID: 184
+    classID: 43
+    packedSize: 856
+    sourceAssetGUID: cd9f7b171b747f647a0f23da7dc73e27
+    buildTimeAssetPath: Assets/harry_t/ht8b_geo/table_col.fbx
+  - fileID: 185
+    classID: 43
+    packedSize: 2264
+    sourceAssetGUID: 86f5c0efe4048654fba4f0f4053b12f8
+    buildTimeAssetPath: Assets/harry_t/ht8b_geo/ht_ui.fbx
+  - fileID: 186
+    classID: 43
+    packedSize: 1096
+    sourceAssetGUID: cd9f7b171b747f647a0f23da7dc73e27
+    buildTimeAssetPath: Assets/harry_t/ht8b_geo/table_col.fbx
+  - fileID: 187
+    classID: 43
+    packedSize: 2284
+    sourceAssetGUID: 86f5c0efe4048654fba4f0f4053b12f8
+    buildTimeAssetPath: Assets/harry_t/ht8b_geo/ht_ui.fbx
+  - fileID: 188
+    classID: 43
+    packedSize: 856
+    sourceAssetGUID: cd9f7b171b747f647a0f23da7dc73e27
+    buildTimeAssetPath: Assets/harry_t/ht8b_geo/table_col.fbx
+  - fileID: 189
+    classID: 43
+    packedSize: 2268
+    sourceAssetGUID: 86f5c0efe4048654fba4f0f4053b12f8
+    buildTimeAssetPath: Assets/harry_t/ht8b_geo/ht_ui.fbx
+  - fileID: 190
+    classID: 43
+    packedSize: 976
+    sourceAssetGUID: cd9f7b171b747f647a0f23da7dc73e27
+    buildTimeAssetPath: Assets/harry_t/ht8b_geo/table_col.fbx
+  - fileID: 191
+    classID: 43
+    packedSize: 496
+    sourceAssetGUID: 86f5c0efe4048654fba4f0f4053b12f8
+    buildTimeAssetPath: Assets/harry_t/ht8b_geo/ht_ui.fbx
+  - fileID: 192
+    classID: 43
+    packedSize: 856
+    sourceAssetGUID: cd9f7b171b747f647a0f23da7dc73e27
+    buildTimeAssetPath: Assets/harry_t/ht8b_geo/table_col.fbx
+  - fileID: 193
+    classID: 43
+    packedSize: 588
+    sourceAssetGUID: 86f5c0efe4048654fba4f0f4053b12f8
+    buildTimeAssetPath: Assets/harry_t/ht8b_geo/ht_ui.fbx
+  - fileID: 194
+    classID: 43
+    packedSize: 856
+    sourceAssetGUID: cd9f7b171b747f647a0f23da7dc73e27
+    buildTimeAssetPath: Assets/harry_t/ht8b_geo/table_col.fbx
+  - fileID: 195
+    classID: 43
+    packedSize: 1740
+    sourceAssetGUID: 86f5c0efe4048654fba4f0f4053b12f8
+    buildTimeAssetPath: Assets/harry_t/ht8b_geo/ht_ui.fbx
+  - fileID: 196
+    classID: 43
+    packedSize: 856
+    sourceAssetGUID: cd9f7b171b747f647a0f23da7dc73e27
+    buildTimeAssetPath: Assets/harry_t/ht8b_geo/table_col.fbx
+  - fileID: 197
+    classID: 43
+    packedSize: 2284
+    sourceAssetGUID: 86f5c0efe4048654fba4f0f4053b12f8
+    buildTimeAssetPath: Assets/harry_t/ht8b_geo/ht_ui.fbx
+  - fileID: 198
+    classID: 43
+    packedSize: 1884
+    sourceAssetGUID: 86f5c0efe4048654fba4f0f4053b12f8
+    buildTimeAssetPath: Assets/harry_t/ht8b_geo/ht_ui.fbx
+  - fileID: 199
+    classID: 43
+    packedSize: 856
+    sourceAssetGUID: cd9f7b171b747f647a0f23da7dc73e27
+    buildTimeAssetPath: Assets/harry_t/ht8b_geo/table_col.fbx
+  - fileID: 200
+    classID: 43
+    packedSize: 2228
+    sourceAssetGUID: 86f5c0efe4048654fba4f0f4053b12f8
+    buildTimeAssetPath: Assets/harry_t/ht8b_geo/ht_ui.fbx
+  - fileID: 201
+    classID: 43
+    packedSize: 856
+    sourceAssetGUID: cd9f7b171b747f647a0f23da7dc73e27
+    buildTimeAssetPath: Assets/harry_t/ht8b_geo/table_col.fbx
+  - fileID: 202
+    classID: 43
+    packedSize: 2264
+    sourceAssetGUID: 86f5c0efe4048654fba4f0f4053b12f8
+    buildTimeAssetPath: Assets/harry_t/ht8b_geo/ht_ui.fbx
+  - fileID: 203
+    classID: 43
+    packedSize: 1096
+    sourceAssetGUID: cd9f7b171b747f647a0f23da7dc73e27
+    buildTimeAssetPath: Assets/harry_t/ht8b_geo/table_col.fbx
+  - fileID: 204
+    classID: 43
+    packedSize: 2264
+    sourceAssetGUID: 86f5c0efe4048654fba4f0f4053b12f8
+    buildTimeAssetPath: Assets/harry_t/ht8b_geo/ht_ui.fbx
+  - fileID: 205
+    classID: 43
+    packedSize: 856
+    sourceAssetGUID: cd9f7b171b747f647a0f23da7dc73e27
+    buildTimeAssetPath: Assets/harry_t/ht8b_geo/table_col.fbx
+  - fileID: 206
+    classID: 43
+    packedSize: 2264
+    sourceAssetGUID: 86f5c0efe4048654fba4f0f4053b12f8
+    buildTimeAssetPath: Assets/harry_t/ht8b_geo/ht_ui.fbx
+  - fileID: 207
+    classID: 43
+    packedSize: 1412
+    sourceAssetGUID: 86f5c0efe4048654fba4f0f4053b12f8
+    buildTimeAssetPath: Assets/harry_t/ht8b_geo/ht_ui.fbx
+  - fileID: 208
+    classID: 43
+    packedSize: 2044
+    sourceAssetGUID: 86f5c0efe4048654fba4f0f4053b12f8
+    buildTimeAssetPath: Assets/harry_t/ht8b_geo/ht_ui.fbx
+  - fileID: 209
+    classID: 43
+    packedSize: 856
+    sourceAssetGUID: cd9f7b171b747f647a0f23da7dc73e27
+    buildTimeAssetPath: Assets/harry_t/ht8b_geo/table_col.fbx
+  - fileID: 210
+    classID: 43
+    packedSize: 596
+    sourceAssetGUID: 86f5c0efe4048654fba4f0f4053b12f8
+    buildTimeAssetPath: Assets/harry_t/ht8b_geo/ht_ui.fbx
+  - fileID: 211
+    classID: 43
+    packedSize: 596
+    sourceAssetGUID: 86f5c0efe4048654fba4f0f4053b12f8
+    buildTimeAssetPath: Assets/harry_t/ht8b_geo/ht_ui.fbx
+  - fileID: 212
+    classID: 48
+    packedSize: 645088
+    sourceAssetGUID: 0000000000000000f000000000000000
+    buildTimeAssetPath: Resources/unity_builtin_extra
+  - fileID: 213
+    classID: 48
+    packedSize: 10624
+    sourceAssetGUID: 0000000000000000f000000000000000
+    buildTimeAssetPath: Resources/unity_builtin_extra
+  - fileID: 214
+    classID: 48
+    packedSize: 30520
+    sourceAssetGUID: 0000000000000000f000000000000000
+    buildTimeAssetPath: Resources/unity_builtin_extra
+  - fileID: 215
+    classID: 48
+    packedSize: 4096
+    sourceAssetGUID: 0000000000000000f000000000000000
+    buildTimeAssetPath: Resources/unity_builtin_extra
+  - fileID: 216
+    classID: 48
+    packedSize: 3992
+    sourceAssetGUID: 0000000000000000f000000000000000
+    buildTimeAssetPath: Resources/unity_builtin_extra
+  - fileID: 217
+    classID: 48
+    packedSize: 3236
+    sourceAssetGUID: 1c55f2ee8b0d80543a1ff5349bcefb0f
+    buildTimeAssetPath: Assets/harry_t/ht8b_desktop/sgameview.shader
+  - fileID: 218
+    classID: 48
+    packedSize: 71700
+    sourceAssetGUID: 1ccecd9b89b8a4f14bfb64f29ddfcc81
+    buildTimeAssetPath: Packages/com.unity.probuilder/Content/Shader/StandardVertexColor.shader
+  - fileID: 219
+    classID: 48
+    packedSize: 4420
+    sourceAssetGUID: 1d44442f7be17c748a23e9d8274ec12f
+    buildTimeAssetPath: Assets/harry_t/ht8b_shaders/scorecard.shader
+  - fileID: 220
+    classID: 48
+    packedSize: 3804
+    sourceAssetGUID: 26d9a1bee6bdefb439e9d194fa9b605a
+    buildTimeAssetPath: Assets/harry_t/ht8b_shaders/additive.shader
+  - fileID: 221
+    classID: 48
+    packedSize: 9112
+    sourceAssetGUID: 2dcd9e0568e0a6f45b92c60ba2eb16a0
+    buildTimeAssetPath: Assets/VRCSDK/Sample Assets/Shaders/Mobile/VRChat-Mobile-Diffuse.shader
+  - fileID: 222
+    classID: 48
+    packedSize: 4936
+    sourceAssetGUID: 362c941fef704dd46a03ef71fa790e5e
+    buildTimeAssetPath: Assets/harry_t/ht8b_shaders/hoverballs.shader
+  - fileID: 223
+    classID: 48
+    packedSize: 4028
+    sourceAssetGUID: 3e81d39173deeaf45b279d8a945e619a
+    buildTimeAssetPath: Assets/harry_t/ht8b_shaders/quest_cutout.shader
+  - fileID: 224
+    classID: 48
+    packedSize: 373816
+    sourceAssetGUID: 412ea878efbed224d97338aed34a773c
+    buildTimeAssetPath: Assets/USharpVideo/Shaders/StandardVideoEmissive.shader
+  - fileID: 225
+    classID: 48
+    packedSize: 4288
+    sourceAssetGUID: 4c684f44deb66844a9c8d17e5523225f
+    buildTimeAssetPath: Assets/harry_t/ht8b_shaders/text_aclip.shader
+  - fileID: 226
+    classID: 48
+    packedSize: 74516
+    sourceAssetGUID: 4d2b9e4ef22d6924993fad8181636136
+    buildTimeAssetPath: Assets/harry_t/ht8b_shaders/tablesurface.shader
+  - fileID: 227
+    classID: 48
+    packedSize: 34136
+    sourceAssetGUID: 4e65a9b7cc2f36f47a35d23f463e6638
+    buildTimeAssetPath: Assets/harry_t/ht8b_shaders/cuecenter_quest.shader
+  - fileID: 228
+    classID: 48
+    packedSize: 39364
+    sourceAssetGUID: 6608d08bdaa82d44c90a91637a4cebf0
+    buildTimeAssetPath: Assets/harry_t/ht8b_shaders/tablesurface_quest.shader
+  - fileID: 229
+    classID: 48
+    packedSize: 4824
+    sourceAssetGUID: 693137b858e4dc64c83be531351f45e6
+    buildTimeAssetPath: Assets/VRCSDK/Sample Assets/Shaders/Mirror.shader
+  - fileID: 230
+    classID: 48
+    packedSize: 4080
+    sourceAssetGUID: 7d7ba681170499649ba9dbc66b7f0f73
+    buildTimeAssetPath: Assets/harry_t/ht8b_shaders/twoframe.shader
+  - fileID: 231
+    classID: 48
+    packedSize: 3508
+    sourceAssetGUID: 82746aca1ec793845a647954ea6f590d
+    buildTimeAssetPath: Assets/harry_t/ht8b_desktop/sgameui.shader
+  - fileID: 232
+    classID: 48
+    packedSize: 4080
+    sourceAssetGUID: 91bec5ec3cef3314b85cecc821399250
+    buildTimeAssetPath: Assets/harry_t/ht8b_shaders/twoframe_quest.shader
+  - fileID: 233
+    classID: 48
+    packedSize: 4252
+    sourceAssetGUID: 9200bec112b65ec4fbbbd33fa89c20f4
+    buildTimeAssetPath: Assets/VRCSDK/Sample Assets/Shaders/Mobile/VRChat-Mobile-Particle-Add.shader
+  - fileID: 234
+    classID: 48
+    packedSize: 5672
+    sourceAssetGUID: 934d35199923954459b12aa46fc3af08
+    buildTimeAssetPath: Assets/harry_t/ht8b_shaders/cuecenter.shader
+  - fileID: 235
+    classID: 48
+    packedSize: 4548
+    sourceAssetGUID: 9405571f915a34042af269c61ba56c1c
+    buildTimeAssetPath: Assets/harry_t/ht8b_shaders/cliptable.shader
+  - fileID: 236
+    classID: 48
+    packedSize: 107132
+    sourceAssetGUID: 9788d723ed7eac946a9a599e4a6ba940
+    buildTimeAssetPath: Assets/VRCSDK/Sample Assets/Shaders/Video-RealtimeEmissiveGamma.shader
+  - fileID: 237
+    classID: 48
+    packedSize: 8268
+    sourceAssetGUID: 9d61949da4bd1b545b4fdacba6dfb5da
+    buildTimeAssetPath: Assets/USharpVideo/Shaders/UI-MerlinUI.shader
+  - fileID: 238
+    classID: 48
+    packedSize: 3928
+    sourceAssetGUID: a2434e6d7a4f396488c413a5dc45578c
+    buildTimeAssetPath: Assets/harry_t/ht8b_shaders/shadowplane_mulw.shader
+  - fileID: 239
+    classID: 48
+    packedSize: 4932
+    sourceAssetGUID: abde177d175cbb347b65ed762069ab49
+    buildTimeAssetPath: Assets/harry_t/ht8b_shaders/hoverballs_quest.shader
+  - fileID: 240
+    classID: 48
+    packedSize: 4204
+    sourceAssetGUID: ac03ce1d9977415459291435483a77d8
+    buildTimeAssetPath: Assets/harry_t/ht8b_shaders/cliptable_quest.shader
+  - fileID: 241
+    classID: 48
+    packedSize: 2992
+    sourceAssetGUID: ac2e15a9ab6f6164eb3e9bae97b58bd2
+    buildTimeAssetPath: Assets/harry_t/ht8b_desktop/sgamefill.shader
+  - fileID: 242
+    classID: 74
+    packedSize: 2368
+    sourceAssetGUID: ea8077da5766357479dd3ebf31da098c
+    buildTimeAssetPath: Assets/USharpVideo/Animations/InterpTo0.anim
+  - fileID: 243
+    classID: 74
+    packedSize: 2368
+    sourceAssetGUID: 599105a1454742644906304ddb0562cd
+    buildTimeAssetPath: Assets/USharpVideo/Animations/InterpTo1.anim
+  - fileID: 244
+    classID: 83
+    packedSize: 124
+    sourceAssetGUID: 145bbd1a0d9f9984a9c0fd65011d2e29
+    buildTimeAssetPath: Assets/harry_t/ht8b_audio/spin.wav
+  - fileID: 245
+    classID: 83
+    packedSize: 128
+    sourceAssetGUID: 2078afcccf933644f8f8be8e0af53d0e
+    buildTimeAssetPath: Assets/harry_t/ht8b_audio/clickbtn.wav
+  - fileID: 246
+    classID: 83
+    packedSize: 128
+    sourceAssetGUID: 58d4d3f70b3918e43af5bf6701874286
+    buildTimeAssetPath: Assets/harry_t/ht8b_audio/sink_hs.wav
+  - fileID: 247
+    classID: 83
+    packedSize: 132
+    sourceAssetGUID: 615c1a837da5b064d94ae184777f887a
+    buildTimeAssetPath: Assets/harry_t/ht8b_audio/clickbtn_1.wav
+  - fileID: 248
+    classID: 83
+    packedSize: 128
+    sourceAssetGUID: 79f25f3cae8364e459effd5656179f5b
+    buildTimeAssetPath: Assets/harry_t/ht8b_audio/newround.wav
+  - fileID: 249
+    classID: 83
+    packedSize: 128
+    sourceAssetGUID: 7e018d0d5157def489cd0c21dcc6605f
+    buildTimeAssetPath: Assets/harry_t/ht8b_audio/point.wav
+  - fileID: 250
+    classID: 83
+    packedSize: 128
+    sourceAssetGUID: c5c3277a589929d49be99bc2f100aae1
+    buildTimeAssetPath: Assets/harry_t/ht8b_audio/hit01.wav
+  - fileID: 251
+    classID: 83
+    packedSize: 128
+    sourceAssetGUID: e55c033e7d8b29e409baf5343b67bead
+    buildTimeAssetPath: Assets/harry_t/ht8b_audio/hit02.wav
+  - fileID: 252
+    classID: 83
+    packedSize: 128
+    sourceAssetGUID: f36f285a62b99d8449cf1685083885b8
+    buildTimeAssetPath: Assets/harry_t/ht8b_audio/intro.wav
+  - fileID: 253
+    classID: 83
+    packedSize: 128
+    sourceAssetGUID: feebba097cc8e2d4fb236753ecd5c137
+    buildTimeAssetPath: Assets/harry_t/ht8b_audio/hit03.wav
+  - fileID: 254
+    classID: 84
+    packedSize: 80
+    sourceAssetGUID: 47ac27448e8b7a942aa7471935e4d8db
+    buildTimeAssetPath: Assets/USharpVideo/RenderTextures/VideoRT.renderTexture
+  - fileID: 255
+    classID: 84
+    packedSize: 80
+    sourceAssetGUID: 909407e29b19c6240a648f67742a397c
+    buildTimeAssetPath: Assets/harry_t/ht8b_desktop/gameview.renderTexture
+  - fileID: 256
+    classID: 89
+    packedSize: 131424
+    sourceAssetGUID: 27547d632fb7e44469763bafe593b43f
+    buildTimeAssetPath: Assets/ht8b/ReflectionProbe-4.exr
+  - fileID: 257
+    classID: 91
+    packedSize: 1232
+    sourceAssetGUID: 43d010a9dfd9d934db896b3ca4f95eeb
+    buildTimeAssetPath: Assets/USharpVideo/Animations/SliderController.controller
+  - fileID: 258
+    classID: 115
+    packedSize: 104
+    sourceAssetGUID: f70555f144d8491a825f0804e09c671c
+    buildTimeAssetPath: D:/UnityEngines/2018.4.20f1/Editor/Data/UnityExtensions/Unity/GUISystem/Standalone/UnityEngine.UI.dll
+  - fileID: 259
+    classID: 115
+    packedSize: 96
+    sourceAssetGUID: f70555f144d8491a825f0804e09c671c
+    buildTimeAssetPath: D:/UnityEngines/2018.4.20f1/Editor/Data/UnityExtensions/Unity/GUISystem/Standalone/UnityEngine.UI.dll
+  - fileID: 260
+    classID: 115
+    packedSize: 120
+    sourceAssetGUID: 661092b4961be7145bfbe56e1e62337b
+    buildTimeAssetPath: Assets/VRCSDK/Plugins/VRCSDK3.dll
+  - fileID: 261
+    classID: 115
+    packedSize: 104
+    sourceAssetGUID: f70555f144d8491a825f0804e09c671c
+    buildTimeAssetPath: D:/UnityEngines/2018.4.20f1/Editor/Data/UnityExtensions/Unity/GUISystem/Standalone/UnityEngine.UI.dll
+  - fileID: 262
+    classID: 115
+    packedSize: 120
+    sourceAssetGUID: 661092b4961be7145bfbe56e1e62337b
+    buildTimeAssetPath: Assets/VRCSDK/Plugins/VRCSDK3.dll
+  - fileID: 263
+    classID: 115
+    packedSize: 92
+    sourceAssetGUID: 661092b4961be7145bfbe56e1e62337b
+    buildTimeAssetPath: Assets/VRCSDK/Plugins/VRCSDK3.dll
+  - fileID: 264
+    classID: 115
+    packedSize: 96
+    sourceAssetGUID: 4ecd63eff847044b68db9453ce219299
+    buildTimeAssetPath: Assets/VRCSDK/Plugins/VRCCore-Editor.dll
+  - fileID: 265
+    classID: 115
+    packedSize: 80
+    sourceAssetGUID: f70555f144d8491a825f0804e09c671c
+    buildTimeAssetPath: D:/UnityEngines/2018.4.20f1/Editor/Data/UnityExtensions/Unity/GUISystem/Standalone/UnityEngine.UI.dll
+  - fileID: 266
+    classID: 115
+    packedSize: 88
+    sourceAssetGUID: f5f67c52d1564df4a8936ccd202a3bd8
+    buildTimeAssetPath: D:/UnityEngines/2018.4.20f1/Editor/Data/UnityExtensions/Unity/GUISystem/UnityEngine.UI.dll
+  - fileID: 267
+    classID: 115
+    packedSize: 88
+    sourceAssetGUID: f70555f144d8491a825f0804e09c671c
+    buildTimeAssetPath: D:/UnityEngines/2018.4.20f1/Editor/Data/UnityExtensions/Unity/GUISystem/Standalone/UnityEngine.UI.dll
+  - fileID: 268
+    classID: 115
+    packedSize: 104
+    sourceAssetGUID: f70555f144d8491a825f0804e09c671c
+    buildTimeAssetPath: D:/UnityEngines/2018.4.20f1/Editor/Data/UnityExtensions/Unity/GUISystem/Standalone/UnityEngine.UI.dll
+  - fileID: 269
+    classID: 115
+    packedSize: 116
+    sourceAssetGUID: 661092b4961be7145bfbe56e1e62337b
+    buildTimeAssetPath: Assets/VRCSDK/Plugins/VRCSDK3.dll
+  - fileID: 270
+    classID: 115
+    packedSize: 116
+    sourceAssetGUID: 661092b4961be7145bfbe56e1e62337b
+    buildTimeAssetPath: Assets/VRCSDK/Plugins/VRCSDK3.dll
+  - fileID: 271
+    classID: 115
+    packedSize: 100
+    sourceAssetGUID: 661092b4961be7145bfbe56e1e62337b
+    buildTimeAssetPath: Assets/VRCSDK/Plugins/VRCSDK3.dll
+  - fileID: 272
+    classID: 115
+    packedSize: 108
+    sourceAssetGUID: 661092b4961be7145bfbe56e1e62337b
+    buildTimeAssetPath: Assets/VRCSDK/Plugins/VRCSDK3.dll
+  - fileID: 273
+    classID: 115
+    packedSize: 88
+    sourceAssetGUID: f70555f144d8491a825f0804e09c671c
+    buildTimeAssetPath: D:/UnityEngines/2018.4.20f1/Editor/Data/UnityExtensions/Unity/GUISystem/Standalone/UnityEngine.UI.dll
+  - fileID: 274
+    classID: 115
+    packedSize: 108
+    sourceAssetGUID: 661092b4961be7145bfbe56e1e62337b
+    buildTimeAssetPath: Assets/VRCSDK/Plugins/VRCSDK3.dll
+  - fileID: 275
+    classID: 115
+    packedSize: 80
+    sourceAssetGUID: 30a280ee91c49eb48a6c8895e91c768d
+    buildTimeAssetPath: Assets/harry_t/quest_stuff.cs
+  - fileID: 276
+    classID: 115
+    packedSize: 88
+    sourceAssetGUID: 45115577ef41a5b4ca741ed302693907
+    buildTimeAssetPath: Assets/Udon/UdonBehaviour.cs
+  - fileID: 277
+    classID: 115
+    packedSize: 128
+    sourceAssetGUID: bf61d954ecb803046953c666facfb904
+    buildTimeAssetPath: Assets/Udon/ProgramSources/SerializedUdonProgramAsset.cs
+  - fileID: 278
+    classID: 115
+    packedSize: 96
+    sourceAssetGUID: f70555f144d8491a825f0804e09c671c
+    buildTimeAssetPath: D:/UnityEngines/2018.4.20f1/Editor/Data/UnityExtensions/Unity/GUISystem/Standalone/UnityEngine.UI.dll
+  - fileID: 279
+    classID: 115
+    packedSize: 80
+    sourceAssetGUID: f5f67c52d1564df4a8936ccd202a3bd8
+    buildTimeAssetPath: D:/UnityEngines/2018.4.20f1/Editor/Data/UnityExtensions/Unity/GUISystem/UnityEngine.UI.dll
+  - fileID: 280
+    classID: 115
+    packedSize: 80
+    sourceAssetGUID: f70555f144d8491a825f0804e09c671c
+    buildTimeAssetPath: D:/UnityEngines/2018.4.20f1/Editor/Data/UnityExtensions/Unity/GUISystem/Standalone/UnityEngine.UI.dll
+  - fileID: 281
+    classID: 115
+    packedSize: 88
+    sourceAssetGUID: f70555f144d8491a825f0804e09c671c
+    buildTimeAssetPath: D:/UnityEngines/2018.4.20f1/Editor/Data/UnityExtensions/Unity/GUISystem/Standalone/UnityEngine.UI.dll
+  - fileID: 282
+    classID: 115
+    packedSize: 92
+    sourceAssetGUID: 661092b4961be7145bfbe56e1e62337b
+    buildTimeAssetPath: Assets/VRCSDK/Plugins/VRCSDK3.dll
+  - fileID: 283
+    classID: 115
+    packedSize: 128
+    sourceAssetGUID: f70555f144d8491a825f0804e09c671c
+    buildTimeAssetPath: D:/UnityEngines/2018.4.20f1/Editor/Data/UnityExtensions/Unity/GUISystem/Standalone/UnityEngine.UI.dll
+  - fileID: 284
+    classID: 115
+    packedSize: 104
+    sourceAssetGUID: f5f67c52d1564df4a8936ccd202a3bd8
+    buildTimeAssetPath: D:/UnityEngines/2018.4.20f1/Editor/Data/UnityExtensions/Unity/GUISystem/UnityEngine.UI.dll
+  - fileID: 285
+    classID: 115
+    packedSize: 104
+    sourceAssetGUID: f70555f144d8491a825f0804e09c671c
+    buildTimeAssetPath: D:/UnityEngines/2018.4.20f1/Editor/Data/UnityExtensions/Unity/GUISystem/Standalone/UnityEngine.UI.dll
+  - fileID: 286
+    classID: 115
+    packedSize: 120
+    sourceAssetGUID: 661092b4961be7145bfbe56e1e62337b
+    buildTimeAssetPath: Assets/VRCSDK/Plugins/VRCSDK3.dll
+  - fileID: 287
+    classID: 115
+    packedSize: 96
+    sourceAssetGUID: f70555f144d8491a825f0804e09c671c
+    buildTimeAssetPath: D:/UnityEngines/2018.4.20f1/Editor/Data/UnityExtensions/Unity/GUISystem/Standalone/UnityEngine.UI.dll
+  - fileID: 288
+    classID: 115
+    packedSize: 88
+    sourceAssetGUID: f70555f144d8491a825f0804e09c671c
+    buildTimeAssetPath: D:/UnityEngines/2018.4.20f1/Editor/Data/UnityExtensions/Unity/GUISystem/Standalone/UnityEngine.UI.dll
+  - fileID: 289
+    classID: 115
+    packedSize: 108
+    sourceAssetGUID: 661092b4961be7145bfbe56e1e62337b
+    buildTimeAssetPath: Assets/VRCSDK/Plugins/VRCSDK3.dll
+  - fileID: 290
+    classID: 115
+    packedSize: 92
+    sourceAssetGUID: 661092b4961be7145bfbe56e1e62337b
+    buildTimeAssetPath: Assets/VRCSDK/Plugins/VRCSDK3.dll
+  - fileID: 291
+    classID: 115
+    packedSize: 96
+    sourceAssetGUID: f5f67c52d1564df4a8936ccd202a3bd8
+    buildTimeAssetPath: D:/UnityEngines/2018.4.20f1/Editor/Data/UnityExtensions/Unity/GUISystem/UnityEngine.UI.dll
+  - fileID: 292
+    classID: 115
+    packedSize: 96
+    sourceAssetGUID: f70555f144d8491a825f0804e09c671c
+    buildTimeAssetPath: D:/UnityEngines/2018.4.20f1/Editor/Data/UnityExtensions/Unity/GUISystem/Standalone/UnityEngine.UI.dll
+  - fileID: 293
+    classID: 115
+    packedSize: 88
+    sourceAssetGUID: f70555f144d8491a825f0804e09c671c
+    buildTimeAssetPath: D:/UnityEngines/2018.4.20f1/Editor/Data/UnityExtensions/Unity/GUISystem/Standalone/UnityEngine.UI.dll
+  - fileID: 294
+    classID: 128
+    packedSize: 110090
+    sourceAssetGUID: 452f7d8d1a7418943b69d2df35655ebe
+    buildTimeAssetPath: Assets/Udon/ReferenceDocs/_static/fonts/Inconsolata-Bold.ttf
+  - fileID: 295
+    classID: 128
+    packedSize: 656698
+    sourceAssetGUID: 98baae691215eb546a697ff7d942a5bb
+    buildTimeAssetPath: Assets/Udon/ReferenceDocs/_static/fonts/Lato-Regular.ttf
+  - fileID: 296
+    classID: 128
+    packedSize: 656674
+    sourceAssetGUID: d8a7948bc83b01f45ab5078c10dd8e04
+    buildTimeAssetPath: Assets/Udon/ReferenceDocs/_static/fonts/Lato-Bold.ttf
+  - fileID: 297
+    classID: 128
+    packedSize: 97110
+    sourceAssetGUID: e3027d149d2f75647b130d9ed7f7014c
+    buildTimeAssetPath: Assets/Udon/ReferenceDocs/_static/fonts/Inconsolata-Regular.ttf
+  - fileID: 298
+    classID: 213
+    packedSize: 620
+    sourceAssetGUID: 0000000000000000f000000000000000
+    buildTimeAssetPath: Resources/unity_builtin_extra
+  - fileID: 299
+    classID: 213
+    packedSize: 564
+    sourceAssetGUID: 0000000000000000f000000000000000
+    buildTimeAssetPath: Resources/unity_builtin_extra
+  - fileID: 300
+    classID: 213
+    packedSize: 568
+    sourceAssetGUID: 0000000000000000f000000000000000
+    buildTimeAssetPath: Resources/unity_builtin_extra
+  - fileID: 301
+    classID: 213
+    packedSize: 576
+    sourceAssetGUID: 0000000000000000f000000000000000
+    buildTimeAssetPath: Resources/unity_builtin_extra
+  - fileID: 302
+    classID: 213
+    packedSize: 540
+    sourceAssetGUID: 0000000000000000f000000000000000
+    buildTimeAssetPath: Resources/unity_builtin_extra
+  - fileID: 303
+    classID: 213
+    packedSize: 512
+    sourceAssetGUID: 0000000000000000f000000000000000
+    buildTimeAssetPath: Resources/unity_builtin_extra
+  - fileID: 304
+    classID: 213
+    packedSize: 688
+    sourceAssetGUID: 3d8579bba8b7da04e9dda290b1c4b69d
+    buildTimeAssetPath: Assets/USharpVideo/UI/VolumeOffIcon.png
+  - fileID: 305
+    classID: 213
+    packedSize: 1876
+    sourceAssetGUID: 6cd63d5dffe834d48bf7d6d21886191d
+    buildTimeAssetPath: Assets/USharpVideo/UI/VolumeUpIcon.png
+  - fileID: 306
+    classID: 213
+    packedSize: 1028
+    sourceAssetGUID: 72ed45fa65deb2e47946aecb14641080
+    buildTimeAssetPath: Assets/USharpVideo/UI/LockedIcon.png
+  - fileID: 307
+    classID: 213
+    packedSize: 1012
+    sourceAssetGUID: 9167dd3d2e3ef014b8f654bc2ed65bc8
+    buildTimeAssetPath: Assets/USharpVideo/UI/UnlockedIcon.png
+  - fileID: 308
+    classID: 213
+    packedSize: 964
+    sourceAssetGUID: 9e343bf2817053b4f80db9cb7cb0674c
+    buildTimeAssetPath: Assets/USharpVideo/UI/PlayIcon.png
+  - fileID: 309
+    classID: 213
+    packedSize: 772
+    sourceAssetGUID: a6c247f1521b4e24680bea4451d79f37
+    buildTimeAssetPath: Assets/USharpVideo/UI/StopIcon.png
+  - fileID: 310
+    classID: 213
+    packedSize: 1056
+    sourceAssetGUID: d715aac9a5d4a7143b47cb9b5816dc9d
+    buildTimeAssetPath: Assets/USharpVideo/UI/PauseIcon.png
+  - fileID: 311
+    classID: 213
+    packedSize: 1272
+    sourceAssetGUID: d845cc7962eac99449448e125acc8e8f
+    buildTimeAssetPath: Assets/USharpVideo/UI/InfoCircleIcon.png
+  - fileID: 312
+    classID: 213
+    packedSize: 1008
+    sourceAssetGUID: d9d7a1911407b2347a1803b105012b18
+    buildTimeAssetPath: Assets/USharpVideo/UI/VolumeDownIcon.png
+  - fileID: 313
+    classID: 213
+    packedSize: 728
+    sourceAssetGUID: ed50b66f4596dd54f8ea61eb10bb6b2a
+    buildTimeAssetPath: Assets/USharpVideo/UI/MuteIcon.png
+  - fileID: 314
+    classID: 114
+    packedSize: 20612
+    sourceAssetGUID: 7070804a4f39e4b4192ec03de7ac72b3
+    buildTimeAssetPath: Assets/SerializedUdonPrograms/0579e2f7d1c57a241a07d45f6088960b.asset
+  - fileID: 315
+    classID: 114
+    packedSize: 35380
+    sourceAssetGUID: a44ba74c8f1b6be41b187afea290b443
+    buildTimeAssetPath: Assets/SerializedUdonPrograms/0cfd2b8f0262db847bfb55bab92d3218.asset
+  - fileID: 316
+    classID: 114
+    packedSize: 11956
+    sourceAssetGUID: c1aa292b5e016c04aa754c8df5f90845
+    buildTimeAssetPath: Assets/SerializedUdonPrograms/0e78d0c5c758aaf4f9d0ace911a2c5d8.asset
+  - fileID: 317
+    classID: 114
+    packedSize: 113816
+    sourceAssetGUID: 45f2ac4387d0d1b4b88211004cced7b9
+    buildTimeAssetPath: Assets/SerializedUdonPrograms/14b4018c8b30e7f4a843f35fbd61f788.asset
+  - fileID: 318
+    classID: 114
+    packedSize: 15908
+    sourceAssetGUID: 5f1bb8f4af4adeb478e00afd30130537
+    buildTimeAssetPath: Assets/SerializedUdonPrograms/18a8a73823b22934e929c67357a4e2d7.asset
+  - fileID: 319
+    classID: 114
+    packedSize: 24344
+    sourceAssetGUID: 81983a9cecb126549b75fd51d3dcb58e
+    buildTimeAssetPath: Assets/SerializedUdonPrograms/19c6455fcf036f447a988be402108b3c.asset
+  - fileID: 320
+    classID: 114
+    packedSize: 21624
+    sourceAssetGUID: 48f624190e4df7c4da122fadb18e6fd6
+    buildTimeAssetPath: Assets/SerializedUdonPrograms/1f7e9fb643472ef4d83f2ad49fe34b18.asset
+  - fileID: 321
+    classID: 114
+    packedSize: 290732
+    sourceAssetGUID: ebf2fff676ad0ee478044c771b4004ea
+    buildTimeAssetPath: Assets/SerializedUdonPrograms/36cdb30fddeb0fc46ae45a7c40b38c67.asset
+  - fileID: 322
+    classID: 114
+    packedSize: 15344
+    sourceAssetGUID: 0826431b213d3b542a2c0696f650c346
+    buildTimeAssetPath: Assets/SerializedUdonPrograms/4715e20276be3b141a6a216230cab4e9.asset
+  - fileID: 323
+    classID: 114
+    packedSize: 12252
+    sourceAssetGUID: aaa268bb054f2884686ba04e2b5bf8aa
+    buildTimeAssetPath: Assets/SerializedUdonPrograms/4bfd9d9a0b7684c449d31b38065b43f4.asset
+  - fileID: 324
+    classID: 114
+    packedSize: 17832
+    sourceAssetGUID: 2e151f93fb6689642b9cc45381abdaad
+    buildTimeAssetPath: Assets/SerializedUdonPrograms/5893300e3f688004b9251878e312d460.asset
+  - fileID: 325
+    classID: 114
+    packedSize: 12536
+    sourceAssetGUID: 69ded9fc93865c844a19b49ec388410b
+    buildTimeAssetPath: Assets/SerializedUdonPrograms/5f12be5d27ddf664aba8616b89281404.asset
+  - fileID: 326
+    classID: 114
+    packedSize: 9644
+    sourceAssetGUID: 438bdbeb07322ec48ad1a5eac18bf0f7
+    buildTimeAssetPath: Assets/SerializedUdonPrograms/6657daa4973ee1249aae293810e8bccd.asset
+  - fileID: 327
+    classID: 114
+    packedSize: 50028
+    sourceAssetGUID: 9893fb04fb424794aa1a5befc865e674
+    buildTimeAssetPath: Assets/SerializedUdonPrograms/7341ae212e707bb478afcb1e3c374725.asset
+  - fileID: 328
+    classID: 114
+    packedSize: 15908
+    sourceAssetGUID: 6b33dd6bc321a1245ba58c31a32cfc2d
+    buildTimeAssetPath: Assets/SerializedUdonPrograms/73571ae951ee35b479181d7ee4a4be25.asset
+  - fileID: 329
+    classID: 114
+    packedSize: 19544
+    sourceAssetGUID: 2dc2a77e926f7284da257c228b55ac79
+    buildTimeAssetPath: Assets/SerializedUdonPrograms/75f3b7bb830f4324a8b2f49814f3493a.asset
+  - fileID: 330
+    classID: 114
+    packedSize: 15548
+    sourceAssetGUID: f05ce3c019f76114b92ec7a940a16d38
+    buildTimeAssetPath: Assets/SerializedUdonPrograms/83cab6b584d27034e806ca053011b187.asset
+  - fileID: 331
+    classID: 114
+    packedSize: 11060
+    sourceAssetGUID: 521e15c60a90e1348a2dac7124e0215e
+    buildTimeAssetPath: Assets/SerializedUdonPrograms/853a35cf0f51df6498d68490a1f662e3.asset
+  - fileID: 332
+    classID: 114
+    packedSize: 19588
+    sourceAssetGUID: f7fc7a57fcd25e14fbf1f5f6938276f2
+    buildTimeAssetPath: Assets/SerializedUdonPrograms/8803f6df285e2fd48bbd0aeeb81ed533.asset
+  - fileID: 333
+    classID: 114
+    packedSize: 15032
+    sourceAssetGUID: 572fa35afa689084f9a18ea43095cdec
+    buildTimeAssetPath: Assets/SerializedUdonPrograms/980a7697571ae1540827c8b930f79790.asset
+  - fileID: 334
+    classID: 114
+    packedSize: 12820
+    sourceAssetGUID: bac60b0a6a58d5043ae5236b8677f0c2
+    buildTimeAssetPath: Assets/SerializedUdonPrograms/98cd88d0adb2e994a9e93d2efefa9eb4.asset
+  - fileID: 335
+    classID: 114
+    packedSize: 1576752
+    sourceAssetGUID: 78dbdc16313178e44befdaa6c2a0a7d7
+    buildTimeAssetPath: Assets/SerializedUdonPrograms/9f91aac51bd06b849bdfe541bad096bb.asset
+  - fileID: 336
+    classID: 114
+    packedSize: 9660
+    sourceAssetGUID: 56493c24fe03de740805de2505fe46e5
+    buildTimeAssetPath: Assets/SerializedUdonPrograms/a7250c474046ad245ac64456f76800ca.asset
+  - fileID: 337
+    classID: 114
+    packedSize: 12916
+    sourceAssetGUID: 4f7d1e82a5904e94699b9fa89b17efcc
+    buildTimeAssetPath: Assets/SerializedUdonPrograms/aaaeaa7ebc8e35a4e9ad1275785b2636.asset
+  - fileID: 338
+    classID: 114
+    packedSize: 16636
+    sourceAssetGUID: 0e71916e014bee8499936f49a94c77b4
+    buildTimeAssetPath: Assets/SerializedUdonPrograms/acd8738ca64f5a9448dfb040d1f2e4d5.asset
+  - fileID: 339
+    classID: 114
+    packedSize: 12216
+    sourceAssetGUID: 070219d765fa49641ac788916b8c6079
+    buildTimeAssetPath: Assets/SerializedUdonPrograms/b2329c06350f6d24ea49bc2842c81e99.asset
+  - fileID: 340
+    classID: 114
+    packedSize: 12364
+    sourceAssetGUID: 062f651479e3e034f8f89a0cb8c15c21
+    buildTimeAssetPath: Assets/SerializedUdonPrograms/b5280742086799a4c8c0a14e90cd913d.asset
+  - fileID: 341
+    classID: 114
+    packedSize: 11032
+    sourceAssetGUID: 9671ad8842f407540a03cbdb5f3ab605
+    buildTimeAssetPath: Assets/SerializedUdonPrograms/bd743ad479bd4ab4bb472fdf09171930.asset
+  - fileID: 342
+    classID: 114
+    packedSize: 37208
+    sourceAssetGUID: f769cb82a43ae2045b8e2f8343be3b0d
+    buildTimeAssetPath: Assets/SerializedUdonPrograms/c69b708d523a01b449b6ca21384d958c.asset
+  - fileID: 343
+    classID: 114
+    packedSize: 18124
+    sourceAssetGUID: 01c2f3a9a374802478df8a207976a8ca
+    buildTimeAssetPath: Assets/SerializedUdonPrograms/c8df303ceb45ae84f85a11591f741734.asset
+  - fileID: 344
+    classID: 114
+    packedSize: 11028
+    sourceAssetGUID: 84d4d68b2f9b3bb408c5c27b9c31e974
+    buildTimeAssetPath: Assets/SerializedUdonPrograms/cd76fa1d958cae94680539ed949a427d.asset
+  - fileID: 345
+    classID: 114
+    packedSize: 30080
+    sourceAssetGUID: 7431f5b699ecf6e4ea7ac094cdf3843b
+    buildTimeAssetPath: Assets/SerializedUdonPrograms/cdeaa82e9eeca4249860474b074fefa2.asset
+  - fileID: 346
+    classID: 114
+    packedSize: 15516
+    sourceAssetGUID: bcffe2b0424d1744395624a70afef665
+    buildTimeAssetPath: Assets/SerializedUdonPrograms/d5d0346a3148a584da4572e44316e658.asset
+  - fileID: 347
+    classID: 114
+    packedSize: 87560
+    sourceAssetGUID: 0cad64e25c30bae4b8f17fcf6673c953
+    buildTimeAssetPath: Assets/SerializedUdonPrograms/db6380e7c98d9e94bb856b1e1b1cf56c.asset
+  - fileID: 348
+    classID: 114
+    packedSize: 4824
+    sourceAssetGUID: 8999083ba39f42e4fa34256a6ee149ee
+    buildTimeAssetPath: Assets/SerializedUdonPrograms/dfcb9d6121fc4084e97b5303b0054618.asset
+  - fileID: 349
+    classID: 114
+    packedSize: 10984
+    sourceAssetGUID: 37aaf68c0aaaa494f8cc2a44584aaeba
+    buildTimeAssetPath: Assets/SerializedUdonPrograms/f6978e5f7a08f4047b4b9cf219efba6b.asset
+--- !u!1126 &1126782090351637416
+PackedAssets:
+  m_File: 2
+  m_ShortPath: BuildPlayer-testing.resource
+  m_Overhead: 0
+  m_Contents:
+  - fileID: 0
+    classID: 83
+    packedSize: 15968
+    sourceAssetGUID: 615c1a837da5b064d94ae184777f887a
+    buildTimeAssetPath: Assets/harry_t/ht8b_audio/clickbtn_1.wav
+  - fileID: 0
+    classID: 83
+    packedSize: 16896
+    sourceAssetGUID: 79f25f3cae8364e459effd5656179f5b
+    buildTimeAssetPath: Assets/harry_t/ht8b_audio/newround.wav
+  - fileID: 0
+    classID: 83
+    packedSize: 24288
+    sourceAssetGUID: feebba097cc8e2d4fb236753ecd5c137
+    buildTimeAssetPath: Assets/harry_t/ht8b_audio/hit03.wav
+  - fileID: 0
+    classID: 83
+    packedSize: 24960
+    sourceAssetGUID: e55c033e7d8b29e409baf5343b67bead
+    buildTimeAssetPath: Assets/harry_t/ht8b_audio/hit02.wav
+  - fileID: 0
+    classID: 83
+    packedSize: 24992
+    sourceAssetGUID: c5c3277a589929d49be99bc2f100aae1
+    buildTimeAssetPath: Assets/harry_t/ht8b_audio/hit01.wav
+  - fileID: 0
+    classID: 83
+    packedSize: 28576
+    sourceAssetGUID: 2078afcccf933644f8f8be8e0af53d0e
+    buildTimeAssetPath: Assets/harry_t/ht8b_audio/clickbtn.wav
+  - fileID: 0
+    classID: 83
+    packedSize: 47296
+    sourceAssetGUID: 7e018d0d5157def489cd0c21dcc6605f
+    buildTimeAssetPath: Assets/harry_t/ht8b_audio/point.wav
+  - fileID: 0
+    classID: 83
+    packedSize: 53792
+    sourceAssetGUID: 145bbd1a0d9f9984a9c0fd65011d2e29
+    buildTimeAssetPath: Assets/harry_t/ht8b_audio/spin.wav
+  - fileID: 0
+    classID: 83
+    packedSize: 126592
+    sourceAssetGUID: f36f285a62b99d8449cf1685083885b8
+    buildTimeAssetPath: Assets/harry_t/ht8b_audio/intro.wav
+  - fileID: 0
+    classID: 83
+    packedSize: 173152
+    sourceAssetGUID: 58d4d3f70b3918e43af5bf6701874286
+    buildTimeAssetPath: Assets/harry_t/ht8b_audio/sink_hs.wav
+--- !u!382020655 &3324437309900704106
+PluginBuildInfo:
+  m_RuntimePlugins:
+  - OVRPlugin
+  - UnityEngine.Timeline
+  - VRC.Udon.ClientBindings
+  - openvr_api
+  - UnityEngine.UI
+  - UnityEngine.Networking
+  - UnityEngine.SpatialTracking
+  - VRC.Udon.VRCWrapperModules
+  - VRCSDK3
+  - VRC.Udon.VM
+  - AWSSDK.CognitoIdentity
+  - librsync.net
+  - VRC.Udon.Common
+  - Collections.Pooled
+  - System.Collections.Immutable
+  - System.Numerics.Vectors
+  - zlibwapi
+  - AWSSDK.Core
+  - System.Buffers
+  - VRC.Udon.Wrapper
+  - VRC.Udon.Security
+  - UnityEngine.TestRunner
+  - VRCSDKBase
+  - System.Runtime.CompilerServices.Unsafe
+  - AWSSDK.S3
+  - nunit.framework
+  - AWSSDK.SecurityToken
+  - DotZLib
+  - ICSharpCode.SharpZipLib
+  - libopenvr_api
+  - Blake2Sharp
+  - System.Memory
+  - VRCCore-Editor
+  - AudioPluginOculusSpatializer
+  m_EditorPlugins:
+  - VRCSDK3-Editor
+  - Microsoft.CodeAnalysis
+  - VRC.Udon.VRCTypeResolverModules
+  - libaudiopluginresonanceaudio
+  - UnityEditor.GoogleAudioSpatializer
+  - UnityEditor.Networking
+  - audiopluginresonanceaudio
+  - UnityEditor.SpatialTracking
+  - VRC.Udon.Compiler
+  - System.Reflection.Metadata
+  - UnityEditor.Purchasing
+  - Microsoft.CodeAnalysis.CSharp
+  - VRC.Udon.UAssembly
+  - VRC.Udon.Graph
+  - UnityEngine.GoogleAudioSpatializer
+  - UnityEditor.VR
+  - 0Harmony
+  - UnityEditor.UI
+  - VRCSDKBase-Editor
+  - VRC.Udon.VRCGraphModules
+  - UnityEditor.TestRunner
+  - VRC.Udon.EditorBindings
+  - UnityEditor.Timeline
+--- !u!641289076 &4190729890186106846
+AudioBuildInfo:
+  m_IsAudioDisabled: 0
+  m_AudioClipCount: 10
+  m_AudioMixerCount: 0
+--- !u!668709126 &4282348396156308030
+BuiltAssetBundleInfoSet:
+  bundleInfos:
+  - bundleName: scene-standalonewindows64-testing.vrcw
+    bundleArchiveFile: 3
+    packagedFileIndices: 000000000100000002000000
+  - bundleName: SpaceChill
+    bundleArchiveFile: 6
+    packagedFileIndices: 05000000

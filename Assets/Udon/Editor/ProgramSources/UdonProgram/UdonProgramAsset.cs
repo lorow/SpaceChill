@@ -806,6 +806,132 @@ namespace VRC.Udon.Editor.ProgramSources
                         dirty = true;
                     }
                 }
+                else if(variableType == typeof(Gradient))
+                {
+                    Gradient color2Value = variableValue as Gradient;
+                    if (color2Value == null) color2Value = new Gradient();
+                    EditorGUI.BeginChangeCheck();
+                    variableValue = EditorGUILayout.GradientField(symbol, color2Value);
+                    if(EditorGUI.EndChangeCheck())
+                    {
+                        dirty = true;
+                    }
+                }
+                else if(variableType == typeof(Gradient[]))
+                {
+                    Gradient[] valueArray = (Gradient[])variableValue;
+                    GUI.SetNextControlName("NodeField");
+                    bool showArray = false;
+                    if(_arrayStates.ContainsKey(symbol))
+                    {
+                        showArray = _arrayStates[symbol];
+                    }
+                    else
+                    {
+                        _arrayStates.Add(symbol, false);
+                    }
+                    EditorGUILayout.BeginVertical();
+
+                    EditorGUI.BeginChangeCheck();
+                    // Show Foldout Header
+                    showArray = EditorGUILayout.Foldout(showArray, symbol, true);
+                    // Save foldout state
+                    _arrayStates[symbol] = showArray;
+                    
+                    if(showArray)
+                    {
+                        EditorGUI.indentLevel++;
+                        int newSize = EditorGUILayout.IntField(
+                            "size:",
+                            valueArray != null && valueArray.Length > 0 ? valueArray.Length : 1
+                        );
+                        EditorGUILayout.Space();
+                        newSize = newSize >= 0 ? newSize : 0;
+                        Array.Resize(ref valueArray, newSize);
+                        
+                        if(valueArray != null && valueArray.Length > 0)
+                        {
+                            for(int i = 0; i < valueArray.Length; i++)
+                            {
+                                GUI.SetNextControlName("NodeField");
+                                Gradient g = valueArray.Length > i ? (valueArray[i]) : new Gradient();
+                                if (g == null) g = new Gradient();
+                                valueArray[i] = EditorGUILayout.GradientField($"{i}:", g);
+                            }
+                        }
+
+                        EditorGUI.indentLevel--;
+                    }
+                    EditorGUILayout.EndVertical();
+                    if(EditorGUI.EndChangeCheck())
+                    {
+                        variableValue = valueArray;
+                        dirty = true;
+                    }
+                }
+                else if(variableType == typeof(AnimationCurve))
+                {
+                    AnimationCurve curve2Value = variableValue as AnimationCurve;
+                    if (curve2Value == null) curve2Value = new AnimationCurve();
+                    EditorGUI.BeginChangeCheck();
+                    variableValue = EditorGUILayout.CurveField(symbol, curve2Value);
+                    if(EditorGUI.EndChangeCheck())
+                    {
+                        dirty = true;
+                    }
+                }
+                else if(variableType == typeof(AnimationCurve[]))
+                {
+                    AnimationCurve[] valueArray = (AnimationCurve[])variableValue;
+                    GUI.SetNextControlName("NodeField");
+                    bool showArray = false;
+                    if(_arrayStates.ContainsKey(symbol))
+                    {
+                        showArray = _arrayStates[symbol];
+                    }
+                    else
+                    {
+                        _arrayStates.Add(symbol, false);
+                    }
+                    EditorGUILayout.BeginVertical();
+
+                    EditorGUI.BeginChangeCheck();
+                    // Show Foldout Header
+                    showArray = EditorGUILayout.Foldout(showArray, symbol, true);
+                    // Save foldout state
+                    _arrayStates[symbol] = showArray;
+                    
+                    if(showArray)
+                    {
+                        EditorGUI.indentLevel++;
+                        int newSize = EditorGUILayout.IntField(
+                            "size:",
+                            valueArray != null && valueArray.Length > 0 ? valueArray.Length : 1
+                        );
+                        EditorGUILayout.Space();
+                        newSize = newSize >= 0 ? newSize : 0;
+                        Array.Resize(ref valueArray, newSize);
+                        
+                        if(valueArray != null && valueArray.Length > 0)
+                        {
+                            for(int i = 0; i < valueArray.Length; i++)
+                            {
+                                GUI.SetNextControlName("NodeField");
+                                AnimationCurve curve = valueArray.Length > i ? (valueArray[i]) : new AnimationCurve();
+                                if (curve == null) curve = new AnimationCurve();
+                                valueArray[i] = EditorGUILayout.CurveField($"{i}:", curve);
+                            }
+                        }
+
+                        EditorGUI.indentLevel--;
+                    }
+                    EditorGUILayout.EndVertical();
+                    if(EditorGUI.EndChangeCheck())
+                    {
+                        variableValue = valueArray;
+                        dirty = true;
+                    }
+                }
                 else if(variableType == typeof(UnityEngine.Color))
                 {
                     Color color2Value = (Color?)variableValue ?? default;
