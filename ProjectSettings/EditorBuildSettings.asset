@@ -4,5 +4,8 @@
 EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
-  m_Scenes: []
+  m_Scenes:
+  - enabled: 1
+    path: Assets/Physical Interaction/Scenes/PhysicalButtons_SampleScene.unity
+    guid: 54c63ea1cf212b041b70b0d200f6e76c
   m_configObjects: {}
