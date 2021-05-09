@@ -10,17 +10,25 @@ using VRC.Udon;
 
 public class MenuHandler : UdonSharpBehaviour
 {
-    public Dictionary<string, GameObject> availableMenus;
+    public GameObject[] availableMenus;
     public GameObject activeMenu;
 
-    public void SetActiveMenu(string menuName)
+    public void SetActiveMenu(GameObject menu)
     {
-        if (menuName.Length == 0) throw new Exception("Menu name was not provided, something went wrong");
-        if (!availableMenus.Keys.Contains(menuName)) return;
+        Debug.Log(menu.name);
+        if (!menu) Debug.Log("Menu name was not provided, something went wrong");
         
-        // first disable the old menu, then enable the new one
-        activeMenu.SetActive(false);
-        activeMenu = availableMenus[menuName];
-        activeMenu.SetActive(true);
+        // UDON does not support lambdas or Lists yet so Array.exists is out
+        foreach (var avaliableMenu in availableMenus)
+        {
+            if (avaliableMenu == menu)
+            {
+                // first disable the old menu, then enable the new one
+                activeMenu.SetActive(false);
+                activeMenu = menu;
+                activeMenu.SetActive(true);
+                Debug.Log($"Set {menu.name}");
+            }
+        }
     }
 }

@@ -9,10 +9,9 @@ using VRC.Udon;
 public class MenuActivator : UdonSharpBehaviour
 {
     public MenuHandler menuHandler;
-    public string menuName;
-    private void OnTriggerEnter(Collider other)
+    public GameObject menu;
+    private void OnPlayerTriggerEnter(VRCPlayerApi player)
     {
-        menuHandler = other.gameObject.GetComponent<MenuHandler>();
-        menuHandler.SetActiveMenu(menuName);
+        menuHandler.SetActiveMenu(menu);
     }
 }
