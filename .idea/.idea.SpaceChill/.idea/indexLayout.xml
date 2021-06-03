@@ -3,19 +3,19 @@
   <component name="ContentModelUserStore">
     <attachedFolders />
     <explicitIncludes>
-      <Path>Assets</Path>
       <Path>Library/PackageCache/com.unity.cinemachine@2.6.1</Path>
       <Path>Library/PackageCache/com.unity.collab-proxy@1.2.15</Path>
+      <Path>Library/PackageCache/com.unity.package-manager-ui@2.0.13</Path>
       <Path>Library/PackageCache/com.unity.package-manager-ui@2.0.8</Path>
       <Path>Library/PackageCache/com.unity.postprocessing@3.0.3</Path>
       <Path>Library/PackageCache/com.unity.probuilder@4.5.0</Path>
       <Path>Library/PackageCache/com.unity.progrids@3.0.3-preview.6</Path>
       <Path>Library/PackageCache/com.unity.purchasing@2.0.3</Path>
+      <Path>Library/PackageCache/com.unity.purchasing@2.2.1</Path>
       <Path>Library/PackageCache/com.unity.settings-manager@1.0.3</Path>
       <Path>Library/PackageCache/com.unity.textmeshpro@1.5.1</Path>
       <Path>Library/PackageCache/com.unity.xr.oculus.standalone@1.38.4</Path>
       <Path>Library/PackageCache/com.unity.xr.openvr.standalone@1.0.5</Path>
-      <Path>Packages</Path>
       <Path>ProjectSettings</Path>
     </explicitIncludes>
     <explicitExcludes>
@@ -23,7 +23,7 @@
       <Path>.idea</Path>
       <Path>Library</Path>
       <Path>Logs</Path>
-      <Path>Temp</Path>
+      <Path>Thry</Path>
       <Path>obj</Path>
     </explicitExcludes>
   </component>
