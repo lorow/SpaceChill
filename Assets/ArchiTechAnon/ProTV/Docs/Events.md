@@ -1,0 +1,173 @@
+# TV Events
+
+## SUPPORT ME!
+<a href='https://ko-fi.com/I3I84I3Z8' target='_blank'><img height='36' style='border:0px;height:36px;' src='https://cdn.ko-fi.com/cdn/kofi2.png?v=2' border='0' alt='Support me at ko-fi.com' /></a>
+
+## List of Available Incoming Events
+The following is the list of events that any behavior may call to modify the TV's state (they ALL start with an underscore `_`):
+- _RefreshMedia
+    - The main workhorse event that handles loading whatever video is needed to be loaded (either video swap or refreshing the current one)
+    - This event DOES NOT take ownership of the TV.
+- _ChangeMedia
+    - Wrapper event of _RefreshVideo that specifically expects a new video URL to be provided
+    - Variable used for input data: `IN_ChangeVideo_VRCUrl_Url`
+    - This event DOES attempt to take ownership of the TV. Whether this event does anything is dependant on the master lock settings.
+- _ChangeMediaTo(VRCUrl)
+    - UdonSharp only equivalent of the combination of `IN_ChangeVideo_VRCUrl_Url` and `_ChangeVideo`
+- _ChangeVideoPlayer
+    - This event handles the swapping of the video player configurations defined by the TV.
+    - Variable used for input data: `IN_ChangeVideoPlayer_int_Index`
+    - The variable is a 0-index array value (first entry is the value `0`) representing a particular item in the TV's Video Managers list.
+- _ChangeVideoPlayerTo(int)
+    - UdonSharp only equivalent of the combination of `IN_ChangeVideoPlayer_int_Index` and `_ChangeVideoPlayer`
+- _Play
+    - This event causes the current media to either start or resume, depending on the TV's current state.
+- _Pause
+    - This event causes the current media to suspend if there is one playing.
+- _Stop
+    - This event halts any currently playing media.
+- _Mute
+    - This event disables any audio output from the TV.
+- _UnMute
+    - This event enables any audio output from the TV.
+- _ToggleMute
+    - This event swaps the state of the audio outputs from the TV.
+- _ChangeMuteTo(bool)
+    - UdonSharp only method that updates the state of the audio outputs from the TV, based on the provided bool parameter.
+- _ChangeVolume
+    - This event handles updating the volume of the TV.
+    - Variable used for input data: `IN_ChangeVolume_float_Percent`
+    - The variable is a float that expects a value between 0.0f and 1.0f (representing a percent of the max volume)
+- _ChangeVolumeTo(float)
+    - UdonSharp only equivalent of the combination of `IN_ChangeVolume_float_Percent` and `_ChangeVolume`
+- _AudioMode3d
+    - This event switches any audio outputs from a stereo mode, to a positional audio mode.
+- _AudioMode2d
+    - This event switches any audio outputs from a positional audio mode, to a stereo mode.
+- _ToggleAudioMode
+    - This event swaps the audio output mode between positional and stereo, based on it's current value.
+- _ChangeAudioModeTo(bool)
+    - UdonSharp only method that updates the mode of the audio outputs, based on the provided bool parameter.
+    - If the bool is true, the audio is positional (3d). If false, the audio is stereo (2d).
+- _ReSync
+    - This event makes the TV recalculate the local play time from the synced owner playtime.
+    - Media (especialy long-form) can some times drift from their synced time. This helps mitigate that issue.
+- _Sync
+    - This event forces the TV to conform to any sychnronized data changes.
+    - When in this state, the TV will always attempt to adjust itself so that it stays in sync with the current TV owner.
+- _DeSync
+    - This event forces the TV to ignore any synchronized data changes
+    - This only applies to non-owners. It can allow viewers to watch the media at their own pace. For example if someone has to step away for a moment, they could de-sync and then pause the media. Then when they come back, they can choose to re-sync with the owner, or continue watching from where the left off.
+- _ToggleSync
+    - This event swaps the sync flag to the opposite of its current state.
+- _ChangeSyncTo(bool)
+    - UdonSharp only method that updates the sync flag based on the provided bool parameter.
+- _ChangeSeekTime
+    - This event updates the current time of the actively playing media.
+    - Commonly updated via some sort of slider.
+    - Variable used for input data: `IN_ChangeSeekTime_float_Seconds`
+    - The variable is a float that expects a value between 0.0f and 1.0f (representing a percent of the total video duration)
+- _ChangeSeekTimeTo(float)
+    - UdonSharp only equivalent of the combination of `IN_ChangeSeekTime_float_Seconds` and `_ChangeSeekTime`
+- _ChangeSeekPercent
+    - This event updates the current time of the actively playing media based on the percent value passed.
+    - Expects a normalized 0 to 1 float value representing the point in the video to skip to.
+    - This is primarily useful for UI sliders to control the seek position.
+- _ChangeSeekPercentTo(float)
+    - UdonSharp only equivalent of the combination of `IN_ChangeSeekPercent_float_Percent` and `_ChangeSeekPercent`
+- _SeekForward
+    - This event implicitly fastforwards the seek time by 10 seconds.
+- _SeekBackward
+    - This event implicitly rewinds the seek time by 10 seconds.
+- _Lock
+    - This event tells the TV to only allow the instance master to manage the sync data (video swapping/synced seeking)
+    - This event implicitly assigns the instance master as the TV owner.
+- _UnLock
+    - This event tells the TV to allow anyone to manage the sync data (video swapping/synced seeking)
+- _ToggleLock
+    - This event swaps the locked state of the TV to the opposite of its current state.
+    - This event will ignore any calls to it that aren't from the instance master.
+- _ChangeLockTo(bool)
+    - UdonSharp only method that updates the locked state based on the bool parameter.
+    - This method will ignore any calls to it that aren't from the instance master.
+- _RegisterUdonEventReceiver
+    - This event assigns a given behavior as a subscriber of the TV.
+    - Variables used for input data: `IN_RegisterUdonEventReceiver_UdonBehavior_Subscriber` and `IN_RegisterUdonEventReceiver_byte_Priority`
+    - This event should only be called during the `Start` event phase of a behavior and should simply assign the behavior's own reference to the `Subscriber` variable along with optionally setting the `Priority` variable to a number between 0 and 255 inclusively, where 0 is the highest priority.
+- _RegisterUdonSharpEventReceiver(UdonSharpBehaviour)
+    - UdonSharp only equivalent of the combination of `IN_RegisterUdonEventReceiver_UdonBehavior_Subscriber` and `_RegisterUdonEventReceiver`
+    - This is generally done like this: `tv._RegisterUdonSharpEventReceiver(this);`
+    - The method itself will convert it to a standard UdonBehavior, so don't worry about that.
+    - The priority is always assumed to be 255 when using this method.
+- _RegisterUdonSharpEventReceiverWithPriority(UdonSharpBehaviour, byte)
+    - UdonSharp only equivalent of the combination of `IN_RegisterUdonEventReceiver_UdonBehavior_Subscriber`, `IN_RegisterUdonEventReceiver_byte_Priority` and `_RegisterUdonEventReceiver`
+    - This is generally done like this: `tv._RegisterUdonSharpEventReceiver(this, 10);`
+    - The method itself will convert it to a standard UdonBehavior, so don't worry about that.
+    - The priority is a number between 0 and 255 inclusively, with 0 being the highest priority.
+
+---
+
+## List of Available Outgoing Events
+The following is the list of events that any subscribed behavior may receive (they ALL start with an underscore `_`):
+- _TvReady 
+    - Occurs when the TV has completed all initialization and is ready to be controlled.
+    - If a behavior is registered to the TV _after_ the initialization phase (Start event), then it will be called on the target behavior immediately after registering.
+    - USE THIS EVENT TO "CATCH UP" WITH THE TV'S CURRENT STATE. This helps ensure that even if the plugin starts off as disabled on world load, as soon as it becomes registered, it can immediately sync up its internal state with the TV's. 
+- _TvPlay 
+    - Occurs when a video has started or resumed playing
+- _TvPause 
+    - Occurs when a video has been paused locally
+- _TvStop 
+    - Occurs when a video has been stopped locally
+- _TvMediaStart 
+    - Occurs immediately after a video has been loaded
+- _TvMediaEnd 
+    - Occurs immediately after a video has finished playing 
+    - Can be used to trigger a new video, does NOT occur if video is set to loop
+- _TvMediaLoop 
+    - Occurs when a video starts over after finishing 
+    - Triggered only if video is set to loop OR if video is at the end and the owner pressed the play button for a one-time loop
+- _TvMediaChange
+    - Occurs when a user has claimed ownership of the TV and declared a new video to play
+    - This event happens before the video is actually loaded. To take action when a video is ready after it has been loaded, use the `_TvMediaStart` event.
+- _TvOwnerChange
+    - Occurs when a different player takes control of the TV.
+- _TvVideoPlayerChange 
+    - Occurs when the TV has swapped the video player configuration to a different one
+    - This event will attempt to set the variable `OUT_TvVideoPlayerChange_int_Index` with the current index value of the video player configuration that has been swapped to.
+- _TvVideoPlayerError 
+    - Occurs when the video failed to resolve and play for some reason
+    - This event will attempt to set the variable `OUT_TvVideoPlayerError_VideoError_Error` with the VideoError value that caused the event to trigger.
+- _TvMute
+    - Occurs when the local user mutes the current video
+- _TvUnMute
+    - Occurs when the local user unmutes the current video
+- _TvVolumeChange
+    - Occurs when the local user updates the volume percent value
+    - This event will attempt to set the variable `OUT_TvVolumeChange_float_Percent` with the updated volume percent. This event might be called many times in a short period, especially if it is affected by a slider element modifying the TV's volume. 
+- _TvAudioMode3d
+    - Occurs when the local user switches from positional to stereo audio
+- _TvAudioMode2d
+    - Occurs when the local user switches from stereo to positional audio
+- _TvEnableLoop
+    - Occurs when the local user enables looping for the current video.
+- _TvDisableLoop
+    - Occurs when the local user disables looping for the current video.
+- _TvSync
+    - Occurs when the local user enables video synchronization (disabled for owner as one cannot desync with oneself)
+- _TvDeSync
+    - Occurs when the local user disables video synchronization (disabled for owner as one cannot desync with oneself)
+- _TvLock
+    - Occurs when an authorized user (usually instance master) locks the TV for authorized use only.
+- _TvUnLock
+    - Occurs when an authorized user (usually instance master) unlocks the TV for anyone to use.
+- _TvLoading
+    - Occurs when the TV's loading state is enabled 
+    - It can happen at various points, so this event is mostly used for UIs to reflect the loading state of the TV.
+- _TvLoadingEnd
+    - Occurs when the TV's loading state is disabled 
+    - It can happen at various points, so this event is mostly used for UIs to reflect the loading state of the TV.
+- _TvLoadingStop
+    - Occurs when the TV's loading state is interrupted
+    - This is caused when the `_Stop` event is triggered while a video is loading.
+
