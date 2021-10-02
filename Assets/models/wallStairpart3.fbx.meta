@@ -1,66 +1,11 @@
 fileFormatVersion: 2
-guid: 080e827d363a8f140a418d649149c935
+guid: e405be6f83fd8a544b7203c9ad0791cd
 ModelImporter:
-  serializedVersion: 23
-  fileIDToRecycleName:
-    100000: Cube
-    100002: Cube.002
-    100004: Cube.003
-    100006: Cube.004
-    100008: Cube.005
-    100010: Cube.006
-    100012: //RootNode
-    100014: Cube.001
-    100016: Cube.007
-    100018: Cube.008
-    100020: Cube.009
-    400000: Cube
-    400002: Cube.002
-    400004: Cube.003
-    400006: Cube.004
-    400008: Cube.005
-    400010: Cube.006
-    400012: //RootNode
-    400014: Cube.001
-    400016: Cube.007
-    400018: Cube.008
-    400020: Cube.009
-    2100000: No Name
-    2100002: Material.001
-    2300000: Cube
-    2300002: Cube.002
-    2300004: Cube.003
-    2300006: Cube.004
-    2300008: Cube.005
-    2300010: Cube.006
-    2300012: Cube.001
-    2300014: Cube.007
-    2300016: Cube.008
-    2300018: Cube.009
-    3300000: Cube
-    3300002: Cube.002
-    3300004: Cube.003
-    3300006: Cube.004
-    3300008: Cube.005
-    3300010: Cube.006
-    3300012: Cube.001
-    3300014: Cube.007
-    3300016: Cube.008
-    3300018: Cube.009
-    4300000: Cube.004
-    4300002: Cube
-    4300004: Cube.002
-    4300006: Cube.003
-    4300008: Cube.005
-    4300010: Cube.006
-    4300012: Cube.001
-    4300014: Cube.007
-    4300016: Cube.008
-    4300018: Cube.009
-    2186277476908879412: ImportLogs
+  serializedVersion: 19301
+  internalIDToNameTable: []
   externalObjects: {}
   materials:
-    importMaterials: 1
+    materialImportMode: 1
     materialName: 0
     materialSearch: 1
     materialLocation: 1
@@ -86,32 +31,35 @@ ModelImporter:
     extraExposedTransformPaths: []
     extraUserProperties: []
     clipAnimations: []
-    isReadable: 1
+    isReadable: 0
   meshes:
     lODScreenPercentages: []
     globalScale: 1
     meshCompression: 0
     addColliders: 0
     useSRGBMaterialColor: 1
+    sortHierarchyByName: 1
     importVisibility: 1
     importBlendShapes: 1
     importCameras: 1
     importLights: 1
+    fileIdsGeneration: 2
     swapUVChannels: 0
     generateSecondaryUV: 0
     useFileUnits: 1
-    optimizeMeshForGPU: 1
     keepQuads: 0
     weldVertices: 1
     preserveHierarchy: 0
+    skinWeightsMode: 0
+    maxBonesPerVertex: 4
+    minBoneWeight: 0.001
+    meshOptimizationFlags: -1
     indexFormat: 0
     secondaryUVAngleDistortion: 8
     secondaryUVAreaDistortion: 15.000001
     secondaryUVHardAngle: 88
     secondaryUVPackMargin: 4
     useFileScale: 1
-    previousCalculatedGlobalScale: 1
-    hasPreviousCalculatedGlobalScale: 0
   tangentSpace:
     normalSmoothAngle: 60
     normalImportMode: 0
@@ -120,10 +68,10 @@ ModelImporter:
     legacyComputeAllNormalsFromSmoothingGroupsWhenMeshHasBlendShapes: 0
     blendShapeNormalImportMode: 1
     normalSmoothingSource: 0
+  referencedClips: []
   importAnimation: 1
-  copyAvatar: 0
   humanDescription:
-    serializedVersion: 2
+    serializedVersion: 3
     human: []
     skeleton: []
     armTwist: 0.5
@@ -133,13 +81,16 @@ ModelImporter:
     armStretch: 0.05
     legStretch: 0.05
     feetSpacing: 0
+    globalScale: 1
     rootMotionBoneName: 
     hasTranslationDoF: 0
     hasExtraRoot: 0
     skeletonHasParents: 1
   lastHumanDescriptionAvatarSource: {instanceID: 0}
-  animationType: 0
+  autoGenerateAvatarMappingIfUnspecified: 1
+  animationType: 2
   humanoidOversampling: 1
+  avatarSetup: 0
   additionalBone: 0
   userData: 
   assetBundleName: 
