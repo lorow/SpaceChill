@@ -1,26 +1,8 @@
 fileFormatVersion: 2
-guid: ffcdc65cfd6190546ad615c3ffa317ff
+guid: e4756ff2cbc52ec4aa0222c6d8faece7
 ModelImporter:
   serializedVersion: 19301
-  internalIDToNameTable:
-  - first:
-      74: 6997882522552206460
-    second: Circle|CircleAction
-  - first:
-      74: -359618272553315812
-    second: Circle|CircleAction.001
-  - first:
-      74: 4297823779466780295
-    second: Circle|Circle|Circle|CircleAction.001|Circle|CircleAction.001
-  - first:
-      74: 5672049404069263868
-    second: Circle|Circle|Circle|CircleAction|Circle|CircleAction
-  - first:
-      74: -4536862518059988176
-    second: Circle|Circle|Circle|Circle|Circle|CircleAction.001|Circle|CircleActio
-  - first:
-      74: 7397050547033498173
-    second: Circle|Circle|Circle|Circle|Circle|CircleAction|Circle|CircleAction|Ci
+  internalIDToNameTable: []
   externalObjects: {}
   materials:
     materialImportMode: 1
