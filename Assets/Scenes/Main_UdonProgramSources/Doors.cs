@@ -14,7 +14,7 @@ public class Doors : UdonSharpBehaviour
     public float slideTime = 5;
     private float allowedOffset = 0.001f;
 
-    private void handleDoorPosition(Transform door, int slideVector = 1)
+    private void handleDoorPosition(Transform door, int slideVector)
     {
         if (door == null)
             return;
@@ -28,7 +28,7 @@ public class Doors : UdonSharpBehaviour
     public override void OnPlayerTriggerEnter(VRCPlayerApi player)
     {
         handleDoorPosition(leftDoor, -1);
-        handleDoorPosition(rightDoor);
+        handleDoorPosition(rightDoor, 1);
     }
 
     public override void OnPlayerTriggerExit(VRCPlayerApi player)
