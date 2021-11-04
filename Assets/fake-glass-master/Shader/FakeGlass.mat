@@ -8,7 +8,7 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: FakeGlass
-  m_Shader: {fileID: 4800000, guid: 988a1c30f4aa54f469424000c870e630, type: 3}
+  m_Shader: {fileID: 4800000, guid: a92a89f7e0314174a870667cce8d5884, type: 3}
   m_ShaderKeywords: _ALPHAPREMULTIPLY_ON _NORMALMAP
   m_LightmapFlags: 0
   m_EnableInstancingVariants: 0
@@ -74,6 +74,7 @@ Material:
     - _Glossiness: 1
     - _GlossyReflections: 1
     - _IOR: 1
+    - _InteriorDiffuseStrength: 0.1
     - _Metallic: 0
     - _Mode: 3
     - _NormalMapScale: 1

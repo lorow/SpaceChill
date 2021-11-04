@@ -1185,7 +1185,7 @@ Material:
     - m_start_Hologram: 0
     - m_start_Iridescence: 0
     - m_start_Lighting: 0
-    - m_start_MainHueShift: 1
+    - m_start_MainHueShift: 0
     - m_start_MainVertexColors: 0
     - m_start_Matcap2: 0
     - m_start_Metallic: 0
