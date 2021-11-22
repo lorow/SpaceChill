@@ -3607,7 +3607,7 @@ PrefabInstance:
     - target: {fileID: -8679921383154817045, guid: de7d27e9759748e47b61b767b38d0cb6,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: -119
+      value: -111.4
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: de7d27e9759748e47b61b767b38d0cb6,
         type: 3}
@@ -3654,10 +3654,40 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -3541750007469160348, guid: de7d27e9759748e47b61b767b38d0cb6,
+        type: 3}
+      propertyPath: m_Materials.Array.data[1]
+      value: 
+      objectReference: {fileID: 2100000, guid: 206096d6a713c2e4b84f9a766f194d14, type: 2}
+    - target: {fileID: -3541750007469160348, guid: de7d27e9759748e47b61b767b38d0cb6,
+        type: 3}
+      propertyPath: m_Materials.Array.data[2]
+      value: 
+      objectReference: {fileID: 2100000, guid: 206096d6a713c2e4b84f9a766f194d14, type: 2}
+    - target: {fileID: -3541750007469160348, guid: de7d27e9759748e47b61b767b38d0cb6,
+        type: 3}
+      propertyPath: m_Materials.Array.data[3]
+      value: 
+      objectReference: {fileID: 2100000, guid: 206096d6a713c2e4b84f9a766f194d14, type: 2}
     - target: {fileID: 919132149155446097, guid: de7d27e9759748e47b61b767b38d0cb6,
         type: 3}
       propertyPath: m_Name
       value: VRCChillRoom - fixed scale
+      objectReference: {fileID: 0}
+    - target: {fileID: 8608194506828012141, guid: de7d27e9759748e47b61b767b38d0cb6,
+        type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 2.2
+      objectReference: {fileID: 0}
+    - target: {fileID: 8608194506828012141, guid: de7d27e9759748e47b61b767b38d0cb6,
+        type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.638
+      objectReference: {fileID: 0}
+    - target: {fileID: 8608194506828012141, guid: de7d27e9759748e47b61b767b38d0cb6,
+        type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 2.31
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: de7d27e9759748e47b61b767b38d0cb6, type: 3}
@@ -3681,6 +3711,25 @@ MeshCollider:
   m_Convex: 0
   m_CookingOptions: 30
   m_Mesh: {fileID: -8339595133283640797, guid: de7d27e9759748e47b61b767b38d0cb6, type: 3}
+--- !u!1 &353287974 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: -1246057595632761916, guid: de7d27e9759748e47b61b767b38d0cb6,
+    type: 3}
+  m_PrefabInstance: {fileID: 353287971}
+  m_PrefabAsset: {fileID: 0}
+--- !u!65 &353287975
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 353287974}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 1.6942749, y: 5.790364, z: 1.3350466}
+  m_Center: {x: -0.030611038, y: -0.13869892, z: -0.21699324}
 --- !u!1 &358170787
 GameObject:
   m_ObjectHideFlags: 0
@@ -17774,6 +17823,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: kitchenV1
       objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 41ae32aa38dc33b4b850c5ef1a0f1337,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 976723959910379622, guid: 41ae32aa38dc33b4b850c5ef1a0f1337,
         type: 3}
       propertyPath: m_Materials.Array.data[0]
@@ -19284,6 +19338,11 @@ PrefabInstance:
       propertyPath: m_Materials.Array.data[0]
       value: 
       objectReference: {fileID: 2100000, guid: a79edd79845c59f47b245be8a05f75f1, type: 2}
+    - target: {fileID: -7400541651846802462, guid: dc35eea018221754f9174dfa96e67223,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: -7377385338288389855, guid: dc35eea018221754f9174dfa96e67223,
         type: 3}
       propertyPath: m_LocalScale.y
@@ -20044,6 +20103,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: Staris to the first floor-12
+      objectReference: {fileID: 0}
+    - target: {fileID: 2052343099508719538, guid: dc35eea018221754f9174dfa96e67223,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 2519807953241387606, guid: dc35eea018221754f9174dfa96e67223,
         type: 3}
