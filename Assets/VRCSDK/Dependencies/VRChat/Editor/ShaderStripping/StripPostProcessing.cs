@@ -12,11 +12,6 @@ namespace VRC.SDKBase.Editor.ShaderStripping
 
         public void OnProcessShader(Shader shader, ShaderSnippetData snippet, IList<ShaderCompilerData> data)
         {
-            if(EditorUserBuildSettings.activeBuildTarget != BuildTarget.Android)
-            {
-                return;
-            }
-
             string shaderName = shader.name;
             if(string.IsNullOrEmpty(shaderName) || !shaderName.Contains("PostProcessing"))
             {
