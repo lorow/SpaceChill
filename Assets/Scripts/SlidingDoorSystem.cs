@@ -7,7 +7,7 @@ using VRC.Udon;
 
 public class SlidingDoorSystem : UdonSharpBehaviour
 {
-    public float doorOffset = 1.889f;
+    public Vector3 doorOffset;
     public Transform leftDoor;
     public Transform rightDoor;
     public float slideTime = 10;
@@ -25,8 +25,8 @@ public class SlidingDoorSystem : UdonSharpBehaviour
         _startingPositionLeft = _desiredLeftPosition = leftDoor.localPosition;
         _startingPositionRight = _desiredRightPosition=  rightDoor.localPosition;
         
-        _desiredLeftPositionOpen = new Vector3(_startingPositionLeft.x, _startingPositionLeft.y, _startingPositionLeft.z + doorOffset);
-        _desiredRightPositionOpen = new Vector3(_startingPositionRight.x, _desiredRightPosition.y, _desiredRightPosition.z - doorOffset);
+        _desiredLeftPositionOpen = new Vector3(_startingPositionLeft.x + doorOffset.x, _startingPositionLeft.y + doorOffset.y, _startingPositionLeft.z + doorOffset.z);
+        _desiredRightPositionOpen = new Vector3(_startingPositionRight.x - doorOffset.x, _desiredRightPosition.y - doorOffset.y, _desiredRightPosition.z - doorOffset.z);
     }
 
     public override void OnPlayerTriggerEnter(VRCPlayerApi player)
