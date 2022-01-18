@@ -72,24 +72,28 @@ namespace ArchiTech
             var titles = playlist.titles;
             var urls = playlist.urls;
             var hidden = new bool[urls.Length];
-            if (searchTerm == "") {
-                playlist.hidden = hidden;
-                playlist._UpdateView();
+            if (searchTerm == "")
+            {
+                playlist._UpdateFilter(hidden);
                 return urls.Length;
             }
             int count = 0;
             for (int i = 0; i < urls.Length; i++)
             {
                 var shown = false;
-                if (!shown && searchInTitles) shown = titles[i].ToLower().Contains(searchTerm);
-                if (!shown && searchInUrls) shown = urls[i].Get().ToLower().Contains(searchTerm);
+                if (!shown && searchInTitles)
+                {
+                    var title = titles[i];
+                    if (title != null) shown = titles[i].ToLower().Contains(searchTerm);
+                }
+                if (!shown && searchInUrls) {
+                    var url = urls[i];
+                    if (url != null) shown = url.Get().ToLower().Contains(searchTerm);
+                }
                 hidden[i] = !shown;
                 if (shown) count++;
             }
-            playlist.hidden = hidden;
-            // allows movement control to return to the user faster
-            // playlist.SendCustomEventDelayedFrames(nameof(playlist._UpdateView), 2);
-            playlist._UpdateView();
+            playlist._UpdateFilter(hidden);
             return count;
         }
 

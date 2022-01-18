@@ -66,12 +66,13 @@ namespace ArchiTech
         private bool requestedByMe = false;
         private const string EMPTY = "";
         private bool noActiveMedia = true;
-        private VRCPlayerApi local;
+        private VRCPlayerApi localPlayer;
+        private bool hasLocalPlayer;
         private bool init = false;
         private bool debug = true;
         private string debugColor = "yellow";
 
-        private void initialize()
+        public void _Initialize()
         {
             if (init) return;
             if (tv == null) tv = transform.parent.GetComponent<TVManagerV2>();
@@ -95,9 +96,10 @@ namespace ArchiTech
                 SetProgramVariable("url" + i, VRCUrl.Empty);
             }
             loadingBar = listContainer.GetChild(0).GetComponentInChildren<Slider>();
+            localPlayer = Networking.LocalPlayer;
+            hasLocalPlayer = localPlayer != null;
             hasLoadingBar = loadingBar != null;
             hasTitleInput = titleInput != null;
-            local = Networking.LocalPlayer;
             _UpdateUrlInput();
             updateUI();
             // this plugin's priority should be higher than most other plugins
@@ -107,7 +109,7 @@ namespace ArchiTech
 
         void Start()
         {
-            initialize();
+            _Initialize();
             var canvases = GetComponentsInChildren<Canvas>();
             foreach (Canvas c in canvases)
             {
@@ -138,7 +140,7 @@ namespace ArchiTech
         {
             if (isTVOwner())
             {
-                Networking.SetOwner(local, gameObject);
+                Networking.SetOwner(localPlayer, gameObject);
                 var pid = player.playerId;
                 for (int i = 0; i < maxQueuedVideos; i++)
                 {
@@ -201,10 +203,10 @@ namespace ArchiTech
                 return;
             }
             log($"QueueMedia: Assigning new media to entry {target}");
-            Networking.SetOwner(local, gameObject);
+            Networking.SetOwner(localPlayer, gameObject);
             SetProgramVariable("url" + target, urlIn);
             SetProgramVariable("title" + target, titleIn);
-            owners[target] = local.playerId;
+            owners[target] = localPlayer.playerId;
             // TODO fix highlight on queue?
             if (hasLoadingBar && target == 0)
                 loadingBar.value = url0.Get() == tv.url.Get() ? 1f : 0f;
@@ -215,9 +217,9 @@ namespace ArchiTech
         public void _Remove()
         {
             var index = getInteractedIndex();
-            if (index > -1 && (local.playerId == owners[index] || isMasterOwner()))
+            if (index > -1 && (localPlayer.playerId == owners[index] || isMasterOwner()))
             {
-                Networking.SetOwner(local, gameObject);
+                Networking.SetOwner(localPlayer, gameObject);
                 if (index == 0 && matchCurrentUrl(true))
                 {
                     tv._Stop();
@@ -247,14 +249,14 @@ namespace ArchiTech
 
         public void ALL_RequestNext() // PUT ALL Next BUTTON CHECKS HERE
         {
-            if (tv.loading) return; // ignore any requests for next while loading to prevent next spamming
+            if (tv.loading || !hasLocalPlayer) return; // ignore any requests for next while loading to prevent next spamming
             if (tv.locked && isTVOwner())
             { // only allow the TV owner to act if the tv is locked
                 if (requestedByMe)
                 { // only allow self-requested NEXT calls when the TV is locked.
                     if (matchCurrentUrl(true))
                     { // if the current url is in the TV, switch to the next URL
-                        Networking.SetOwner(local, gameObject);
+                        Networking.SetOwner(localPlayer, gameObject);
                         nextURL();
                     }
                     play();
@@ -264,19 +266,19 @@ namespace ArchiTech
             {
                 if (matchCurrentUrl(true))
                 { // if the current url is in the TV
-                    if (isOwner() && checkNextUrl(false) || local.playerId == owners[1])
+                    if (isOwner() && checkNextUrl(false) || localPlayer.playerId == owners[1])
                     {
                         // allow pass through for queue owner if there isn't another media in queue
                         //      This allows for media end to clear the last url from the queue
                         // update owner of queue to the owner of next queued media otherwise
-                        Networking.SetOwner(local, gameObject);
+                        Networking.SetOwner(localPlayer, gameObject);
                         nextURL();
                         play();
                     }
                 }
                 else
                 {
-                    if (checkCurrentUrl(true) && local.playerId == owners[0])
+                    if (checkCurrentUrl(true) && localPlayer.playerId == owners[0])
                     {
                         // if there is a URL in the queue, make the owner of that queue entry play the video
                         play();
@@ -486,7 +488,7 @@ namespace ArchiTech
                 var remove = removal[i];
                 if (remove != null)
                 {
-                    var canRemove = local == owner || masterOwner;
+                    var canRemove = localPlayer == owner || masterOwner;
                     remove.gameObject.SetActive(canRemove);
                 }
                 listContainer.GetChild(i).gameObject.SetActive(true);
@@ -519,9 +521,9 @@ namespace ArchiTech
 
 
 
-        private bool isOwner() => Networking.IsOwner(local, gameObject);
-        private bool isMasterOwner() => tv.allowMasterControl && local.isMaster || local.isInstanceOwner;
-        private bool isTVOwner() => Networking.IsOwner(local, tv.gameObject);
+        private bool isOwner() => Networking.IsOwner(localPlayer, gameObject);
+        private bool isMasterOwner() => hasLocalPlayer && (tv.allowMasterControl && localPlayer.isMaster || localPlayer.isInstanceOwner);
+        private bool isTVOwner() => Networking.IsOwner(localPlayer, tv.gameObject);
 
         private void log(string value)
         {

@@ -15,23 +15,27 @@ namespace ArchiTech
     {
         [NonSerialized] public BaseVRCVideoPlayer player;
         [NonSerialized] public bool isVisible;
-        [Tooltip("Flag whether or not to have this video manager should automatcially manage the visibility of attached screens.")]
-        public bool autoManageScreenVisibility = true;
-        [Tooltip("Flag whether or not to have this video manager should automatically control the attached speakers' audio setup (2d/3d).")]
+        [Tooltip("Flag whether or not to have this video manager should automatically control the managed speakers' audio setup (2d/3d).")]
         public bool autoManageAudioMode = true;
-        [Tooltip("Flag whether or not to have this video manager should automatically control the attached speakers' volume.")]
+        [Tooltip("Flag whether or not to have this video manager should automatically control the managed speakers' volume.")]
         public bool autoManageVolume = true;
-        [Tooltip("Flag whether or not to have this video manager should automatically control the attached speakers' mute state.")]
+        [Tooltip("Flag whether or not to have this video manager should automatically control the managed speakers' mute state.")]
         public bool autoManageMute = true;
         [Tooltip("Amount to set the audio spread in degrees (0-360) when switching to 3D audio mode. Set to a negative number to disable updating the spread automatically.")]
         [Range(0f, 360f)] public float spread3D = -1f;
-        public GameObject[] screens;
-        public AudioSource[] speakers;
+        [Header("List of automatically-managed screens and speakers.")]
+        [SerializeField] private GameObject[] managedScreens;
+        [SerializeField] private AudioSource[] managedSpeakers;
+        [Header("List of reference-only screens and speakers, helpful for plugins.")]
+        [SerializeField] private GameObject[] unmanagedScreens;
+        [SerializeField] private AudioSource[] unmanagedSpeakers;
+        [HideInInspector] public GameObject[] screens; // combined list of managed and unmanaged
+        [HideInInspector] public AudioSource[] speakers; // combined list of managed and unmanaged
         private TVManagerV2 tv;
         private VideoError lastError;
         [System.NonSerialized] public bool muted = true;
         [System.NonSerialized] public float volume = 0.5f;
-        [System.NonSerialized] public bool audio3d = true; 
+        [System.NonSerialized] public bool audio3d = true;
 
         private bool init = false;
         private bool skipLog = false;
@@ -43,6 +47,28 @@ namespace ArchiTech
             player = (BaseVRCVideoPlayer)GetComponent(typeof(BaseVRCVideoPlayer));
             player.EnableAutomaticResync = false;
             namePrefix = transform.parent.name;
+            // 2.1 upgrade handling for the new field names. 
+            // screens/speakers fields used to contain the whole list of the respective types, 
+            // but are to now be used as a composite list of managed and unmanaged that is exposed publicly within the compiler.
+            // Using managedScreens as the target for backwards compatible behaviour with how it was before.
+            if (screens == null) screens = new GameObject[0];
+            if (speakers == null) speakers = new AudioSource[0];
+            if (managedScreens == null || managedScreens.Length == 0)
+                managedScreens = screens;
+            if (managedSpeakers == null || managedSpeakers.Length == 0)
+                managedSpeakers = speakers;
+            if (unmanagedScreens == null) unmanagedScreens = new GameObject[0];
+            if (unmanagedSpeakers == null) unmanagedSpeakers = new AudioSource[0];
+
+            // combine screen list internally
+            screens = new GameObject[managedScreens.Length + unmanagedScreens.Length];
+            Array.Copy(managedScreens, 0, screens, 0, managedScreens.Length);
+            Array.Copy(unmanagedScreens, 0, screens, managedScreens.Length, unmanagedScreens.Length);
+
+            // combine speaker list internally
+            speakers = new AudioSource[managedSpeakers.Length + unmanagedSpeakers.Length];
+            Array.Copy(managedSpeakers, 0, speakers, 0, managedSpeakers.Length);
+            Array.Copy(unmanagedSpeakers, 0, speakers, managedSpeakers.Length, unmanagedSpeakers.Length);
             init = true;
         }
         void Start()
@@ -61,7 +87,7 @@ namespace ArchiTech
         // new void OnVideoLoop() => tv.OnVideoPlayerLoop();
         // new void OnVideoPause() => tv.OnVideoPlayerPause();
         // new void OnVideoPlay() => tv.OnVideoPlayerPlay();
-        new void OnVideoReady() => tv._OnVideoPlayerStart();
+        new void OnVideoReady() => tv._OnVideoPlayerReady();
 
 
         // === Public events to control the video player parts ===
@@ -69,13 +95,10 @@ namespace ArchiTech
         public void _Show()
         {
             if (!init) initialize();
-            if (autoManageScreenVisibility)
+            foreach (var screen in managedScreens)
             {
-                foreach (var screen in screens)
-                {
-                    if (screen == null) continue;
-                    screen.SetActive(true);
-                }
+                if (screen == null) continue;
+                screen.SetActive(true);
             }
             if (autoManageMute) _UnMute();
             isVisible = true;
@@ -88,13 +111,10 @@ namespace ArchiTech
             if (!init) initialize();
             if (autoManageMute) _Mute();
             player.Stop();
-            if (autoManageScreenVisibility)
+            foreach (var screen in managedScreens)
             {
-                foreach (var screen in screens)
-                {
-                    if (screen == null) continue;
-                    screen.SetActive(false);
-                }
+                if (screen == null) continue;
+                screen.SetActive(false);
             }
             isVisible = false;
             log("Deactivated");
@@ -117,7 +137,7 @@ namespace ArchiTech
         {
             if (!init) initialize();
             this.muted = muted;
-            foreach (AudioSource speaker in speakers)
+            foreach (AudioSource speaker in managedSpeakers)
             {
                 if (speaker == null) continue;
                 log($"Setting {speaker.gameObject.name} Mute to {muted}");
@@ -134,7 +154,7 @@ namespace ArchiTech
             this.audio3d = use3dAudio;
             float blend = use3dAudio ? 1.0f : 0.0f;
             float spread = use3dAudio ? spread3D : 360f;
-            foreach (AudioSource speaker in speakers)
+            foreach (AudioSource speaker in managedSpeakers)
             {
                 if (speaker == null) continue;
                 speaker.spatialBlend = blend;
@@ -149,7 +169,7 @@ namespace ArchiTech
         {
             if (!init) initialize();
             this.volume = volume;
-            foreach (AudioSource speaker in speakers)
+            foreach (AudioSource speaker in managedSpeakers)
             {
                 if (speaker == null) continue;
                 speaker.volume = volume;
@@ -159,7 +179,8 @@ namespace ArchiTech
 
         // ================= Helper Methods =================
 
-        public void _SetTV(TVManagerV2 manager) {
+        public void _SetTV(TVManagerV2 manager)
+        {
             tv = manager;
             namePrefix = tv.gameObject.name;
         }

@@ -62,6 +62,7 @@ namespace ArchiTech
 
         // parameter for _ChangeVideo event
         [NonSerialized] public VRCUrl IN_ChangeMedia_VRCUrl_Url = VRCUrl.Empty;
+        [NonSerialized] public VRCUrl IN_ChangeMedia_VRCUrl_Alt = VRCUrl.Empty;
         // [System.NonSerialized] public VRCUrl IN_ChangeMedia_VRCUrl_UrlQuest = VRCUrl.Empty;
         // parameter for _ChangeVolume event, expects it to be a normalized float between 0f and 1f
         [NonSerialized] public float IN_ChangeVolume_float_Percent = 0f;
@@ -85,6 +86,8 @@ namespace ArchiTech
 
         [Tooltip("This is the URL to set as automatically playing when the first user joins a new instance. This has no bearing on an existing instance as the TV has already been syncing data after the initial point.")]
         public VRCUrl autoplayURL = VRCUrl.Empty;
+        [Tooltip("This is an optional alternate url that can be provided for situations when the main url is insufficient (such as an alternate stream endpoint for Quest to use)")]
+        public VRCUrl autoplayURLAlt = VRCUrl.Empty;
         [Tooltip("This is used to offset the delay of the initial attempt for a TV to fetch it's URL when a user joins a world. Primarily used if there are multiple TVs in the world to avoid excessive rate limiting issues. Make sure each TV has a different value (recommend intervals of 3).")]
         [Range(0f, 60f)] public float autoplayStartOffset = 0f;
         [Tooltip("The volume that the TV starts off at.")]
@@ -153,15 +156,17 @@ namespace ArchiTech
         [NonSerialized] public int stateSync = STOPPED;
         [NonSerialized] public int state = STOPPED;
         [NonSerialized] public int currentState = STOPPED;
-        [NonSerialized] public VRCUrl urlSync = VRCUrl.Empty;
         [NonSerialized] public VRCUrl url = VRCUrl.Empty;
-        [NonSerialized] public VRCUrl urlQuestSync = VRCUrl.Empty;
-        [NonSerialized] public VRCUrl urlQuest = VRCUrl.Empty;
+        [NonSerialized] public VRCUrl urlMain = VRCUrl.Empty;
+        [NonSerialized] public VRCUrl urlMainSync = VRCUrl.Empty;
+        [NonSerialized] public VRCUrl urlAlt = VRCUrl.Empty;
+        [NonSerialized] public VRCUrl urlAltSync = VRCUrl.Empty;
+        [NonSerialized] public bool useAlternateUrl = false;
         // a miscellaneous string that is used to describe the current video. 
         // Allows for different extensions to share things like custom video titles in a centralized way.
         // Is automatically by default the current URL's full domain name.
         // The ideal place to update this is during the _OnMediaStart event.
-        [NonSerialized] public string localLabel = string.Empty;
+        [NonSerialized] public string localLabel = EMPTY;
         [NonSerialized] public string[] urlMeta = new string[0];
         [NonSerialized] public bool lockedSync = false;
         [NonSerialized] public bool locked = false;
@@ -212,7 +217,7 @@ namespace ArchiTech
         private string[] haltedEvents = new string[23];
 
         // === Misc variables ===
-        private string playerNameOverride = string.Empty;
+        private string playerNameOverride = EMPTY;
         private bool refreshAfterWait = false;
         private bool sendEvents = false;
         private bool activeInitialized = false;
@@ -222,9 +227,16 @@ namespace ArchiTech
         private bool initialCatchUp = true;
         private float syncEnforcementTimeLimit = 3f;
         private bool hasActiveManager = false;
+        private bool hasLocalPlayer = false;
         private VRCPlayerApi localPlayer;
+#if UNITY_ANDROID
+        private bool isQuest = true;
+#else
+        private bool isQuest = false;
+#endif
         private bool debug = true;
         [NonSerialized] public bool init = false;
+        private const string EMPTY = "";
 
         private void initialize()
         {
@@ -232,22 +244,35 @@ namespace ArchiTech
             init = true;
             log($"Starting TVManagerV2");
             localPlayer = Networking.LocalPlayer;
+            hasLocalPlayer = localPlayer != null;
             syncData = transform.GetComponentInChildren<TVManagerV2ManualSync>();
             syncData._SetTV(this);
             if (videoManagers == null) videoManagers = GetComponentsInChildren<VideoManagerV2>();
             if (videoManagers != null)
             {
+                bool noManagers = true;
                 foreach (VideoManagerV2 m in videoManagers)
                 {
-                    if (m != null) m._SetTV(this);
+                    if (m != null)
+                    {
+                        m._SetTV(this);
+                        noManagers = false;
+                    }
+                }
+                if (noManagers)
+                {
+                    err("No video managers available. Make sure any desired video managers are properly associated with the TV, otherwise the TV will not work.");
+                    return;
                 }
             }
             // assign inital video if owner
-            IN_ChangeMedia_VRCUrl_Url = url = urlSync = autoplayURL;
+            IN_ChangeMedia_VRCUrl_Url = urlMain = urlMainSync = autoplayURL;
+            IN_ChangeMedia_VRCUrl_Alt = urlAlt = urlAltSync = autoplayURLAlt;
+            useAlternateUrl = isQuest;
             // determine initial locked state
             if (lockedByDefault)
             {
-                if (localPlayer.isMaster) lockedSync = true;
+                if (hasLocalPlayer && localPlayer.isMaster) lockedSync = true;
                 locked = true;
             }
             // load initial video player (sets the nextManager value)
@@ -257,7 +282,7 @@ namespace ArchiTech
             sendEvents = eventTargets != null && eventTargets.Length > 0;
             forwardEvent(EVENT_READY);
             if (startHidden) gameObject.SetActive(false);
-            if (localPlayer.isMaster) syncData._RequestSync();
+            if (hasLocalPlayer && localPlayer.isMaster) syncData._RequestSync();
             // make the script wait a few seconds before trying to fetch the video data for the first time.
             waitUntil = Time.realtimeSinceStartup + 3f + autoplayStartOffset;
             if (automaticResyncInterval == 0f) automaticResyncInterval = Mathf.Infinity;
@@ -301,7 +326,7 @@ namespace ArchiTech
 
         void Update()
         {
-            if (init) { } else return; // has not yet been initialized
+            if (init && hasLocalPlayer) { } else return; // has not yet been initialized or is playmode without cyanemu
             var time = Time.realtimeSinceStartup;
             // wait until the timeout has cleard
             if (time < waitUntil) return;
@@ -382,7 +407,7 @@ namespace ArchiTech
                 var compSyncTime = syncTime + lagComp;
                 if (compSyncTime > endTime) compSyncTime = endTime;
                 float syncDelta = Mathf.Abs(currentTime - compSyncTime);
-                if (player.IsPlaying)
+                if (currentState == PLAYING)
                 {
                     // sync time enforcement check should ONLY be for when the video is playing
                     // Also helps fix audio/video desync/drift in most cases.
@@ -432,19 +457,17 @@ namespace ArchiTech
                         else
                         {
                             // non-owner when owner has loop (causing the sync time to start over)
-                            activeManager.player.SetTime(startTime);
+                            player.SetTime(startTime);
                             // update current time to start time so this only executes once, prevents accidental spam
                             currentTime = startTime;
-                            // loop is cheap so make the sync timeout minimal but NOT 0
-                            queueSync(0.01f);
                             forwardEvent(EVENT_MEDIALOOP);
                         }
                     }
                     else
                     {
                         // in any other condition, pause the video, specifying the media has finished
-                        activeManager.player.Pause();
-                        activeManager.player.SetTime(endTime);
+                        player.Pause();
+                        player.SetTime(endTime);
                         currentState = PAUSED;
                         currentTime = endTime;
                         if (owner) syncTime = currentTime;
@@ -478,11 +501,13 @@ namespace ArchiTech
             if (Time.realtimeSinceStartup < waitUntil) return;
             if (urlRevision != urlRevisionSync)
             {
-                log("URL change via deserialization");
+                log($"URL change via deserialization: {urlRevision} -> {urlRevisionSync}");
                 urlRevision = urlRevisionSync;
-                url = urlSync;
+                urlMain = urlMainSync;
+                urlAlt = urlAltSync;
                 // trigger video load
-                IN_ChangeMedia_VRCUrl_Url = url;
+                IN_ChangeMedia_VRCUrl_Url = urlMain;
+                IN_ChangeMedia_VRCUrl_Alt = urlAlt;
                 queueRefresh(0f);
             }
             if (locked != lockedSync)
@@ -551,7 +576,7 @@ namespace ArchiTech
 
 
         // Once the active manager detects the player has finished loading, get video information and log
-        public void _OnVideoPlayerStart()
+        public void _OnVideoPlayerReady()
         {
             var owner = isOwner();
             cacheVideoInfo();
@@ -606,20 +631,18 @@ namespace ArchiTech
                 log("jumpToTime preceeds startTime. Updating.");
                 jumpToTime = startTime;
             }
+            errorOccurred = false;
+            initialCatchUp = true;
+            currentState = PLAYING;
+            activeManager.player.Play();
             if (jumpToTime > 0f)
             {
                 log($"Jumping {name} [{activeManager.gameObject.name}] to timestamp: {jumpToTime}");
                 activeManager.player.SetTime(jumpToTime);
                 jumpToTime = 0f;
             }
-            errorOccurred = false;
-            currentState = PLAYING;
-            initialCatchUp = true;
-            activeManager.player.Play();
             forwardEvent(EVENT_PLAY);
-            queueSync(0.3f);
         }
-
 
 
         // === Public events to control the TV from user interfaces ===
@@ -633,30 +656,51 @@ namespace ArchiTech
                 return; // disallow refreshing media while TV is loading another video
             }
             // compare input URL and previous URL
-            bool hasInputUrl = IN_ChangeMedia_VRCUrl_Url != null && IN_ChangeMedia_VRCUrl_Url.Get() != string.Empty;
-            if (hasInputUrl)
+            IN_ChangeMedia_VRCUrl_Url = IN_ChangeMedia_VRCUrl_Url != null ? IN_ChangeMedia_VRCUrl_Url : VRCUrl.Empty;
+            IN_ChangeMedia_VRCUrl_Alt = IN_ChangeMedia_VRCUrl_Alt != null ? IN_ChangeMedia_VRCUrl_Alt : VRCUrl.Empty;
+            bool hasMainUrl = IN_ChangeMedia_VRCUrl_Url.Get() != EMPTY;
+            bool hasAltUrl = IN_ChangeMedia_VRCUrl_Alt.Get() != EMPTY;
+            if (hasMainUrl || hasAltUrl)
             {
-                log($"New URL : {IN_ChangeMedia_VRCUrl_Url}");
-                url = IN_ChangeMedia_VRCUrl_Url;
+
+                log($"Main URL: {IN_ChangeMedia_VRCUrl_Url.Get()} | Alt URL: {IN_ChangeMedia_VRCUrl_Alt.Get()}");
+                if (hasMainUrl) urlMain = IN_ChangeMedia_VRCUrl_Url;
+                urlAlt = IN_ChangeMedia_VRCUrl_Alt;
                 if (isOwner())
                 {
-                    urlSync = url;
+                    urlMainSync = urlMain;
+                    urlAltSync = urlAlt;
                     urlRevisionSync++;
                     syncData._RequestSync();
                 }
             }
             IN_ChangeMedia_VRCUrl_Url = VRCUrl.Empty;
+            IN_ChangeMedia_VRCUrl_Alt = VRCUrl.Empty;
 
-            if (syncToOwner) url = urlSync;
-            if (url.Get() == string.Empty)
+            if (syncToOwner)
             {
-                log("URL is blank. Skip.");
+                urlMain = urlMainSync;
+                urlAlt = urlAltSync;
+            }
+            if (urlMain.Get() == EMPTY) urlMain = urlAlt;
+            if (useAlternateUrl && urlAlt.Get() == EMPTY) urlAlt = urlMain;
+            if (urlMain.Get() == EMPTY)
+            {
+                log("Main URL is blank. Skip.");
                 return;
             }
+            var oldUrl = url;
+            url = useAlternateUrl ? urlAlt : urlMain;
             log($"{name} [{nextManager.gameObject.name}] loading URL: {url}");
-            nextManager.player.LoadURL(url);
-            if (hasInputUrl) forwardEvent(EVENT_MEDIACHANGE);
-            setLoadingState(true);
+            if (!useAlternateUrl && hasAltUrl && !hasMainUrl) { }
+            else
+            {
+                // loading state MUST be set first so that any errors that occur (notably the INVALID_URL error)
+                // will be able to decide whether to not to change the loading state as needed.
+                setLoadingState(true);
+                nextManager.player.LoadURL(url);
+            }
+            if (!errorOccurred && hasMainUrl != useAlternateUrl || hasAltUrl == useAlternateUrl) forwardEvent(EVENT_MEDIACHANGE);
         }
 
         public void _ChangeMedia()
@@ -671,20 +715,27 @@ namespace ArchiTech
         // equivalent to: udonBehavior.SetProgramVariable("IN_ChangeMedia_VRCUrl_Url", (VRCUrl) url); udonBehavior.SendCustomEvent("_ChangeMedia");
         public void _ChangeMediaTo(VRCUrl url)
         {
-            log("Change Media by param check");
             IN_ChangeMedia_VRCUrl_Url = url;
             _ChangeMedia();
         }
 
-        // public void _ChangeQuestMediaTo(VRCUrl url)
-        // {
-        //     if (!changeMediaChecks()) return;
-        // }
+        public void _ChangeAltMediaTo(VRCUrl alt)
+        {
+            IN_ChangeMedia_VRCUrl_Alt = alt;
+            _ChangeMedia();
+        }
+
+
+        public void _ChangeMediaToWithAlt(VRCUrl url, VRCUrl alt)
+        {
+            IN_ChangeMedia_VRCUrl_Url = url;
+            IN_ChangeMedia_VRCUrl_Alt = alt;
+            _ChangeMedia();
+        }
 
         public void _DelayedChangeMediaTo(VRCUrl url)
         {
             if (!changeMediaChecks()) return;
-            log("Delayed Media Change");
             IN_ChangeMedia_VRCUrl_Url = url;
             // refresh next frame
             queueRefresh(0f);
@@ -707,7 +758,7 @@ namespace ArchiTech
         }
 
 
-        // equivalent to: udonBehavior.SetProgramVariable("IN_ChangeVideoPlayer_int_Index", (VRCUrl) url); udonBehavior.SendCustomEvent("_ChangeVideoPlayer");
+        // equivalent to: udonBehavior.SetProgramVariable("IN_ChangeVideoPlayer_int_Index", (int) index); udonBehavior.SendCustomEvent("_ChangeVideoPlayer");
         public void _ChangeVideoPlayer()
         {
             if (!init) return;
@@ -730,7 +781,6 @@ namespace ArchiTech
             videoPlayer = IN_ChangeVideoPlayer_int_Index;
             forwardVariable(OUT_VIDEOPLAYER, videoPlayer);
             forwardEvent(EVENT_VIDEOPLAYERCHANGE);
-            log($"Is next player null? {nextManager == null}");
             log($"Switching to: {gameObject.name} [{nextManager.gameObject.name}]");
             IN_ChangeVideoPlayer_int_Index = -1;
         }
@@ -817,7 +867,7 @@ namespace ArchiTech
             {
                 log("Stop called while loading");
                 // if stop is called while loading a video, the video loading will be halted instead of the active player
-                nextManager._Hide();
+                if (!errorOccurred) nextManager._Hide();
                 loading = false;
                 locallyPaused = false;
                 errorOccurred = false;
@@ -837,6 +887,24 @@ namespace ArchiTech
             locallyPaused = false;
             errorOccurred = false;
             forwardEvent(EVENT_STOP);
+        }
+
+        public void _UseMainUrl()
+        {
+            useAlternateUrl = false;
+            queueRefresh(0f);
+        }
+
+        public void _UseAltUrl()
+        {
+            useAlternateUrl = true;
+            queueRefresh(0f);
+        }
+
+        public void _ToggleUrl()
+        {
+            useAlternateUrl = !useAlternateUrl;
+            queueRefresh(0f);
         }
 
         public void _Mute()
@@ -1055,7 +1123,6 @@ namespace ArchiTech
             IN_RegisterUdonEventReceiver_byte_Priority = defaultPriority;
             // forward the ready state for registrations that happen after the TV init phase
             if (init) forwardEvent(EVENT_READY);
-            // else initialize();
         }
 
         public void _RegisterUdonSharpEventReceiver(UdonSharpBehaviour target)
@@ -1152,17 +1219,17 @@ namespace ArchiTech
             float value;
             string param;
             // check for start param
-            param = getUrlParam(urlSync, "start");
+            param = getUrlParam(url, "start");
             if (float.TryParse(param, out value)) startTime = value;
             else startTime = 0f;
             // check for end param
-            param = getUrlParam(urlSync, "end");
+            param = getUrlParam(url, "end");
             if (float.TryParse(param, out value)) endTime = value;
             else endTime = videoLength;
             videoDuration = endTime - startTime;
             // check for loop param
             int toggle;
-            param = getUrlParam(urlSync, "loop");
+            param = getUrlParam(url, "loop");
             int.TryParse(param, out toggle);
             bool check = toggle != 0;
             if (loop != check)
@@ -1174,15 +1241,15 @@ namespace ArchiTech
             // only parse if another jumpToTime value has not been set.
             if (jumpToTime == startTime)
             {
-                param = getUrlParam(urlSync, "t");
+                param = getUrlParam(url, "t");
                 if (float.TryParse(param, out value)) jumpToTime = value;
             }
-            urlMeta = getUrlMeta(urlSync);
+            urlMeta = getUrlMeta(url);
             log("Params set after video is ready");
         }
 
         private bool isOwner() => Networking.IsOwner(gameObject);
-        private bool isMasterOwner() => allowMasterControl && localPlayer.isMaster || localPlayer.isInstanceOwner;
+        private bool isMasterOwner() => hasLocalPlayer && (allowMasterControl && localPlayer.isMaster || localPlayer.isInstanceOwner);
 
 
         private void forwardEvent(string eventName)
@@ -1242,7 +1309,7 @@ namespace ArchiTech
         {
             // strip the protocol
             var s = url.Get().Split(new string[] { "://" }, 2, System.StringSplitOptions.None);
-            if (s.Length == 1) return string.Empty;
+            if (s.Length == 1) return EMPTY;
             // strip everything after the first slash
             s = s[1].Split(new char[] { '/' }, 2, System.StringSplitOptions.None);
             // just to be sure, strip everything after the question mark if one is present
@@ -1263,7 +1330,7 @@ namespace ArchiTech
         {
             // strip everything before the query parameters
             string[] s = url.Get().Split(new char[] { '?' }, 2, System.StringSplitOptions.None);
-            if (s.Length == 1) return string.Empty;
+            if (s.Length == 1) return EMPTY;
             // just to be sure, strip everything after the url bang if one is present
             s = s[1].Split(new char[] { '#' }, 2, System.StringSplitOptions.None);
             // attempt to find parameter name match
@@ -1274,7 +1341,7 @@ namespace ArchiTech
                 if (p[0] == name) return p[1];
             }
             // if one can't be found, return an empty string
-            return string.Empty;
+            return EMPTY;
         }
 
         private string[] getUrlMeta(VRCUrl url)

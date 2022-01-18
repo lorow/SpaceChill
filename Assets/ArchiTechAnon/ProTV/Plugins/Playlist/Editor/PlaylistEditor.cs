@@ -20,20 +20,16 @@ namespace ArchiTech.Editor
         ScrollRect scrollView;
         RectTransform content;
         GameObject template;
+        bool shuffleOnLoad;
         bool autoplayList;
+        bool startFromRandomEntry;
         bool continueWhereLeftOff;
         bool autoplayOnVideoError;
         bool showUrls = true;
         VRCUrl[] urls;
-        // VRCUrl[] oldUrls;
         string[] titles;
-        // string[] oldTitles;
         Sprite[] images;
-        // Sprite[] oldImages;
         int visibleCount;
-        int visibleOffset;
-        Button[] buttons;
-        Button[] oldButtons;
         Vector2 scrollPos;
         PlaylistAction updateMode = PlaylistAction.NOOP;
         bool manualToImport = false;
@@ -60,7 +56,6 @@ namespace ArchiTech.Editor
             scrollView = playlist.scrollView;
             content = playlist.content;
             template = playlist.template;
-            visibleCount = playlist.visibleCount;
 
             if (recache) cacheEntryInfo();
 
@@ -70,7 +65,7 @@ namespace ArchiTech.Editor
             showPlaylistEntries();
             if (EditorGUI.EndChangeCheck() && updateMode != PlaylistAction.NOOP)
             {
-                Debug.Log("Recording Changes");
+                Debug.Log("Changes Detected");
                 Undo.RecordObject(playlist, "Modify Playlist Content");
                 if (updateMode != PlaylistAction.OTHER)
                 {
@@ -82,16 +77,16 @@ namespace ArchiTech.Editor
                 playlist.content = content;
                 playlist.template = template;
                 playlist.showUrls = showUrls;
+                playlist.shuffleOnLoad = shuffleOnLoad;
                 playlist.autoplayList = autoplayList;
+                playlist.startFromRandomEntry = startFromRandomEntry;
                 playlist.continueWhereLeftOff = continueWhereLeftOff;
                 playlist.autoplayOnVideoError = autoplayOnVideoError;
                 playlist.urls = urls;
                 playlist.titles = titles;
                 playlist.images = images;
-                playlist.hidden = new bool[urls.Length];
                 playlist._EDITOR_importSrc = importSrc;
                 playlist._EDITOR_manualToImport = manualToImport;
-                playlist.visibleCount = visibleCount;
                 updateMode = PlaylistAction.NOOP;
             }
 
@@ -130,6 +125,11 @@ namespace ArchiTech.Editor
             template = (GameObject)EditorGUILayout.ObjectField("Playlist Item Template", playlist.template, typeof(GameObject), true);
             if (template != playlist.template) updateMode = PlaylistAction.OTHER;
             EditorGUILayout.BeginHorizontal();
+            EditorGUILayout.PrefixLabel("Shuffle Playlist on Load");
+            shuffleOnLoad = EditorGUILayout.Toggle(playlist.shuffleOnLoad);
+            if (shuffleOnLoad != playlist.shuffleOnLoad) updateMode = PlaylistAction.OTHER;
+            EditorGUILayout.EndHorizontal();
+            EditorGUILayout.BeginHorizontal();
             EditorGUILayout.PrefixLabel("Autoplay?");
             autoplayList = EditorGUILayout.Toggle(playlist.autoplayList);
             if (autoplayList != playlist.autoplayList) updateMode = PlaylistAction.OTHER;
@@ -139,13 +139,19 @@ namespace ArchiTech.Editor
             {
                 EditorGUILayout.BeginHorizontal();
                 EditorGUILayout.Space();
-                EditorGUILayout.PrefixLabel("Continue from where it left off:");
+                EditorGUILayout.PrefixLabel("Start from random entry");
+                startFromRandomEntry = EditorGUILayout.Toggle(playlist.startFromRandomEntry);
+                if (startFromRandomEntry != playlist.startFromRandomEntry) updateMode = PlaylistAction.OTHER;
+                EditorGUILayout.EndHorizontal();
+                EditorGUILayout.BeginHorizontal();
+                EditorGUILayout.Space();
+                EditorGUILayout.PrefixLabel("Continue from last known entry");
                 continueWhereLeftOff = EditorGUILayout.Toggle(playlist.continueWhereLeftOff);
                 if (continueWhereLeftOff != playlist.continueWhereLeftOff) updateMode = PlaylistAction.OTHER;
                 EditorGUILayout.EndHorizontal();
                 EditorGUILayout.BeginHorizontal();
                 EditorGUILayout.Space();
-                EditorGUILayout.PrefixLabel("Continue after a video error:");
+                EditorGUILayout.PrefixLabel("Skip to next entry on video error");
                 autoplayOnVideoError = EditorGUILayout.Toggle(playlist.autoplayOnVideoError);
                 if (autoplayOnVideoError != playlist.autoplayOnVideoError) updateMode = PlaylistAction.OTHER;
                 EditorGUILayout.EndHorizontal();
@@ -191,11 +197,13 @@ namespace ArchiTech.Editor
                 if (importSrc != playlist._EDITOR_importSrc)
                 {
                     updateMode = PlaylistAction.OTHER;
+                    entriesCount = 0;
+                    imagesCount = 0;
                 }
                 if (importSrc != null)
                 {
-                    entriesCount = countEntries(importSrc.text);
-                    imagesCount = countImages(importSrc.text);
+                    if (entriesCount == 0) entriesCount = countEntries(importSrc.text);
+                    if (imagesCount == 0) imagesCount = countImages(importSrc.text);
 
                     if (GUILayout.Button("Import", GUILayout.ExpandWidth(false)))
                     {
@@ -284,25 +292,29 @@ namespace ArchiTech.Editor
             text = text.Trim();
             string[] lines = text.Split('\n');
             int count = countEntries(text);
-            // if (count > 100) count = 100;
             urls = new VRCUrl[count];
             titles = new string[count];
             images = new Sprite[count];
             count = -1;
             string currentTitle = "";
             Sprite currentImage = null;
+            uint missingTitles = 0;
             foreach (string l in lines)
             {
                 var line = l.Trim();
                 if (line.StartsWith(newEntryIndicator))
                 {
-                    if (currentTitle.Length > 0)
+                    if (count > -1)
                     {
+                        if (currentTitle.Length == 0)
+                        {
+                            Debug.Log($"Missing title at index {count}");
+                            missingTitles++;
+                        }
                         titles[count] = currentTitle.Trim();
                         currentTitle = "";
                         currentImage = null;
                     }
-                    // if (count == 100) break; // only allow 100 entries per playlist.
                     count++;
                     urls[count] = new VRCUrl(line.Substring(newEntryIndicator.Length).Trim());
                     continue;
@@ -318,9 +330,18 @@ namespace ArchiTech.Editor
                 if (currentTitle.Length > 0) currentTitle += '\n';
                 currentTitle += line.Trim();
             }
-            if (currentTitle.Length > 0 && count > -1)
+            if (count > -1)
             {
                 titles[count] = currentTitle.Trim();
+                if (currentTitle.Length == 0)
+                {
+                    missingTitles++;
+                    Debug.Log($"Missing title at index {count}");
+                }
+            }
+            if (missingTitles > 0)
+            {
+                Debug.LogWarning($"Just a heads up, this playlist has {missingTitles} entries that don't have any titles.");
             }
         }
 
@@ -353,7 +374,6 @@ namespace ArchiTech.Editor
             var pageStart = currentPage * perPage;
             var pageEnd = Math.Min(urlCount, pageStart + perPage);
             var height = Mathf.Min(330f, perPage * 55f) + 15f; // cap size at 330 + 15 for spacing for the horizontal scroll bar
-
             EditorGUILayout.Space();
             scrollPos = EditorGUILayout.BeginScrollView(scrollPos, GUILayout.Height(height)); // 1
             EditorGUI.BeginDisabledGroup(manualToImport); // 2
@@ -366,31 +386,21 @@ namespace ArchiTech.Editor
                 EditorGUILayout.BeginHorizontal(); // 5
                 EditorGUILayout.LabelField($"Url {i}", GUILayout.MaxWidth(100f), GUILayout.ExpandWidth(false));
                 var url = new VRCUrl(EditorGUILayout.TextField(urls[i].Get(), GUILayout.ExpandWidth(true)));
-                if (url.Get() != urls[i].Get())
-                {
-                    updateMode = PlaylistAction.UPDATESELF;
-                }
+                if (url.Get() != urls[i].Get()) updateMode = PlaylistAction.UPDATESELF;
                 urls[i] = url;
-
                 EditorGUILayout.EndHorizontal(); // end 5
 
                 // TITLE field management
                 EditorGUILayout.BeginHorizontal(); // 5
                 EditorGUILayout.LabelField("  Description", GUILayout.MaxWidth(100f), GUILayout.ExpandWidth(false));
                 var title = EditorGUILayout.TextArea(titles[i], GUILayout.Width(250f), GUILayout.ExpandWidth(true));
-                if (title != titles[i])
-                {
-                    updateMode = PlaylistAction.UPDATESELF;
-                }
+                if (title != titles[i]) updateMode = PlaylistAction.UPDATESELF;
                 titles[i] = title;
                 EditorGUILayout.EndHorizontal(); // end 5
 
                 EditorGUILayout.EndVertical(); // end 4
                 var image = (Sprite)EditorGUILayout.ObjectField(images[i], typeof(Sprite), false, GUILayout.Height(50), GUILayout.Width(50));
-                if (image != images[i])
-                {
-                    updateMode = PlaylistAction.UPDATESELF;
-                }
+                if (image != images[i]) updateMode = PlaylistAction.UPDATESELF;
                 images[i] = image;
                 if (!manualToImport)
                 {
@@ -428,6 +438,34 @@ namespace ArchiTech.Editor
             }
             EditorGUI.EndDisabledGroup(); // end 2
             EditorGUILayout.EndScrollView(); // end 1
+        }
+
+        #region Scene Updates
+
+        private void updateScene()
+        {
+            Debug.Log("Updating Scene");
+            if (scrollView?.viewport == null)
+            {
+                Debug.LogError("ScrollRect or associated viewport is null. Ensure they are connected in the inspector.");
+                return;
+            }
+            switch (updateMode)
+            {
+                case PlaylistAction.ADD: addItem(); break;
+                case PlaylistAction.MOVEUP: moveItem(targetEntry, targetEntry - 1); break;
+                case PlaylistAction.MOVEDOWN: moveItem(targetEntry, targetEntry + 1); break;
+                case PlaylistAction.REMOVE: removeItem(targetEntry); break;
+                case PlaylistAction.REMOVEALL: removeAll(); break;
+                default: break;
+            }
+            targetEntry = -1;
+            switch (updateMode)
+            {
+                case PlaylistAction.UPDATEVIEW:
+                case PlaylistAction.UPDATESELF: updateContents(); break;
+                default: rebuildScene(); break;
+            }
         }
 
         private void addItem()
@@ -505,26 +543,6 @@ namespace ArchiTech.Editor
             urls = new VRCUrl[0];
             titles = new string[0];
             images = new Sprite[0];
-        }
-
-        private void updateScene()
-        {
-            if (scrollView?.viewport == null) return;
-            switch (updateMode)
-            {
-                case PlaylistAction.ADD: addItem(); break;
-                case PlaylistAction.MOVEUP: moveItem(targetEntry, targetEntry - 1); break;
-                case PlaylistAction.MOVEDOWN: moveItem(targetEntry, targetEntry + 1); break;
-                case PlaylistAction.REMOVE: removeItem(targetEntry); break;
-                case PlaylistAction.REMOVEALL: removeAll(); break;
-                default: break;
-            }
-            targetEntry = -1;
-            switch (updateMode) {
-                case PlaylistAction.UPDATEVIEW:
-                case PlaylistAction.UPDATESELF: updateContents(); break;
-                default: rebuildScene(); break;
-            }
         }
 
         public void rebuildScene()
@@ -608,7 +626,7 @@ namespace ArchiTech.Editor
             // TODO enforce this assumption
             float X = 0f;
             float Y = 0f;
-
+            // TODO Take the left-right margins into account for spacing
             // should be able to make the assumption that all entries are the same structure (thus width/height) as template
             Rect tmpl = ((RectTransform)playlist.template.transform).rect;
             float entryHeight = tmpl.height;
@@ -658,11 +676,10 @@ namespace ArchiTech.Editor
             var targetOffset = Mathf.Min(steppedOffset, maxOffset);
 
             // update the scrollview content proxy's height
-            scrollView.content.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, contentHeight);
+            float scrollHeight = Mathf.Max(contentHeight, max.height + item.height / 2);
+            scrollView.content.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, scrollHeight);
             if (scrollView.verticalScrollbar != null)
-            {
                 scrollView.verticalScrollbar.value = 1f - (float)rawOffset / (maxOffset);
-            }
 
             return Mathf.Max(0, targetOffset);
         }
@@ -681,28 +698,40 @@ namespace ArchiTech.Editor
                 }
                 var entry = content.GetChild(i);
                 entry.gameObject.SetActive(true);
+
+                // track found components
+                bool titleSet = false;
+                bool urlSet = false;
+                bool imageSet = false;
+
                 // update entry contents
-                var url = entry.Find("Url");
-                if (showUrls && url != null)
+                Text[] textArr = entry.GetComponentsInChildren<Text>(true);
+                foreach (Text component in textArr)
                 {
-                    var urlRef = url.GetComponent<Text>();
-                    urlRef.text = urls[playlistIndex].Get();
-                    EditorUtility.SetDirty(urlRef); // this forces the scene to update for each change as they happen
+                    if (!titleSet && component.name == "Title")
+                    {
+                        component.text = titles[playlistIndex];
+                        EditorUtility.SetDirty(component); // this forces the scene to update for each change as they happen
+                        titleSet = true;
+                    }
+                    else if (!urlSet && component.name == "Url" && showUrls)
+                    {
+                        component.text = urls[playlistIndex].Get();
+                        EditorUtility.SetDirty(component); // this forces the scene to update for each change as they happen
+                        urlSet = true;
+                    }
                 }
-                var title = entry.Find("Title");
-                if (title != null)
+
+                Image[] imageArr = entry.GetComponentsInChildren<Image>(true);
+                foreach (Image component in imageArr)
                 {
-                    var titleRef = title.GetComponent<Text>();
-                    titleRef.text = titles[playlistIndex];
-                    EditorUtility.SetDirty(titleRef); // this forces the scene to update for each change as they happen
-                }
-                var image = entry.Find("Image");
-                if (image != null)
-                {
-                    var imageRef = image.GetComponent<Image>();
-                    imageRef.sprite = images[playlistIndex];
-                    image.gameObject.SetActive(images[playlistIndex] != null);
-                    EditorUtility.SetDirty(imageRef); // this forces the scene to update for each change as they happen
+                    if (!imageSet && (component.name == "Image" || component.name == "Poster"))
+                    {
+                        component.sprite = images[playlistIndex];
+                        component.gameObject.SetActive(images[playlistIndex] != null);
+                        EditorUtility.SetDirty(component); // this forces the scene to update for each change as they happen
+                        imageSet = true;
+                    }
                 }
                 playlistIndex++;
             }
@@ -719,5 +748,7 @@ namespace ArchiTech.Editor
 
             UnityEventTools.AddStringPersistentListener(eventRegister, customEvent, nameof(playlist._UpdateView));
         }
+
+        #endregion
     }
 }

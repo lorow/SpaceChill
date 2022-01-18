@@ -1,6 +1,92 @@
-# ArchiTechAnon TV Asset
+# ProTV Asset Changelog
 
-## 2.0 Beta 8.4 (Current Version)
+## 2.1 Stable Release
+- Version bump for release
+
+## 2.1 Beta 3.0
+- Updated VideoManger to have separate lists for managed and unmanaged speakers and screens.
+    - This is intended to allow for more fine grained control of what the video managers should actually affect.
+    - Immediate use case is for dealing with audio link speakers(they are typically at 0.001) that you don't want the volume changed on, but still want to have the TV control the auible speakers' volume.
+- Removed the autoManageScreenVisibility flag.
+    - With the new Unmanaged Screens list, this flag is duplicated functionality.
+- Updated example scene to reflect these changes.
+
+NOTE: Existing TV setups should still work as expected after importing. There is fallback logic that exists for handling the previous references that Unity already has serialized. The only exception is if you set the autoManageScreenVisibiliy flag to prevent the VideoManager from controlling the referenced screens. To fix, you will need to add that screen to the Unmanaged Screens list for the same behaviour.
+
+## 2.1 Beta 2.9
+- Add additional null check for the Queue plugin to remove unintended error occuring in non-cyanemu playmode (like build & publish)
+
+## 2.1 Beta 2.8
+- Fix playlist unintentionally scrolling when contained within a pickup object (something that moves the playlist's world postition)
+- Adjustments to the Modern Model and Legacy Model prefabs for the options available. This clarifies some options as well as includes a default Unity player option in the general controls options list. Legacy Model Extended still retains the original list from the example scene.
+- Fix timestamp not being preserved as it used to during a video player swap.
+
+## 2.1 Beta 2.7
+- Add null checks to remove unintended errors occuring in non-cyanemu playmode (like build & publish)
+
+## 2.1 Beta 2.6
+- Add null check to the video swap dropdown layering check incase the dropdown isn't a direct child of it's associated canvas object. This avoids an incedental script crash, but can cause odd layering issue if it's not a direct child, so be careful.
+
+## 2.1 Beta 2.5
+- Fix bad execution ordering between TVManagerV2 and TVManagerV2ManualSync scripts
+- Add events on the playlist to manage the autoplay mode
+
+## 2.1 Beta 2.4
+- Fix layering issues and pointer issues with the general controls video swap dropdown
+
+## 2.1 Beta 2.3
+- Add explicit Refresh button to the slim UI prefab.
+- Updated the icon for the Resync button on the slim UI prefab to be distinct from the Refresh button.
+- Add new VertControls UI prefab. Similar to Slim UI, but layout is vertical with some elements removed.
+- Remove forced canvas sort order for controls UIs.
+
+## 2.1 Beta 2.2
+- Fix playlist not updating the TV's localLabel on non-owners
+- Fix attempt for videos having issues with looping (stutter and occasionally unexpected pausing)
+- Minor performance improvment to the playlist editor script
+- Fix playlist producing null titles instead of empty strings causing the search feature to fail
+- Add warning message when a playlist import detects one or more entries that do not have a title associated with it. This is just an alert and can be ignored if the missing titles are intentional.
+
+## 2.1 Beta 2.1
+- Change `useAlternateUrl` to be not exposed to the inspector. It is still a public variable for runtime though.
+- Change url logic to have quest default to the alternate, with fallback to main url when alternate is not provided (this allows seemless backwards compatibility)
+
+## 2.1 Beta 2.0
+- Add first class support for alternate urls. This aliviates issues with requiring separate URLs for each platform (notably VRCDN)
+- Fix playlist not always correctly representing the loading bar percent while scrolling.
+- Add toggle prefab to allow switching between Main and Alt urls. This is _HIGHLY_ recommended to have in-world if you make use of
+the alternate url feature.
+- New events related to alternate urls: `_UseMainUrl`, `_UseAltUrl`, `_ToggleUrl`
+- BE SURE TO CHECK YOUR SCENE REFERENCES TO ENSURE THEY ARE CONNECTED PROPERLY. Some variable names changed related to urls and certain references _may_ have become disconnected.
+- Fix certain issues with the skybox playlist not working properly.
+- Update `PlayURL (Micro)` prefab to support alternate url. Great for predetermined stream splitting.
+
+## 2.1 Beta 1.1
+- Additional internal state caching improvements for playlist
+- Add playlist shuffling via `_Shuffle` event.
+- Add option to automaticially shuffle the playlist on world load (currently not synced).
+- Add option to start autoplaying at a random index in the playlist.
+- Add playlist view automatically seeking to the current index on world load (complements the random index start).
+- Some code golfing micro-optimizations
+
+## 2.1 Beta 1.0
+- Improve some internal state caching for playlist
+- Add playlist pagination prefab.
+- Fix scrollbar not resizing with the playlist when a filter is applied (aka playlist search)
+- Add U#'s URL Resolver shim for playmode testing with the unity player (AVPro still doesn't work in-editor yet)
+
+## 2.0 Stable Release
+- Version bump for release
+
+## 2.0 Beta 8.5
+- Update automatic resync interval to Infinity if value is 0 (both values should represent the same effect).
+- Mitigations for when the TV starts off in the world as disabled. Should be able to just toggle the game object at will, though if you want the TV to start off as disabled, make sure the game object itself is off instead of relying on other scripts to toggle it off for you (like a toggle script). There is a known bug with having it on and disabling it during Start. See and upvote: https://feedback.vrchat.com/vrchat-udon-closed-alpha-bugs/p/1123-udon-objects-with-udon-children-initialize-late-despite-execution-order-ove
+- Forcefully disable the built-in auto-resync cause it breaks things reeeee
+- Improve the skybox options in the demo scene.
+- Rename Plugins folder to OfficialPlugins.
+- Update playlist structure and logic for vastly improved performance at larger list sizes.
+
+## 2.0 Beta 8.4
 - Fixed entry placement regression in playlist auto-grid.
 - Add skybox support for CubeMap style 360 video.
 - Add skybox support for 3D video modes SideBySide and OverUnder.

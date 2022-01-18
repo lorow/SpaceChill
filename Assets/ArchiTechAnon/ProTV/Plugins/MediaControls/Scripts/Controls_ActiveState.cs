@@ -14,10 +14,14 @@ namespace ArchiTech
     public class Controls_ActiveState : UdonSharpBehaviour
     {
         public TVManagerV2 tv;
-        public VRCUrlInputField inputURL;
         public bool showVideoOwner = true;
         public bool showVideoOwnerID = false;
-        public Button go;
+        public VRCUrlInputField mainUrlInput;
+        public Button updateMainUrl;
+        public Button switchToMainUrl;
+        public VRCUrlInputField altUrlInput;
+        public Button updateAltUrl;
+        public Button switchToAltUrl;
         public Button play;
         public Button pause;
         public Button stop;
@@ -44,6 +48,7 @@ namespace ArchiTech
         public Text endTime;
         public Slider loadingBar;
         public Transform loadingSpinner;
+        public GameObject loadingSpinnerContainer;
         public Dropdown videoPlayerSwap;
         public Text info;
 
@@ -55,14 +60,20 @@ namespace ArchiTech
         private Image volumeIndicator;
         private Image masterLockIndicator;
         private Image syncIndicator;
+        private Image mainIndicator;
+        private Image altIndicator;
 
         private VideoError OUT_TvVideoPlayerError_VideoError_Error;
         private float OUT_TvVolumeChange_float_Percent;
         private int OUT_TvVideoPlayerChange_int_Index;
 
         // boolean checks for the existence of the various public fields
-        private bool hasInput;
+        private bool hasMainInput;
+        private bool hasAltInput;
+        private bool hasMain;
+        private bool hasAlt;
         private bool hasGo;
+        private bool hasAltGo;
         private bool hasPlay;
         private bool hasPause;
         private bool hasStop;
@@ -79,12 +90,14 @@ namespace ArchiTech
         private bool hasInfo;
         private bool hasCurrentTime;
         private bool hasEndTime;
+        private bool hasLocalPlayer;
 
 
         private bool needDropdownCorrection = true;
         private float loadingBarDamp = 0f;
         private float startTime = 0f;
         private float duration = 0f;
+        private int videoPlayerSwapOrder = 0;
         private bool isLive = true;
         private bool isLoading = false;
         private bool isLocked = false;
@@ -96,14 +109,19 @@ namespace ArchiTech
         private VRCPlayerApi localPlayer;
         private bool debugMode = true;
 
-        private void initialize()
+        public void _Initialize()
         {
             if (init) return;
             if (tv == null) tv = transform.parent.GetComponent<TVManagerV2>();
             localPlayer = Networking.LocalPlayer;
 
-            hasInput = inputURL != null;
-            hasGo = go != null;
+            hasLocalPlayer = localPlayer != null;
+            hasMainInput = mainUrlInput != null;
+            hasAltInput = altUrlInput != null;
+            hasMain = switchToMainUrl != null;
+            hasAlt = switchToAltUrl != null;
+            hasGo = updateMainUrl != null;
+            hasAltGo = updateAltUrl != null;
             hasPlay = play != null;
             hasPause = pause != null;
             hasStop = stop != null;
@@ -122,7 +140,18 @@ namespace ArchiTech
             hasEndTime = endTime != null;
 
             // hide the go button until text is entered into the input field
-            if (hasGo) go.gameObject.SetActive(false);
+            if (hasGo) updateMainUrl.gameObject.SetActive(false);
+            if (hasAltGo) updateAltUrl.gameObject.SetActive(false);
+            if (hasMain)
+            {
+                mainIndicator = switchToMainUrl.image;
+                mainIndicator.enabled = !tv.useAlternateUrl;
+            }
+            if (hasAlt)
+            {
+                altIndicator = switchToAltUrl.image;
+                altIndicator.enabled = tv.useAlternateUrl;
+            }
             if (hasVolume)
                 // volume expects the structure of a default Unity UI slider
                 volumeIndicator = volume.handleRect.transform.Find("Fill").GetComponent<Image>();
@@ -132,6 +161,11 @@ namespace ArchiTech
                 masterLock.gameObject.SetActive(isMasterOwner());
             }
             if (hasLoadingBar) loadingBar.gameObject.SetActive(false);
+            if (hasLoadingSpinner)
+            {
+                if (loadingSpinnerContainer == null)
+                    loadingSpinnerContainer = loadingSpinner.gameObject;
+            }
             if (hasSeek)
             {
                 skipSeek = true;
@@ -148,18 +182,25 @@ namespace ArchiTech
 
         void Start()
         {
-            initialize();
-            var canvases = GetComponentsInChildren<Canvas>();
-            foreach (Canvas c in canvases)
+            _Initialize();
+            var canvases = GetComponentsInChildren(typeof(VRCUiShape));
+            foreach (Component c in canvases)
             {
-                c.sortingOrder = -1;
                 var box = c.GetComponent<BoxCollider>();
                 if (box != null)
                 {
-                    var rect = (RectTransform) c.transform;
-                    log($"Auto-adjusting Canvas collider with order {c.sortingOrder}");
+                    var rect = (RectTransform)c.transform;
                     box.isTrigger = true;
                     box.size = new Vector3(rect.sizeDelta.x, rect.sizeDelta.y, 0);
+                }
+            }
+            if (hasVideoPlayerSwap)
+            {
+                var c = videoPlayerSwap.transform.Find("Template").GetComponent<Canvas>();
+                if (c != null)
+                {
+                    // cache the original sort order for the template object
+                    videoPlayerSwapOrder = c.sortingOrder;
                 }
             }
         }
@@ -206,8 +247,22 @@ namespace ArchiTech
                     if (needDropdownCorrection)
                     {
                         var c = t.GetComponent<Canvas>();
-                        log($"Updating dropdown canvas sort order from {c.sortingOrder}");
-                        c.sortingOrder = 0;
+                        var box = c.GetComponent<BoxCollider>();
+                        if (box != null)
+                        {
+                            var rect = (RectTransform)t;
+                            box.isTrigger = true;
+                            box.size = new Vector3(rect.sizeDelta.x, rect.sizeDelta.y, 0);
+                            box.center = new Vector3(0, rect.sizeDelta.y / 2, 0);
+                        }
+                        // assign the cached sort order value and move the dropdown in front of the blocker element
+                        c.sortingOrder = videoPlayerSwapOrder;
+                        var blocker = videoPlayerSwap.transform.parent.Find("Blocker");
+                        if (blocker != null)
+                        {
+                            blocker.GetComponent<Canvas>().sortingOrder = videoPlayerSwapOrder;
+                            videoPlayerSwap.transform.SetSiblingIndex(blocker.GetSiblingIndex() + 1);
+                        }
                         needDropdownCorrection = false;
                     }
                 }
@@ -217,19 +272,29 @@ namespace ArchiTech
 
         new void OnPlayerLeft(VRCPlayerApi player)
         {
-            if (hasInput && isOwner())
-                inputURL.gameObject.SetActive(true);
+            if (hasMainInput && isOwner())
+                mainUrlInput.gameObject.SetActive(true);
             if (hasMasterLock)
                 masterLock.gameObject.SetActive(isMasterOwner());
         }
         // === UI EVENTS ===
         public void _UpdateUrlInput()
         {
-            if (hasInput && hasGo)
+            if (hasMainInput && hasGo)
             {
-                if (inputURL.GetUrl().Get() == string.Empty)
-                    go.gameObject.SetActive(false);
-                else go.gameObject.SetActive(true);
+                if (mainUrlInput.GetUrl().Get() == string.Empty)
+                    updateMainUrl.gameObject.SetActive(false);
+                else updateMainUrl.gameObject.SetActive(true);
+            }
+        }
+
+        public void _UpdateAltUrlInput()
+        {
+            if (hasAltInput && hasAltGo)
+            {
+                if (altUrlInput.GetUrl().Get() == string.Empty)
+                    updateAltUrl.gameObject.SetActive(false);
+                else updateAltUrl.gameObject.SetActive(true);
             }
         }
 
@@ -273,11 +338,35 @@ namespace ArchiTech
         }
         public void _ChangeMedia()
         {
-            if (hasInput && inputURL.GetUrl().Get() != string.Empty)
+            if (hasMainInput && mainUrlInput.GetUrl().Get() != string.Empty)
             {
-                tv._ChangeMediaTo(inputURL.GetUrl());
-                inputURL.SetUrl(VRCUrl.Empty);
+                tv._ChangeMediaTo(mainUrlInput.GetUrl());
+                mainUrlInput.SetUrl(VRCUrl.Empty);
             }
+        }
+
+        public void _ChangeAltMedia()
+        {
+            if (hasAltInput && altUrlInput.GetUrl().Get() != string.Empty)
+            {
+                tv._ChangeAltMediaTo(altUrlInput.GetUrl());
+                altUrlInput.SetUrl(VRCUrl.Empty);
+            }
+        }
+
+        public void _UseMainUrl()
+        {
+            if (!tv.useAlternateUrl) return;
+            tv._UseMainUrl();
+            if (hasMain) mainIndicator.enabled = true;
+            if (hasAlt) altIndicator.enabled = false;
+        }
+        public void _UseAltUrl()
+        {
+            if (tv.useAlternateUrl) return;
+            tv._UseAltUrl();
+            if (hasMain) mainIndicator.enabled = false;
+            if (hasAlt) altIndicator.enabled = true;
         }
 
 
@@ -400,8 +489,8 @@ namespace ArchiTech
                 loadingBar.gameObject.SetActive(true);
                 loadingBar.value = 0f;
             }
-            if (hasLoadingSpinner) loadingSpinner.gameObject.SetActive(true);
-            if (hasInput) inputURL.gameObject.SetActive(false);
+            if (hasLoadingSpinner) loadingSpinnerContainer.SetActive(true);
+            if (hasMainInput) mainUrlInput.gameObject.SetActive(false);
             isLoading = true;
         }
         public void _TvLoadingEnd()
@@ -413,8 +502,8 @@ namespace ArchiTech
                 loadingBar.gameObject.SetActive(false);
                 loadingBar.value = 0f;
             }
-            if (hasLoadingSpinner) loadingSpinner.gameObject.SetActive(false);
-            if (hasInput && !isLocked) inputURL.gameObject.SetActive(true);
+            if (hasLoadingSpinner) loadingSpinnerContainer.SetActive(false);
+            if (hasMainInput && !isLocked) mainUrlInput.gameObject.SetActive(true);
             isLoading = false;
         }
         public void _TvLoadingAbort()
@@ -426,19 +515,15 @@ namespace ArchiTech
             if (!isMasterOwner())
             {
                 isLocked = true;
-                if (hasInput)
-                    inputURL.gameObject.SetActive(false);
+                if (hasMainInput) mainUrlInput.gameObject.SetActive(false);
             }
-            if (hasMasterLock)
-                masterLockIndicator.sprite = lockedIcon;
+            if (hasMasterLock) masterLockIndicator.sprite = lockedIcon;
         }
         public void _TvUnLock()
         {
             isLocked = false;
-            if (hasInput)
-                inputURL.gameObject.SetActive(true);
-            if (hasMasterLock)
-                masterLockIndicator.sprite = unlockedIcon;
+            if (hasMainInput) mainUrlInput.gameObject.SetActive(true);
+            if (hasMasterLock) masterLockIndicator.sprite = unlockedIcon;
         }
         public void _TvVolumeChange()
         {
@@ -472,10 +557,10 @@ namespace ArchiTech
                         t = "[Player Error] Unable to load video. If livestream, it has stopped/ended.";
                         break;
                     case VideoError.AccessDenied:
-                        t = "[Access Denied] Try enabling Untrusted URLs in Settings";
+                        t = "[Access Denied] Try enabling Untrusted URLs in the Settings menu";
                         break;
                     case VideoError.InvalidURL:
-                        t = "[Invalid URL] Parsing issue? Wait a moment then try again.";
+                        t = "[Invalid URL] Parsing issue? Wait a moment then try again. Check for typos.";
                         break;
                     case VideoError.RateLimited:
                         t = "[Rate Limited] Waiting 5 seconds to retry.";
@@ -485,6 +570,15 @@ namespace ArchiTech
                         break;
                 }
                 info.text = t;
+            }
+            if (hasLoadingBar && OUT_TvVideoPlayerError_VideoError_Error != VideoError.RateLimited)
+            {
+                loadingBar.gameObject.SetActive(false);
+                loadingBar.value = 0f;
+            }
+            if (hasLoadingSpinner)
+            {
+                loadingSpinnerContainer.SetActive(false);
             }
         }
 
@@ -500,7 +594,7 @@ namespace ArchiTech
 
         // === helpers ===
         private bool isOwner() => Networking.IsOwner(localPlayer, tv.gameObject);
-        private bool isMasterOwner() => tv.allowMasterControl && localPlayer.isMaster || localPlayer.isInstanceOwner;
+        private bool isMasterOwner() => hasLocalPlayer && (tv.allowMasterControl && localPlayer.isMaster || localPlayer.isInstanceOwner);
         private void updateInfo()
         {
             var player = Networking.GetOwner(tv.gameObject);
@@ -575,15 +669,15 @@ namespace ArchiTech
 
         private void log(string value)
         {
-            if (!skipLog) Debug.Log($"[<color=#1F84A9>A</color><color=#A3A3A3>T</color><color=#2861B4>A</color> | <color=#ffffff>SlimUI ({tv.gameObject.name})</color>] {value}");
+            if (!skipLog) Debug.Log($"[<color=#1F84A9>A</color><color=#A3A3A3>T</color><color=#2861B4>A</color> | <color=#fc7bcc>MediaControls ({tv.gameObject.name}/{name})</color>] {value}");
         }
         private void warn(string value)
         {
-            if (!skipLog) Debug.LogWarning($"[<color=#1F84A9>A</color><color=#A3A3A3>T</color><color=#2861B4>A</color> | <color=#ffffff>SlimUI ({tv.gameObject.name})</color>] {value}");
+            if (!skipLog) Debug.LogWarning($"[<color=#1F84A9>A</color><color=#A3A3A3>T</color><color=#2861B4>A</color> | <color=#fc7bcc>MediaControls ({tv.gameObject.name}/{name})</color>] {value}");
         }
         private void err(string value)
         {
-            Debug.LogError($"[<color=#1F84A9>A</color><color=#A3A3A3>T</color><color=#2861B4>A</color> | <color=#ffffff>SlimUI ({tv.gameObject.name})</color>] {value}");
+            Debug.LogError($"[<color=#1F84A9>A</color><color=#A3A3A3>T</color><color=#2861B4>A</color> | <color=#fc7bcc>MediaControls ({tv.gameObject.name}/{name})</color>] {value}");
         }
     }
 }

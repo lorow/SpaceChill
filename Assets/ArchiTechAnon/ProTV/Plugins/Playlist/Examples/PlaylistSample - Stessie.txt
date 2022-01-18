@@ -1,44 +1,85 @@
-@https://www.youtube.com/watch?v=BHuF3cUf4n8
-/Assets/ArchiTechAnon/ProTV/Plugins/Playlist/Images/Stessie - Together.png
+@https://soundcloud.com/stessieofficial/together
+/Assets/ArchiTechAnon/ProTV/Plugins/Playlist/Images/Stessie - Together.jpg
 Stessie - Together
 
-@https://www.youtube.com/watch?v=JWP5e6u4ryE
-/Assets/ArchiTechAnon/ProTV/Plugins/Playlist/Images/Stessie & BLOOD CODE - Candy Heart.png
+@https://soundcloud.com/stessieofficial/candyheart
+/Assets/ArchiTechAnon/ProTV/Plugins/Playlist/Images/Stessie & BLOOD CODE - Candy Heart.jpg
 Stessie & BLOOD CODE - Candy Heart
 
-@https://www.youtube.com/watch?v=ORCR6czqHiI
-/Assets/ArchiTechAnon/ProTV/Plugins/Playlist/Images/Stessie - Atmosphere.png
+@https://soundcloud.com/stessieofficial/atmosphere
+/Assets/ArchiTechAnon/ProTV/Plugins/Playlist/Images/Stessie - Atmosphere.jpg
 Stessie - Atmosphere
 
-@https://www.youtube.com/watch?v=gyR9bdqsv_4
+@https://soundcloud.com/stessieofficial/faraway
+/Assets/ArchiTechAnon/ProTV/Plugins/Playlist/Images/Stessie - Far Away.jpg
+Stessie - Far Away
+
+@https://soundcloud.com/stessieofficial/sprinkles
+/Assets/ArchiTechAnon/ProTV/Plugins/Playlist/Images/Stessie - Friends EP.jpg
+Stessie - Sprinkles!
+
+@https://soundcloud.com/stessieofficial/close-to-you
+/Assets/ArchiTechAnon/ProTV/Plugins/Playlist/Images/Stessie - Friends EP.jpg
 Stessie - Close To You
 
-@https://www.youtube.com/watch?v=L_KS8SUgga0
-Stessie - Take Flight (feat. QORA)
+@https://soundcloud.com/stessieofficial/friends
+/Assets/ArchiTechAnon/ProTV/Plugins/Playlist/Images/Stessie - Friends EP.jpg
+Stessie - Friends
+
+@https://soundcloud.com/stessieofficial/happy-ai
+/Assets/ArchiTechAnon/ProTV/Plugins/Playlist/Images/Stessie - Friends EP.jpg
+Stessie - Happy A.I.
+
+@https://soundcloud.com/stessieofficial/celebrate
+/Assets/ArchiTechAnon/ProTV/Plugins/Playlist/Images/Stessie - Celebrate.jpg
+Stessie - Celebrate
+
+@https://soundcloud.com/stessieofficial/cargo
+/Assets/ArchiTechAnon/ProTV/Plugins/Playlist/Images/Puppet - Cargo (Stessie Remix).jpg
+Puppet - Cargo (Stessie Remix)
+
+@https://soundcloud.com/stessieofficial/take-flight
+/Assets/ArchiTechAnon/ProTV/Plugins/Playlist/Images/Stessie - Take Flight (ft. QORA).jpg
+Stessie - Take Flight (ft. QORA)
 
 @https://www.youtube.com/watch?v=M3sKoQzdWE0
 i couldn't sleep so i remixed Astronomia
 
-@https://www.youtube.com/watch?v=xB_rTRmVwBs
-Stessie - Danger (Official Audio)
+@https://soundcloud.com/stessieofficial/needyourlove
+/Assets/ArchiTechAnon/ProTV/Plugins/Playlist/Images/Stessie - Utopia EP.jpg
+Stessie - Need Your Love (ft. Azuria Sky)
 
-@https://www.youtube.com/watch?v=C6gZhhubgIE
-Stessie - Utopia EP (Full Mix)
+@https://soundcloud.com/stessieofficial/danger
+/Assets/ArchiTechAnon/ProTV/Plugins/Playlist/Images/Stessie - Utopia EP.jpg
+Stessie - Danger
 
-@https://www.youtube.com/watch?v=9jF8wZomQM4
-Stessie - End Of Time (feat. Fokushi) [Official Lyric Video]
+@https://soundcloud.com/stessieofficial/utopia
+/Assets/ArchiTechAnon/ProTV/Plugins/Playlist/Images/Stessie - Utopia EP.jpg
+Stessie - Utopia
 
-@https://www.youtube.com/watch?v=VoZNsq9IzeA
+@https://soundcloud.com/stessieofficial/areyouthere
+/Assets/ArchiTechAnon/ProTV/Plugins/Playlist/Images/Stessie - Utopia EP.jpg
+Stessie - Are You There (ft. QORA)
+
+@https://soundcloud.com/stessieofficial/end-of-time
+/Assets/ArchiTechAnon/ProTV/Plugins/Playlist/Images/Stessie - End Of Time (ft. Fokushi).jpg
+Stessie - End Of Time (ft. Fokushi)
+
+@https://soundcloud.com/stessieofficial/high
+/Assets/ArchiTechAnon/ProTV/Plugins/Playlist/Images/Stessie - High.jpg
+Stessie - High
+
+@https://soundcloud.com/stessieofficial/free
+/Assets/ArchiTechAnon/ProTV/Plugins/Playlist/Images/Jim Yosef & Stessie - Free.jpg
 Jim Yosef & Stessie - Free
 
 @https://www.youtube.com/watch?v=4LWYw2MD4XQ
 Kotori & Stessie - Bloom
 
-@https://www.youtube.com/watch?v=CrQRy5K-TFU
-Stessie - Find Me Here (feat. Bien)
+@https://soundcloud.com/stessieofficial/find-me-here
+/Assets/ArchiTechAnon/ProTV/Plugins/Playlist/Images/Stessie - Find Me Here (ft. Bien).jpg
+Stessie - Find Me Here (ft. Bien)
 
-@https://www.youtube.com/watch?v=BICF4_xRrMg
+@https://soundcloud.com/stessieofficial/ready
+/Assets/ArchiTechAnon/ProTV/Plugins/Playlist/Images/Stessie - Ready.jpg
 Stessie - Ready
-
-@https://www.youtube.com/watch?v=u378Cc1m4R0
-Stessie - Happy A.I.

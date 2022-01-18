@@ -11,14 +11,15 @@ namespace ArchiTech
     public class QuickPlay : UdonSharpBehaviour
     {
         public TVManagerV2 tv;
-        public VRCUrl url;
+        public VRCUrl url = VRCUrl.Empty;
+        public VRCUrl altUrl = VRCUrl.Empty;
         public string title;
         private VRCPlayerApi local;
         private bool init = false;
         private bool debug = false;
         private string debugColor = "#ffaa66";
 
-        private void initialize()
+        public void _Initialize()
         {
             if (init) return;
 
@@ -29,13 +30,12 @@ namespace ArchiTech
 
         void Start()
         {
-            initialize();
-            var canvases = GetComponentsInChildren<Canvas>();
-            foreach (Canvas c in canvases)
+            _Initialize();
+            var shapes = GetComponentsInChildren(typeof(VRC_UiShape));
+            foreach (Component s in shapes)
             {
-                c.sortingOrder = -1;
-                var box = c.GetComponent<BoxCollider>();
-                var rect = c.GetComponent<RectTransform>();
+                var box = s.GetComponent<BoxCollider>();
+                var rect = s.GetComponent<RectTransform>();
                 if (box != null)
                 {
                     log("Auto-adjusting Canvas collider");
@@ -52,12 +52,13 @@ namespace ArchiTech
 
         public void _Activate()
         {
-            tv._ChangeMediaTo(url);
+            tv._ChangeMediaToWithAlt(url, altUrl);
         }
 
         public void _TvMediaStart()
         {
-            if (tv.url.Get() == url.Get())
+            var tvUrl = tv.url.Get();
+            if (tvUrl == url.Get() || tvUrl == altUrl.Get())
                 tv.localLabel = title;
         }
 

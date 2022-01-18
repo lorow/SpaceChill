@@ -109,6 +109,7 @@ namespace ArchiTech
             var speakers = manager.speakers;
             foreach (var speaker in speakers)
             {
+                if (speaker == null) continue;
                 if (speaker.gameObject.name == speakerName)
                 {
                     log("Valid source found");
@@ -116,6 +117,7 @@ namespace ArchiTech
                     return;
                 }
             }
+            warn($"No audio source called {speakerName} was found connected to the {manager.gameObject.name} video manager.");
         }
 
 

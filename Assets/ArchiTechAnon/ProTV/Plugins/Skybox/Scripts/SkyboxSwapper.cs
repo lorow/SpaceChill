@@ -13,6 +13,7 @@ namespace ArchiTech
         public TVManagerV2 tv;
         public Material skybox;
         public Material fallback;
+        public Slider brightness;
 
         [Header("State Indicators")]
         public Color active = new Color(0.4f, 0.4f, 0.4f);
@@ -26,7 +27,7 @@ namespace ArchiTech
         public Button sideBySideLayout;
         public Button overUnderLayout;
 
-        private bool hasSkyboxSwapper;
+        private bool hasBrightness;
         private bool hasFlipVertical;
         private bool hasSwapEyes;
         private bool hasPanoramicMode;
@@ -35,16 +36,15 @@ namespace ArchiTech
         private bool hasNot3DLayout;
         private bool hasSideBySideLayout;
         private bool hasOverUnderLayout;
-        public Slider brightness;
         private bool init = false;
 
-        void Start()
-        {
+        public void _Initialize() {
             if (init) return;
 
             if (tv == null) tv = transform.parent.GetComponent<TVManagerV2>();
             if (fallback == null) fallback = RenderSettings.skybox;
 
+            hasBrightness = brightness != null;
             hasFlipVertical = flipVertical != null;
             hasSwapEyes = swapEyes != null;
             hasPanoramicMode = panoramicMode != null;
@@ -56,17 +56,22 @@ namespace ArchiTech
 
             _Panoramic();
             _Not3D();
-            brightness.value = 1f;
+            if (hasBrightness) brightness.value = 1f;
 
             tv._RegisterUdonSharpEventReceiver(this);
             init = true;
+        }
+
+        void Start()
+        {
+            _Initialize();
         }
 
         // ========== Shader Toggles =========
 
         public void _Brightness()
         {
-            skybox.SetFloat("_Exposure", brightness.value);
+            if (hasBrightness) skybox.SetFloat("_Exposure", brightness.value);
         }
 
         public void _Not3D()

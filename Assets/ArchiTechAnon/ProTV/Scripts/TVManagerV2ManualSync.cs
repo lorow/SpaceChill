@@ -8,14 +8,14 @@ using VRC.Udon.Common;
 namespace ArchiTech
 {
     [UdonBehaviourSyncMode(BehaviourSyncMode.Manual)]
-    [DefaultExecutionOrder(-9999)] // needs to initialize before anything else if possible
+    [DefaultExecutionOrder(-9998)] // needs to initialize just after any TVManagerV2 script
     public class TVManagerV2ManualSync : UdonSharpBehaviour
     {
         private TVManagerV2 tv;
 
         [UdonSynced] private int state = 0;
-        [UdonSynced] private VRCUrl url = VRCUrl.Empty;
-        // [UdonSynced] private VRCUrl urlQuest = VRCUrl.Empty;
+        [UdonSynced] private VRCUrl urlMain = VRCUrl.Empty;
+        [UdonSynced] private VRCUrl urlAlt = VRCUrl.Empty;
         [UdonSynced] private bool locked = false;
         [UdonSynced] private int urlRevision = 0;
         [UdonSynced] private bool loading = false;
@@ -25,9 +25,11 @@ namespace ArchiTech
         new void OnPreSerialization()
         {
             // Extract data from TV for manual sync
+            log($"PreSerialization: ownerState {state} | locked {locked} | urlRevision {urlRevision}");
+            log($"Main URL {urlMain} | Alt URL {urlAlt}");
             state = tv.stateSync;
-            url = tv.urlSync;
-            // urlQuest = tv.urlQuestSync;
+            urlMain = tv.urlMainSync;
+            urlAlt = tv.urlAltSync;
             locked = tv.lockedSync;
             urlRevision = tv.urlRevisionSync;
             loading = tv.loadingSync;
@@ -35,11 +37,12 @@ namespace ArchiTech
 
         new void OnDeserialization()
         {
-            log($"Deserialization: ownerState {state} | syncUrl {url} | locked {locked} | urlRevision {urlRevision}");
+            log($"Deserialization: ownerState {state} | locked {locked} | urlRevision {urlRevision}");
+            log($"Main URL {urlMain} | Alt URL {urlAlt}");
             // Update TV with new manually synced data
             tv.stateSync = state;
-            tv.urlSync = url;
-            // tv.urlQuestSync = urlQuest;
+            tv.urlMainSync = urlMain;
+            tv.urlAltSync = urlAlt;
             tv.lockedSync = locked;
             tv.urlRevisionSync = urlRevision;
             tv.loadingSync = loading;
