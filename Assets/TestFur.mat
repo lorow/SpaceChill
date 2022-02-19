@@ -7,13 +7,13 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: FancyBookShelfLower
-  m_Shader: {fileID: 4800000, guid: e9e18fbf88ba9eb44ab0d683cd27c2a3, type: 3}
-  m_ShaderKeywords: VIGNETTE_MASKED _NORMALMAP _SMOOTHNESS_TEXTURE_ALBEDO_CHANNEL_A
+  m_Name: TestFur
+  m_Shader: {fileID: 4800000, guid: 4287dba4d1fb38d44b899145af5fb81a, type: 3}
+  m_ShaderKeywords: VIGNETTE_MASKED _SMOOTHNESS_TEXTURE_ALBEDO_CHANNEL_A
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
-  m_CustomRenderQueue: 2010
+  m_CustomRenderQueue: 2000
   stringTagMap: {}
   disabledShaderPasses: []
   m_SavedProperties:
@@ -68,7 +68,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _BumpMap:
-        m_Texture: {fileID: 2800000, guid: 4b8663e71910ac644843e2e5a74a40ea, type: 3}
+        m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _ClearcoatFallback:
@@ -195,6 +195,18 @@ Material:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    - _FurHeightMap:
+        m_Texture: {fileID: 2800000, guid: 4936f95df08752e46940d871d9288f05, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _FurMask:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _FurTexture:
+        m_Texture: {fileID: 2800000, guid: 85673f25242c2fd42bc72f6a2d75a1b7, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     - _GlitterColorMap:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
@@ -248,7 +260,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MainTex:
-        m_Texture: {fileID: 2800000, guid: a9dcf648838a9f849bdf13768c0837cd, type: 3}
+        m_Texture: {fileID: 2800000, guid: 85673f25242c2fd42bc72f6a2d75a1b7, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _Matcap:
@@ -395,10 +407,6 @@ Material:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
-    - _SpecGlossMap:
-        m_Texture: {fileID: 0}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
     - _SpecularAnisoJitterMacro:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
@@ -477,6 +485,7 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Floats:
     - DSGI: 0
+    - GeometryShader_Enabled: 1
     - Instancing: 0
     - LightmapFlags: 0
     - _1st2nd_Shades_Feather: 0.0001
@@ -499,7 +508,9 @@ Material:
     - _AnisoTangentMapUV: 0
     - _AnisoUseTangentMap: 0
     - _AnisoUseTangentMap1: 0
-    - _AttenuationMultiplier: 1
+    - _AoRampMax: 1
+    - _AoRampMin: 0
+    - _AttenuationMultiplier: 0.9
     - _AudioLinkAddEmission1Band: 0
     - _AudioLinkAddEmissionBand: 0
     - _AudioLinkAnimToggle: 1
@@ -562,7 +573,6 @@ Material:
     - _BRDFMetallicGlossMapUV: 0
     - _BRDFMetallicMapToolTip: 0
     - _BRDFMetallicMapUV: 0
-    - _BRDFMetallicSpecIgnoresBaseColor: 0
     - _BRDFReflectance: 0.5
     - _BRDFReflectionsEnabled: 1
     - _BRDFSpecularEnabled: 1
@@ -832,6 +842,16 @@ Material:
     - _FlipbookTotalFrames: 1
     - _ForceOpaque: 0
     - _ForgotToLockMaterial: 1
+    - _FurAO: 0.545
+    - _FurFadeStart: 0
+    - _FurGravityStrength: -1
+    - _FurHeightMapMax: 1
+    - _FurHeightMapMin: 0
+    - _FurLayers: 23
+    - _FurLength: 0.2
+    - _FurMaxDistance: 100
+    - _FurMinDistance: 100
+    - _FurTipAlpha: 1
     - _GIEmissionMultiplier: 1
     - _GITDEMaxEmissionMultiplier: 0
     - _GITDEMaxEmissionMultiplier1: 0
@@ -901,7 +921,7 @@ Material:
     - _Length: 0
     - _LightingAOTexUV: 0
     - _LightingAdditiveDetailStrength: 1
-    - _LightingAdditiveEnable: 0
+    - _LightingAdditiveEnable: 1
     - _LightingAdditiveGradientEnd: 0.5
     - _LightingAdditiveGradientStart: 0
     - _LightingAdditiveLimitIntensity: 0
@@ -1050,7 +1070,6 @@ Material:
     - _PathTypeR: 0
     - _PathingColorMapUV: 0
     - _PathingMapUV: 0
-    - _PatreonHelpBox: 0
     - _PenetratorEnabled: 0
     - _RGBAlpha_UV: 0
     - _RGBBlendMultiplicative: 0
@@ -1248,7 +1267,6 @@ Material:
     - m_Special_Effects: 0
     - m_end_Alpha: 0
     - m_end_BlackLight: 0
-    - m_end_Blur: 0
     - m_end_BonusSliders: 0
     - m_end_Bulge: 0
     - m_end_CRT: 0
@@ -1270,7 +1288,6 @@ Material:
     - m_end_FlipbookAudioLink: 0
     - m_end_FresnelAlpha: 0
     - m_end_Gameboy: 0
-    - m_end_GrabPass: 0
     - m_end_Hologram: 0
     - m_end_Iridescence: 0
     - m_end_IridescenceAudioLink: 0
@@ -1282,7 +1299,6 @@ Material:
     - m_end_OutlineStencil: 0
     - m_end_PathAudioLink: 0
     - m_end_RGBMask: 0
-    - m_end_Refraction: 0
     - m_end_RimAudioLink: 0
     - m_end_SciFiSpawnIn: 0
     - m_end_ShadowMix: 0
@@ -1323,6 +1339,7 @@ Material:
     - m_end_emissionOptions: 0
     - m_end_flipBook: 0
     - m_end_flipbookHueShift: 0
+    - m_end_furAdvanced: 0
     - m_end_glitter: 0
     - m_end_glitterHueShift: 0
     - m_end_glitterRandom: 0
@@ -1358,13 +1375,13 @@ Material:
     - m_end_subsurface: 0
     - m_end_vertexManipulation: 0
     - m_end_voronoiRandom: 0
+    - m_furOptions: 1
     - m_lightingOptions: 1
-    - m_mainOptions: 0
+    - m_mainOptions: 1
     - m_outlineOptions: 0
     - m_renderingOptions: 0
     - m_start_Alpha: 0
     - m_start_BlackLight: 0
-    - m_start_Blur: 0
     - m_start_BonusSliders: 0
     - m_start_Bulge: 0
     - m_start_CRT: 0
@@ -1386,7 +1403,6 @@ Material:
     - m_start_FlipbookAudioLink: 0
     - m_start_FresnelAlpha: 0
     - m_start_Gameboy: 0
-    - m_start_GrabPass: 0
     - m_start_Hologram: 0
     - m_start_Iridescence: 0
     - m_start_IridescenceAudioLink: 0
@@ -1398,7 +1414,6 @@ Material:
     - m_start_OutlineStencil: 0
     - m_start_PathAudioLink: 0
     - m_start_RGBMask: 0
-    - m_start_Refraction: 0
     - m_start_RimAudioLink: 0
     - m_start_ScifiSpawnIn: 0
     - m_start_ShadowMix: 0
@@ -1439,6 +1454,7 @@ Material:
     - m_start_emissionOptions: 0
     - m_start_flipBook: 0
     - m_start_flipbookHueShift: 0
+    - m_start_furAdvanced: 1
     - m_start_glitter: 0
     - m_start_glitterHueShift: 0
     - m_start_glitterRandom: 0
@@ -1446,7 +1462,7 @@ Material:
     - m_start_glowInDarkEmissionOptions1: 0
     - m_start_lightingAdvanced: 0
     - m_start_lightingHSL: 0
-    - m_start_lightingModifiers: 0
+    - m_start_lightingModifiers: 1
     - m_start_manualFlipbookControl: 0
     - m_start_matcap: 0
     - m_start_matcap2HueShift: 0
@@ -1589,6 +1605,7 @@ Material:
     - _FlipbookMaskPan: {r: 0, g: 0, b: 0, a: 0}
     - _FlipbookScaleOffset: {r: 1, g: 1, b: 0, a: 0}
     - _FlipbookTexArrayPan: {r: 0, g: 0, b: 0, a: 0}
+    - _FurColor: {r: 1, g: 1, b: 1, a: 1}
     - _GlitterColor: {r: 1, g: 1, b: 1, a: 1}
     - _GlitterColorMapPan: {r: 0, g: 0, b: 0, a: 0}
     - _GlitterMaskPan: {r: 0, g: 0, b: 0, a: 0}
@@ -1665,7 +1682,6 @@ Material:
     - _SpawnInEmissionColor: {r: 1, g: 1, b: 1, a: 1}
     - _SpawnInGradientFinish: {r: 0, g: -2, b: 0, a: 1}
     - _SpawnInGradientStart: {r: 0, g: 2, b: 0, a: 1}
-    - _SpecColor: {r: 0.19999996, g: 0.19999996, b: 0.19999996, a: 1}
     - _SpecularAnisoJitterMacro1Pan: {r: 0, g: 0, b: 0, a: 0}
     - _SpecularAnisoJitterMacroPan: {r: 0, g: 0, b: 0, a: 0}
     - _SpecularAnisoJitterMicro1Pan: {r: 0, g: 0, b: 0, a: 0}
