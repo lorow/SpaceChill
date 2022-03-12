@@ -844,7 +844,7 @@ Material:
     - _ForgotToLockMaterial: 1
     - _FurAO: 0.545
     - _FurFadeStart: 0
-    - _FurGravityStrength: -1
+    - _FurGravityStrength: 1
     - _FurHeightMapMax: 1
     - _FurHeightMapMin: 0
     - _FurLayers: 23
