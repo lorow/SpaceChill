@@ -3,17 +3,19 @@
 ## SUPPORT ME!
 <a href='https://ko-fi.com/I3I84I3Z8' target='_blank'><img height='36' style='border:0px;height:36px;' src='https://cdn.ko-fi.com/cdn/kofi2.png?v=2' border='0' alt='Support me at ko-fi.com' /></a>
 
-## Requirements
-- Ensure latest VRCSDK3 (Udon) is imported (last tested with v2021.08.04.15.07)
-- Ensure latest UdonSharp version is imported (last tested with [v0.20.2](https://github.com/MerlinVR/UdonSharp/releases/download/0.20.2/UdonSharp_v0.20.2.unitypackage))
-- Import this package
-- Done.
+## BEFORE IMPORTING PROTV YOU MUST:
+- Ensure latest VRCSDK3 (Udon) is imported (last tested with v2022.06.03.00.03)
+- Ensure you have reloaded the SDK plugins (DO THIS TO AVOID ISSUES WITH URL INPUT FIELDS)
+    - Open the VRCSDK unity menu and select `Reload SDK`
+    - If the VRCSDK menu isn't available, then right click on the `Assets/VRCSDK/Plugins` folder and select `Reimport` (Do _NOT_ select `Reimport All`)
+- Ensure latest UdonSharp version is imported (last tested with [v0.20.3](https://github.com/vrchat-community/UdonSharp/releases/download/0.20.3/UdonSharp_v0.20.3.unitypackage) & v1.X ala VCC)
 
-## Upgrading from 1.x
-Due to the complete rewrite and rebuild with 2.x, there is no specific upgrade path. It is directly recommended to delete the old TV asset entierly before importing ProTV.
+- IMPORTANT NOTE: It is only recommended to import ProTV into a _brand new_ project when using UdonSharp 1.x. There are known issues with nested prefabs when UdonSharp does it's auto-upgrade-on-import thing.
+- If you _must_ upgrade an existing project, prior to begining the upgrade, either delete all ProTV stuff from the scene OR you can try unpacking all ProTV prefabs in the scene. That should allow UdonSharp to upgrade ProTV udon stuff cleanly.
 
 ## Basic Usage
 - Drag a ProTV prefab (located at `Assets/ArchiTechAnon/ProTV/Prefabs`) into your scene wherever you like, rotate in-scene and customize as needed.
+- You can find plugins to customize your ProTV with in the `Assets/ArchiTechAnon/ProTV/Plugins/*/Prefabs` folders.
 
 You can find more about the ready-made TVs in the [`Prefabs Document`](./Docs/Prefabs.md).
 
@@ -25,73 +27,117 @@ You can find more about the ready-made TVs in the [`Prefabs Document`](./Docs/Pr
 - Local only mode, for TVs that need to operate independently for all users.
 - Media resync and reload capability
 - 3D/2D audio toggle
-- Near frame-perfect video looping (audio looping isn't always frame-perfect, depends on the video's codec)
+- Near frame-perfect media looping (audio looping isn't always frame-perfect, depends on the media's codec)
 - Media autoplay URL support
 - Media autoplay delay offsets which help mitigate ratelimit issues with multiple TVs
-- Media url params support (t/start/end/loop)
+- Media url hash params support (t/start/end/loop/live/retry) (see [Understanding Urls](./Docs/UnderstandingURLs.md))
 - Video player swap management for multiple video player configurations
 - Pub/Sub event system for modular extension
-- Instance owner/master locking support (master control is configurable, instance owner is always allowed)
+- Instance owner/master/whitelist locking support (master control is configurable, instance owner is always allowed)
 
 ## Core Architecture
 In addition to the standard proxy controls for video players (play/pause/stop/volume/seek/etc), the two main unique driving factors that the core architecture accomplishes is event driven modularity as well as the multi-configuration management/swap mechanism.
 
-ProTV 2.0 has been re-architected to be more modular and extensible. This is done through a pseudo pub/sub system. In essence, a behavior will pass its own reference to the TV (supports both ugraph and usharp) and then will receive custom events (see the [`Events Document`](./Docs/Events.md)) based on the TV's activity and state. The types of events directly reflect the various supported core features of the TV, such as the standard video and audio controls, as well as the video player swap mechanism for managing multiple configurations.
+ProTV has been architected to be more modular and extensible. This is done through a pseudo pub/sub system. In essence, a behavior will pass its own reference to the TV (supports all udon compilers) and then will receive custom events (see the [`Events Document`](./Docs/Events.md)) based on the TV's activity and state. The types of events directly reflect the various supported core features of the TV, such as the standard video and audio controls, as well as the video player swap mechanism for managing multiple configurations.
 
 More details about the core architecture can be found in the [`Architecture Document`](./Docs/Architecture.md).  
 Details for ready-made plugins for the TV can be found in the [`Plugins Document`](./Docs/Plugins.md).  
 
 ## Core Settings
-- *Autoplay URL*  
-Pretty straight forward. This field is a place to put a video that you wish to automatically start upon first load into the world. This only is true for the instance owner (aka master) upon first visit of a new instance (which is then synced to any late-joiners). Leave empty to not have any autoplay.
 
-- *Autoplay Start Offset*  
-With the Autoplay Start Offset, which is for when there are more than 1 TV in the world, you can tell the TV to wait for X + 3 seconds before loading the sync'd (or autoplay'd) URL after joining the instance.  
-The 3 seconds is required as a buffer for the world to load in, and the field's value is added to that. It's recommended to offset each TV in the world by a 4 or 5 seconds, any less than that has risk of triggering the rate limiting, especially for those that have slower internet.   
-If you only have 1 TV in the world, you don't need to worry about this.  
+- __`Video Managers`__  
+The list of video managers (VideoManagerV2) that the TV will operate with.
 
-- *Paused Resync Threshold*  
-This threshold value is used to determine how much of an offset is allowed from the sync time (video player becoming out-of-sync from owner) before forcing non-owners to jump to the current timestamp that the owner is at.  
+### Autoplay Settings
+- __`Autoplay URL`__  
+Pretty straight forward. This field is a place to put a media url that you wish to automatically start upon first load into the world. This only is true for the instance owner (aka master) upon first visit of a new instance (which is then synced to any late-joiners). Leave empty to not have any autoplay.
+
+- __`Autoplay URL Alt`__  
+This field is the complementary url field to the above one. Quest users default to using the alternate url, but will fall back to the main url if it's not present. Leave both this and the above field empty to not have any autoplay.
+
+- __`Autoplay Label`__  
+If you want your autoplay urls to not display the domain name, you can specify a custom text to be made available to UIs instead.
+
+### Default TV Settings
+
+- __`Initial Volume`__  
+Pretty straight forward. This specifies what the volume should be for the TV at load time between 0% and 100% (represented as a 0.0 to 1.0 decimal)
+
+- __`Initial Player`__  
+This integer value specifies which index of the related _Video Managers_ array option the TV should start off with. The array of video managers is 0-index based. This means that if you have, say, 3 video players in the list, if you wanted to have the TV default to the second video manger in that list, this option would need the value of `1` in it. If you only have one video manager, then set this option to `0`.
+
+- __`Start With 2D Audio`__  
+Flag to specify if the TV should initialize with stereo audio mode or full spacial audio mode.
+
+### Sync Options
+
+- __`Sync To Owner`__  
+This setting determines whether the TV will sync with the data that the owner delivers. Untick if you want the TV to be local only (like for a music player or something).
+
+- __`Automatic Resync Interval`__  
+This option defines how many seconds to wait before attempting to resync. This affects two separate things. 
+    - First is the Audio/Video sync. This particularly affects AVPro for long form videos (like movies) where after some time or excessive CPU hitching (such as repeated alt-tabbing) can cause the audio to eventually become out-of-sync with the video (usually it's the video that falls behind).
+    - Second is the Owner sync. This is where the owner of the current video determines the target timestamp that everyone should be at. ProTV has a loose owner sync mechanism where it will only try to enforce sync at critical points (like switching videos, the owner seeks to a new time in the video, owner pauses the video for everyone, etc).
+    
+    The defaule value of 300 seconds is usually good enough for most cases, and shouldn't need to be changed unless for a specific need.
+
+- __`Paused Resync Threshold`__  
+This is more so a visual feedback feature where if the video is paused locally but the video owner is still playing, the video will update the current playback timestamp every some number of seconds determined by this option. If you don't want the video to resync while paused, set this value to `Infinity` (yes the actual word) to have it never update until the user resumes the video.
 One way to view it is as a live slideshow of what is currently playing. This is intended to allow people to see what is visible on the TV without actually having the media actively running.  
 
-- *Automatic Resync Interval*
-By default the TV will automatically trigger the resync logic every some number of seconds. This option specifies how often to automatically resync.  
-The defaule value of 30 seconds is usually good enough for most cases, and shouldn't need to be changed unless for a specific need.
+- __`Sync Video Player Selection`__  
+This setting, when combined with `Sync To Owner` will restrict the video player swap mechanism to the owner, and sync the active video player selection to other users.
 
-- *Initial Volume/Initial Player*  
-Again, pretty straight forward. The initial volume determines at what volume the TV will start at upon joining the world.  
-Like-wise, the initial player determines which video player configuration to load upon joining the world. The value is a number that represents the index of the Video Players array.
+### Media Load Options
 
-- *Retry Live Media*
-This value defines how many attempts the TV should make when trying to load/reload a live stream. The purpose for this is to allow for a livestream to soft-fail without the videoplayer giving up entirely on that stream. It will attempt to reload the given number of times before finally accepting that the stream actually did end.
+- __`Play Video After Load`__  
+This setting determines whether or not the media that has been loaded will automatically start to play, or require manually clicking the play button to start it. This affects all video loads, including any autoplay media.
 
-- *Start Hidden*  
-This toggle makes it so the TV disables itself (via SetActive) after it has completed all initialization.  
-**IMPORTANT**: DO NOT DISABLE THE TV VIA INSPECTOR OR SEPARATE UDON BEHAVIOR UPON JOINING A WORLD. This will cause issues with the video players. Only use this setting to have the TV be hidden when people join the world. After that any enable/disabling by the user or other scripts is fine. Just not on world join.
+- __`Buffer Delay After Load`__  
+If you wish to have the TV implicitly wait some period of time before allowing the media to play (eg: give the media extra time to buffer)  
+Note: There will always be a minimum of 0.5 seconds of buffer delay to ensure necessary continuity of the TV's internals.
 
-- *Allow Master Control*  
+- __`Max Allowed Loading Time`__  
+This specifies the maximum time that a media should be allowed to take to load. If this time is exceeded, the media error event will be triggered with a `VideoError.PlayerError`.
+
+## Security Options
+
+- __`Allow Master Control`__  
 This is a setting that specifies whether or not the instance master is allowed to lock down the TV to master use only. This will prevent all other users from being able to tell the TV to play something else. NOTE: The instance _Owner_ will always have access to take control no matter what.
 
-- *Locked By Default*
+- __`Locked By Default`__  
 This is a setting that specifies whether or not the TV is master locked from the start. This only affects when the first user joins the instance as master. The locked state is synced for non-owners/late-joiners after that point.
 
-- *Sync To Owner*  
-This setting determines whether the TV will sync with the data that the owner delivers. Untick if you want the TV to be local only (like for a music player or something)
+## Error/Retry Options
+
+- __`Default Retry Count`__  
+This is the number of times a URL should be implicitly reloaded if the media fails to load. If the URL specifies an explicit `retry=X` hash param value, it will be used instead.
+
+- __`Repeating Retry Delay`__  
+This value specifies how long to wait between each retry when a URL fails to load. This only applies to multiple sequential failures after the first retry attempt.
+
+- __`Retry Using Alternate Url`__  
+This flag makes the TV attempt to load the alternate (or main if on quest) URL if the main (or alternate if on quest) URL fails to load the first time. It will only attempt it if the other URL is present and different than the current one. Because it has graceful fallback logic, this feature is enabled by default.
+
+### Misc Options
+
+- __`Start Hidden`__  
+This toggle specifies that the active video manager should behave as if it was manually hidden. This primarily helps with music where you might not want the screen visible by default even though the media is playing.
+
+- __`Start Disabled`__  
+This toggle makes it so the TV disables itself (via SetActive) after it has completed all initialization.  
+
+- __`Debug`__  
+This enables all logging statements to be printed to the console. Disabling this does NOT prevent warnings or errors from printing.
 
 
 ## Caveats
-- General reminder: Not all websites are supported, especially those that implement custom video players. Sometimes the player is able to resolve those to a raw video url. Feel free to see what works.
+- General reminder: Not all websites are supported, especially those that implement custom javascript media players. Sometimes the player is able to resolve those to a raw media url. Feel free to see what works.
 
-- Due to a temporary limitation in Udon, I cannot completely remove the directionality of the default speakers when switching from 3D audio to 2D audio. Once that limitation is lifted, I will fix that.
+- Due to a limitation in Udon, I cannot completely remove the directionality of the default speakers when switching from 3D audio to 2D audio. If that limitation is lifted, I will fix that.
 
-- Quest does not have access to the YoutubeDL tool that desktop uses for resolving youtube/twitch/etc urls, due to technical limitations (not VRC devs fault). Here are some solutions to work around this:
-    1) Download [YoutubeDL](https://github.com/ytdl-org/youtube-dl/releases/) yourself and resolve the URL locally and then put that resulting URL into the TV instead.  
-    You will need to add the executable to the path ([HERE](https://www.c-sharpcorner.com/article/add-a-directory-to-path-environment-variable-in-windows-10/) is one of many articles online describing how to do so) and then once that's done, open up your desired terminal (most likely the Command Line on windows) and type in the following command: `youtube-dl -g -f "best" https://YourLinkHere`
-    Copy the url that it spits out and paste into the TV. Done!
-    2) Use an online tool like [GetVid](https://getvideo.org/en) or any one of the invidious instances that are around (there are various others as well). Just paste your url in and copy the desired video download link you want to play.
+- Quest does not have access to the YoutubeDL tool that desktop uses for resolving youtube/twitch/etc urls, due to technical limitations (not VRC devs fault). Read more in the [Understanding Urls](./Docs/UnderstandingURLs.md) documnet.
+    - *Be aware* that all youtube and twitch long-form urls have an embedded expiration for that url. This means that when you put the long-url media into the player, anytime someone tries to (re)load the media (such as a late joiner), if the expiration has passed the media won't load. You'll need to refresh the URL every like 15 minutes or so.  
+    Not all sites have that, but it is known that youtube and twitch both implement the expiry limitation in their direct urls.  
 
-- *Be aware* that all youtube and twitch long-form urls have an embedded expiration for that url. This means that when you put the video into the player, anytime someone tries to (re)load the video (such as a late joiner), if the expiration has passed the video won't load. You'll need to refresh the URL every like 15 minutes or so.  
-Not all sites have that, but it is known that youtube and twitch both implement the expiry limitation in their direct urls.
-
-- There is a known issue with _low-latency mode_ on AMD GPUs (specifically older ones) where if an HLS livestream (like twitch or vrcdn) is sending too much data (such as a 1080p stream), there is significant artifacting and flickering that will likely occur. The easiest solution is to drop the stream quality by switching to a lower resolution video player, or by grabbing a specifically lower quality stream URL via the [YoutubeDL](https://github.com/ytdl-org/) tool mentioned already. A good universal quality that works well across the board is 480p.  
-The command to specify the resolution is: `youtube-dl -g -f "best[height<=480]" https://YourLinkHere`
+- There is a known issue with _low-latency mode_ on AMD GPUs (specifically older ones) where if an HLS livestream (like twitch) is sending too much data (such as a 1080p stream), there is significant artifacting and flickering that will likely occur. You can either try a lower resolution videoplayer configuration or have a player dropdown option for a non-low-latency configuration.

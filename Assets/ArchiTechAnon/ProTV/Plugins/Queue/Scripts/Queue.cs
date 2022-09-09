@@ -1,12 +1,14 @@
 ﻿
+using System;
 using UdonSharp;
 using UnityEngine;
-using VRC.SDKBase;
-using VRC.Udon;
-using VRC.Udon.Common;
+using UnityEngine.Serialization;
 using UnityEngine.UI;
 using VRC.SDK3.Components;
 using VRC.SDK3.Components.Video;
+using VRC.SDKBase;
+using VRC.Udon;
+using VRC.Udon.Common;
 using VRC.Udon.Common.Interfaces;
 
 namespace ArchiTech
@@ -15,54 +17,54 @@ namespace ArchiTech
     [DefaultExecutionOrder(-1)]
     public class Queue : UdonSharpBehaviour
     {
-        private const string TSTR_QUEUE_LIMIT_REACHED = "Queue Cap Reached";
+        private const string TSTR_QUEUE_LIMIT_REACHED = "Queue Limit Reached";
+        private const string TSTR_PLAYER_LIMIT_REACHED = "Personal Limit Reached";
+
+        [NonSerialized] public VRCUrl IN_URL = new VRCUrl("");
+        [NonSerialized] public VRCUrl IN_ALT = new VRCUrl("");
+        [NonSerialized] public string IN_TITLE = string.Empty;
 
         public TVManagerV2 tv;
         public RectTransform listContainer;
         // public GameObject template;
-        public VRCUrlInputField urlInput;
+        [Obsolete] public VRCUrlInputField urlInput { get => mainUrlInput; set => mainUrlInput = value; }
+        public VRCUrlInputField mainUrlInput;
+        [Obsolete] public VRCUrlInputField altUrlInput { get => questUrlInput; set => mainUrlInput = value; }
+        public VRCUrlInputField questUrlInput;
         public Button queueMedia;
         public Button nextMedia;
         public InputField titleInput;
         public Text toasterMsg;
-        [HideInInspector] public const byte maxVideosPerPlayer = 1;
-        [HideInInspector] public const int maxQueuedVideos = 10;
+        public byte maxVideosPerPlayer = 2;
+        public bool preventDuplicateVideos = true;
+        public bool showUrlsInQueue = true;
+        // Hardcoded for now. Will be configurable in a future update.
+        [NonSerialized] public const int maxQueuedVideos = 20;
         private Text[] urlDisplays = new Text[maxQueuedVideos];
         private Text[] titleDisplays = new Text[maxQueuedVideos];
         private Text[] ownerDisplays = new Text[maxQueuedVideos];
 
-        private int OUT_TvOwnerChange_int_Id;
-        private VideoError OUT_TvVideoPlayerError_VideoError_Error;
+        private int OUT_OWNER;
+        private VideoError OUT_ERROR;
         private Slider loadingBar;
         private float loadingBarDamp;
         private bool isLoading = false;
 
-        // [UdonSynced] private string[] titles = new string[maxQueuedVideos];
-        [UdonSynced] private VRCUrl url0 = VRCUrl.Empty;
-        [UdonSynced] private VRCUrl url1 = VRCUrl.Empty;
-        [UdonSynced] private VRCUrl url2 = VRCUrl.Empty;
-        [UdonSynced] private VRCUrl url3 = VRCUrl.Empty;
-        [UdonSynced] private VRCUrl url4 = VRCUrl.Empty;
-        [UdonSynced] private VRCUrl url5 = VRCUrl.Empty;
-        [UdonSynced] private VRCUrl url6 = VRCUrl.Empty;
-        [UdonSynced] private VRCUrl url7 = VRCUrl.Empty;
-        [UdonSynced] private VRCUrl url8 = VRCUrl.Empty;
-        [UdonSynced] private VRCUrl url9 = VRCUrl.Empty;
-        [UdonSynced] private string title0 = EMPTY;
-        [UdonSynced] private string title1 = EMPTY;
-        [UdonSynced] private string title2 = EMPTY;
-        [UdonSynced] private string title3 = EMPTY;
-        [UdonSynced] private string title4 = EMPTY;
-        [UdonSynced] private string title5 = EMPTY;
-        [UdonSynced] private string title6 = EMPTY;
-        [UdonSynced] private string title7 = EMPTY;
-        [UdonSynced] private string title8 = EMPTY;
-        [UdonSynced] private string title9 = EMPTY;
+        [UdonSynced] private VRCUrl[] urls = new VRCUrl[maxQueuedVideos];
+        [UdonSynced] private VRCUrl[] alts = new VRCUrl[maxQueuedVideos];
+        [UdonSynced] private string[] titles = new string[maxQueuedVideos];
         [UdonSynced] private int[] owners = new int[maxQueuedVideos];
         private Button[] removal = new Button[maxQueuedVideos];
 
+        private int queueLength;
         private bool hasLoadingBar;
+        private bool hasUrlInput;
+        private bool hasAltInput;
         private bool hasTitleInput;
+        private bool hasToaster;
+        private bool hasQueueMedia;
+        private bool hasNextMedia;
+        private bool isOwner { get => Networking.IsOwner(gameObject); }
         private bool requestedByMe = false;
         private const string EMPTY = "";
         private bool noActiveMedia = true;
@@ -70,12 +72,21 @@ namespace ArchiTech
         private bool hasLocalPlayer;
         private bool init = false;
         private bool debug = true;
+        private string debugLabel;
         private string debugColor = "yellow";
 
         public void _Initialize()
         {
             if (init) return;
-            if (tv == null) tv = transform.parent.GetComponent<TVManagerV2>();
+            if (tv == null) tv = transform.GetComponentInParent<TVManagerV2>();
+            if (tv == null)
+            {
+                debugLabel = $"<Missing TV Ref>/{name}";
+                err("The TV reference was not provided. Please make sure the queue knows what TV to connect to.");
+                return;
+            }
+            debugLabel = $"{tv.gameObject.name}/{name}";
+            debug = tv.debug;
             for (int i = 0; i < maxQueuedVideos; i++)
             {
                 var t = listContainer.GetChild(i);
@@ -92,14 +103,19 @@ namespace ArchiTech
                     removal[i] = removeT.GetComponent<Button>();
                     removeT.gameObject.SetActive(false);
                 }
-                SetProgramVariable("title" + i, EMPTY);
-                SetProgramVariable("url" + i, VRCUrl.Empty);
+                titles[i] = EMPTY;
+                urls[i] = VRCUrl.Empty;
             }
-            loadingBar = listContainer.GetChild(0).GetComponentInChildren<Slider>();
+            loadingBar = listContainer.GetChild(0).GetComponentInChildren<Slider>(true);
             localPlayer = Networking.LocalPlayer;
             hasLocalPlayer = localPlayer != null;
             hasLoadingBar = loadingBar != null;
+            hasUrlInput = mainUrlInput != null;
+            hasAltInput = questUrlInput != null;
             hasTitleInput = titleInput != null;
+            hasToaster = toasterMsg != null;
+            hasQueueMedia = queueMedia != null;
+            hasNextMedia = nextMedia != null;
             _UpdateUrlInput();
             updateUI();
             // this plugin's priority should be higher than most other plugins
@@ -110,21 +126,11 @@ namespace ArchiTech
         void Start()
         {
             _Initialize();
-            var canvases = GetComponentsInChildren<Canvas>();
-            foreach (Canvas c in canvases)
-            {
-                var box = c.GetComponent<BoxCollider>();
-                var rect = c.GetComponent<RectTransform>();
-                if (box != null)
-                {
-                    log("Auto-adjusting Canvas collider");
-                    box.isTrigger = true;
-                    box.size = new Vector3(rect.sizeDelta.x, rect.sizeDelta.y, 0);
-                }
-            }
         }
 
-        void LateUpdate()
+        void LateUpdate() => _InternalUpdate();
+
+        public void _InternalUpdate()
         {
             if (isLoading) if (hasLoadingBar)
                 {
@@ -136,33 +142,13 @@ namespace ArchiTech
                 }
         }
 
-        new void OnPlayerLeft(VRCPlayerApi player)
-        {
-            if (isTVOwner())
-            {
-                Networking.SetOwner(localPlayer, gameObject);
-                var pid = player.playerId;
-                for (int i = 0; i < maxQueuedVideos; i++)
-                {
-                    if (owners[i] == pid) SetProgramVariable("url" + i, VRCUrl.Empty);
-                }
-                if (urlExist(url0, true))
-                {
-                    collapseEntries();
-                    requestNext();
-                }
-                else
-                {
-                    collapseEntries();
-                    tv._Stop();
-                }
-            }
-        }
-
         new void OnPostSerialization(SerializationResult result)
         {
             if (result.success) { }
-            else RequestSerialization();
+            else
+            {
+                RequestSerialization();
+            }
         }
 
         new void OnDeserialization()
@@ -170,79 +156,183 @@ namespace ArchiTech
             updateUI();
         }
 
+        new void OnPlayerLeft(VRCPlayerApi p)
+        {
+            if (isTVOwner())
+            {
+                var pid = localPlayer.playerId;
+                var oldpid = p.playerId;
+                for (int i = 0; i < owners.Length; i++)
+                {
+                    if (oldpid == owners[i])
+                    {
+                        owners[i] = pid;
+                    }
+                }
+                updateUI();
+            }
+        }
+
+        // new void OnOwnershipTransferred(VRCPlayerApi p)
+        // {
+        //     isOwner = p.isLocal;
+        // }
+
 
         // === UI Events ===
         public void _UpdateUrlInput()
         {
-            if (urlInput.GetUrl().Get() == string.Empty)
-                queueMedia.gameObject.SetActive(false);
-            else queueMedia.gameObject.SetActive(true);
+            if (hasQueueMedia)
+            {
+                if (!hasUrlInput || mainUrlInput.GetUrl().Get() == string.Empty)
+                    queueMedia.gameObject.SetActive(false);
+                else queueMedia.gameObject.SetActive(true);
+            }
+        }
+
+        public void _QueueMediaInput()
+        {
+            if (hasUrlInput)
+            {
+                IN_URL = mainUrlInput.GetUrl();
+                mainUrlInput.SetUrl(VRCUrl.Empty);
+            }
+            if (IN_URL.Get() == "") return; // no url present
+            if (hasAltInput)
+            {
+                IN_ALT = questUrlInput.GetUrl();
+                questUrlInput.SetUrl(VRCUrl.Empty);
+            }
+            if (hasTitleInput)
+            {
+                IN_TITLE = titleInput.text ?? EMPTY;
+                titleInput.text = EMPTY;
+            }
+            _QueueMedia();
         }
 
         public void _QueueMedia()
         {
-            VRCUrl urlIn = urlInput.GetUrl();
-            urlInput.SetUrl(VRCUrl.Empty);
-            string titleIn = EMPTY;
-            if (hasTitleInput)
-            {
-                titleIn = titleInput.text;
-                titleInput.text = EMPTY;
-            }
+            _Initialize();
+            string inUrl = IN_URL.Get();
+            if (inUrl == EMPTY) return; // no url present
             int target = -1;
             for (int i = maxQueuedVideos - 1; i >= 0; i--)
             {
-                var url = (VRCUrl)GetProgramVariable("url" + i);
+                var url = urls[i];
                 url = url ?? VRCUrl.Empty;
-                if (url.Get() != EMPTY) break;
+                if (url.Get() != EMPTY) break; // find the first entry that is empty
                 target = i;
             }
+            bool validationFailed = false;
+            bool unprivileged = !tv._IsPrivilegedUser();
             if (target == -1)
             {
-                log("Queue is full. Wait until another video has been cleared.");
+                warn("Queue is full. Wait until another media has been cleared.");
+                validationFailed = true;
+            }
+            else if (unprivileged && tv.locked)
+            {
+                warn("TV is locked. You must be a privileged user to queue media while TV is locked.");
+                validationFailed = true;
+            }
+            else if (unprivileged && personalVideosQueued() >= maxVideosPerPlayer)
+            {
+                warn("Personal queue limit reached. Either remove one or wait for the next one to play.");
+                validationFailed = true;
+            }
+            else if (preventDuplicateVideos && videoIsQueued(inUrl))
+            {
+                warn("Media is already in queue. Duplicate media are not allowed.");
+                validationFailed = true;
+            }
+            if (validationFailed)
+            {
+                // purge input data and immediately return
+                IN_URL = VRCUrl.Empty;
+                IN_ALT = VRCUrl.Empty;
+                IN_TITLE = EMPTY;
                 return;
             }
-            log($"QueueMedia: Assigning new media to entry {target}");
-            Networking.SetOwner(localPlayer, gameObject);
-            SetProgramVariable("url" + target, urlIn);
-            SetProgramVariable("title" + target, titleIn);
+            // log($"QueueMedia: Assigning new media to entry {target}");
+            if (!isOwner) Networking.SetOwner(localPlayer, gameObject);
+            urls[target] = IN_URL;
+            alts[target] = IN_ALT;
+            if (!showUrlsInQueue && IN_TITLE == EMPTY)
+            {
+                // if URLS are hidden, but no title is available, use the url as the title.
+                IN_TITLE = inUrl;
+            }
+            titles[target] = IN_TITLE;
             owners[target] = localPlayer.playerId;
-            // TODO fix highlight on queue?
             if (hasLoadingBar && target == 0)
-                loadingBar.value = url0.Get() == tv.url.Get() ? 1f : 0f;
+                loadingBar.value = urls[0].Get() == tv.url.Get() ? 1f : 0f;
             collapseEntries();
             if (noActiveMedia) play();
+            IN_URL = VRCUrl.Empty;
+            IN_ALT = VRCUrl.Empty;
+            IN_TITLE = EMPTY;
         }
 
         public void _Remove()
         {
+            _Initialize();
             var index = getInteractedIndex();
-            if (index > -1 && (localPlayer.playerId == owners[index] || isMasterOwner()))
+            if (index > -1 && (localPlayer.playerId == owners[index] || tv._IsPrivilegedUser()))
             {
-                Networking.SetOwner(localPlayer, gameObject);
+                if (!isOwner) Networking.SetOwner(localPlayer, gameObject);
                 if (index == 0 && matchCurrentUrl(true))
                 {
+                    log("Removing active queue item.");
                     tv._Stop();
                     requestNext();
                 }
                 else
                 {
-                    SetProgramVariable("url" + index, VRCUrl.Empty);
+                    log($"Removing queue item {index}");
+                    urls[index] = VRCUrl.Empty;
                     collapseEntries();
                 }
             }
         }
 
-        public void _Next() => requestNext();
+        public void _Purge()
+        {
+            _Initialize();
+            bool isPrivileged = tv._IsPrivilegedUser();
+            if (isPrivileged) log("Privileged user purging entire queue.");
+            int purgeCount = 0;
+            for (int i = 0; i < queueLength; i++)
+            {
+                if (isPrivileged || localPlayer.playerId == owners[i])
+                {
+                    urls[i] = VRCUrl.Empty;
+                    purgeCount++;
+                    if (i == 0) tv._Stop();
+                }
+            }
+            if (purgeCount > 0)
+            {
+                collapseEntries();
+                log($"Purged {purgeCount} queue entries");
+            }
+
+        }
+
+        public void _Next()
+        {
+            _Initialize();
+            requestNext();
+        }
 
 
         // ======== NETWORK METHODS ===========
 
         private void requestNext()
         {
-            requestedByMe = true;
             if (!tv.locked || isTVOwner())
             {
+                requestedByMe = true;
                 SendCustomNetworkEvent(NetworkEventTarget.All, nameof(ALL_RequestNext));
             }
         }
@@ -256,7 +346,7 @@ namespace ArchiTech
                 { // only allow self-requested NEXT calls when the TV is locked.
                     if (matchCurrentUrl(true))
                     { // if the current url is in the TV, switch to the next URL
-                        Networking.SetOwner(localPlayer, gameObject);
+                        if (!isOwner) Networking.SetOwner(localPlayer, gameObject);
                         nextURL();
                     }
                     play();
@@ -266,12 +356,12 @@ namespace ArchiTech
             {
                 if (matchCurrentUrl(true))
                 { // if the current url is in the TV
-                    if (isOwner() && checkNextUrl(false) || localPlayer.playerId == owners[1])
+                    if (isOwner && checkNextUrl(false) || localPlayer.playerId == owners[1])
                     {
                         // allow pass through for queue owner if there isn't another media in queue
                         //      This allows for media end to clear the last url from the queue
                         // update owner of queue to the owner of next queued media otherwise
-                        Networking.SetOwner(localPlayer, gameObject);
+                        if (!isOwner) Networking.SetOwner(localPlayer, gameObject);
                         nextURL();
                         play();
                     }
@@ -294,19 +384,18 @@ namespace ArchiTech
         public void _TvMediaChange()
         {
             // if the tv media changes and the current URL does not match, collapse the entries
-            if (isOwner() && matchCurrentUrl(false))
+            if (isOwner && matchCurrentUrl(false))
                 collapseEntries();
         }
 
         public void _TvMediaEnd()
         {
             noActiveMedia = true;
-
             if (isTVOwner())
             {
-                if (matchCurrentUrl(true)) // url0 matches the tv url
+                if (matchCurrentUrl(true)) // urls[0] matches the tv url
                     requestNext(); // attempt queueing the next media
-                else play(); // attempt to play url0
+                else play(); // attempt to play urls[0]
             }
         }
 
@@ -314,8 +403,8 @@ namespace ArchiTech
         {
             // track active media state and update the TV label if the current media has a title associated with it
             noActiveMedia = false;
-            if (title0 != EMPTY)
-                tv.localLabel = title0;
+            if (titles[0] != EMPTY)
+                tv.localLabel = titles[0];
         }
 
         public void _TvMediaLoop()
@@ -326,7 +415,8 @@ namespace ArchiTech
 
         public void _TvVideoPlayerError()
         {
-            if (OUT_TvVideoPlayerError_VideoError_Error == VideoError.RateLimited) return; // TV auto-reloads on ratelimited, don't skip current media.
+            if (tv.errorOccurred) { } else return; // only proceed if tv signal an error actually occurred
+            isLoading = false;
             noActiveMedia = true;
         }
 
@@ -355,12 +445,19 @@ namespace ArchiTech
 
         public void _TvLock()
         {
-            nextMedia.gameObject.SetActive(isTVOwner());
+            bool privileged = tv._IsPrivilegedUser();
+            if (hasUrlInput) mainUrlInput.gameObject.SetActive(privileged);
+            if (hasAltInput) questUrlInput.gameObject.SetActive(privileged);
+            if (hasTitleInput) titleInput.gameObject.SetActive(privileged);
+            if (hasNextMedia) nextMedia.gameObject.SetActive(privileged);
         }
 
         public void _TvUnLock()
         {
-            nextMedia.gameObject.SetActive(true);
+            if (hasUrlInput) mainUrlInput.gameObject.SetActive(true);
+            if (hasAltInput) questUrlInput.gameObject.SetActive(true);
+            if (hasTitleInput) titleInput.gameObject.SetActive(true);
+            if (hasNextMedia) nextMedia.gameObject.SetActive(true);
         }
 
         // ======== HELPER METHODS ============
@@ -374,9 +471,9 @@ namespace ArchiTech
 
         private void nextURL()
         {
-            if (isOwner())
+            if (isOwner)
             {
-                url0 = VRCUrl.Empty;
+                urls[0] = VRCUrl.Empty;
                 if (hasLoadingBar) loadingBar.value = 0f;
                 collapseEntries();
             }
@@ -384,11 +481,11 @@ namespace ArchiTech
 
         private void play()
         {
-            if (url0.Get() != EMPTY)
+            if (urls[0].Get() != EMPTY)
             {
                 noActiveMedia = false;
-                log($"Next URL - {url0} | title '{title0}'");
-                tv._ChangeMediaTo(url0);
+                log($"Next URL - {urls[0]} | title '{titles[0]}'");
+                tv._ChangeMediaWithAltTo(urls[0], alts[0]);
             }
         }
 
@@ -407,40 +504,47 @@ namespace ArchiTech
         }
 
 
-        private bool matchCurrentUrl(bool shouldMatch) => urlMatch(url0, shouldMatch);
-        private bool checkCurrentUrl(bool shouldExist) => urlExist(url0, shouldExist);
-        private bool checkNextUrl(bool shouldExist) => urlExist(url1, shouldExist);
+        private bool matchCurrentUrl(bool shouldMatch) => urlMatch(urls[0], shouldMatch);
+        private bool checkCurrentUrl(bool shouldExist) => urlExist(urls[0], shouldExist);
+        private bool checkNextUrl(bool shouldExist) => urlExist(urls[1], shouldExist);
 
         private void collapseEntries()
         {
             var _urls = new VRCUrl[maxQueuedVideos];
+            var _alts = new VRCUrl[maxQueuedVideos];
             var _titles = new string[maxQueuedVideos];
             var _owners = new int[maxQueuedVideos];
             int index = 0;
             for (int i = 0; i < maxQueuedVideos; i++)
             {
-                var url = (VRCUrl)GetProgramVariable("url" + i);
+                var url = urls[i];
                 url = url ?? VRCUrl.Empty;
                 _urls[index] = url;
                 if (url.Get() == EMPTY)
                 {
-                    SetProgramVariable("title" + i, EMPTY);
-                    // titles[i] = EMPTY;
+                    alts[i] = VRCUrl.Empty;
+                    titles[i] = EMPTY;
                     owners[i] = -1;
                     continue;
                 }
-                _titles[index] = (string)GetProgramVariable("title" + i);
-                // _titles[index] = titles[i];
+                _alts[index] = alts[i];
+                _titles[index] = titles[i];
                 _owners[index] = owners[i];
                 index++;
             }
+            queueLength = index;
             log($"Updated to {index} entries");
-            for (int i = 0; i < maxQueuedVideos; i++)
+            for (; index < maxQueuedVideos; index++)
             {
-                SetProgramVariable("url" + i, _urls[i]);
-                SetProgramVariable("title" + i, _titles[i]);
+                // fill the remainder of the arrays with default values
+                _urls[index] = VRCUrl.Empty;
+                _alts[index] = VRCUrl.Empty;
+                _titles[index] = EMPTY;
+                _owners[index] = -1;
             }
-            // titles = _titles;
+            urls = _urls;
+            alts = _alts;
+            titles = _titles;
             owners = _owners;
             RequestSerialization();
             updateUI();
@@ -448,13 +552,15 @@ namespace ArchiTech
 
         private void updateUI()
         {
-            toasterMsg.text = EMPTY;
-            var masterOwner = isMasterOwner();
+            if (hasToaster)
+                toasterMsg.text = EMPTY;
+            var controlBypass = tv._IsPrivilegedUser();
             int count = 0;
+            int personalCount = 0;
             for (int i = 0; i < maxQueuedVideos; i++)
             {
-                var url = (VRCUrl)GetProgramVariable("url" + i);
-                var title = (string)GetProgramVariable("title" + i);
+                var url = urls[i];
+                var title = titles[i];
                 url = url ?? VRCUrl.Empty;
                 if (url.Get() == EMPTY)
                 {
@@ -462,51 +568,62 @@ namespace ArchiTech
                     continue;
                 }
                 var owner = VRCPlayerApi.GetPlayerById(owners[i]);
-                var hasCustomTitle = title != EMPTY;
-                if (!Utilities.IsValid(owner)) return; // invalid player
+                if (!VRC.SDKBase.Utilities.IsValid(owner)) return; // invalid player
                 if (ownerDisplays[i] != null)
                 {
                     if (debug)
-                        ownerDisplays[i].text = $"{owner.displayName} [PID {owner.playerId}]";
+                        ownerDisplays[i].text = $"{owner.displayName} [{owner.playerId}]";
                     else
                         ownerDisplays[i].text = owner.displayName;
                 }
+                bool hasTitle = title != EMPTY;
                 if (titleDisplays[i] != null)
-                    titleDisplays[i].text = title;
+                    if (hasTitle) titleDisplays[i].text = title;
+                    else titleDisplays[i].text = url.Get();
+
                 if (urlDisplays[i] != null)
-                {
-                    if (hasCustomTitle)
-                    {
-                        urlDisplays[i].text = url.Get();
-                    }
-                    else
-                    {
-                        titleDisplays[i].text = url.Get();
-                        urlDisplays[i].text = EMPTY;
-                    }
-                }
+                    if (showUrlsInQueue) urlDisplays[i].text = url.Get();
+                    else urlDisplays[i].text = EMPTY;
+
                 var remove = removal[i];
                 if (remove != null)
                 {
-                    var canRemove = localPlayer == owner || masterOwner;
-                    remove.gameObject.SetActive(canRemove);
+                    var isOwner = localPlayer == owner;
+                    remove.gameObject.SetActive(isOwner || controlBypass);
+                    if (isOwner) personalCount++;
                 }
                 listContainer.GetChild(i).gameObject.SetActive(true);
                 count++;
             }
-            if (hasLoadingBar && url0.Get() != tv.url.Get())
+            if (hasLoadingBar && urls[0].Get() != tv.url.Get())
                 loadingBar.value = 0f;
 
-            if (count == maxQueuedVideos)
+            if (count >= maxQueuedVideos)
             {
-                urlInput.SetUrl(VRCUrl.Empty);
-                urlInput.gameObject.SetActive(false);
-                toasterMsg.text = TSTR_QUEUE_LIMIT_REACHED;
+                if (hasUrlInput)
+                {
+                    mainUrlInput.SetUrl(VRCUrl.Empty);
+                    mainUrlInput.gameObject.SetActive(false);
+                }
+                if (hasTitleInput) titleInput.gameObject.SetActive(false);
+                if (hasToaster) toasterMsg.text = TSTR_QUEUE_LIMIT_REACHED;
             }
-            else urlInput.gameObject.SetActive(true);
-
-            if (tv.locked) nextMedia.gameObject.SetActive(isTVOwner());
-            else nextMedia.gameObject.SetActive(true);
+            else if (!controlBypass && personalCount >= maxVideosPerPlayer)
+            {
+                if (hasUrlInput)
+                {
+                    mainUrlInput.SetUrl(VRCUrl.Empty);
+                    mainUrlInput.gameObject.SetActive(false);
+                }
+                if (hasTitleInput) titleInput.gameObject.SetActive(false);
+                if (hasToaster) toasterMsg.text = TSTR_PLAYER_LIMIT_REACHED;
+            }
+            else
+            {
+                if (hasUrlInput) mainUrlInput.gameObject.SetActive(true);
+                if (hasTitleInput) titleInput.gameObject.SetActive(true);
+                if (hasToaster) toasterMsg.text = "";
+            }
         }
 
         private int getInteractedIndex()
@@ -519,23 +636,36 @@ namespace ArchiTech
             return -1;
         }
 
+        private int personalVideosQueued()
+        {
+            int count = 0;
+            for (int i = 0; i < maxQueuedVideos; i++)
+                if (localPlayer.playerId == owners[i])
+                    count++;
+            return count;
+        }
 
+        private bool videoIsQueued(string url)
+        {
+            foreach (VRCUrl queued in urls)
+                if (queued != null && queued.Get() == url)
+                    return true;
+            return false;
+        }
 
-        private bool isOwner() => Networking.IsOwner(localPlayer, gameObject);
-        private bool isMasterOwner() => hasLocalPlayer && (tv.allowMasterControl && localPlayer.isMaster || localPlayer.isInstanceOwner);
         private bool isTVOwner() => Networking.IsOwner(localPlayer, tv.gameObject);
 
         private void log(string value)
         {
-            if (debug) Debug.Log($"[<color=#1F84A9>A</color><color=#A3A3A3>T</color><color=#2861B4>A</color> | <color={debugColor}>{nameof(Queue)}</color>] {value}");
+            if (debug) Debug.Log($"[<color=#1F84A9>A</color><color=#A3A3A3>T</color><color=#2861B4>A</color> | <color={debugColor}>{nameof(Queue)} ({debugLabel})</color>] {value}");
         }
         private void warn(string value)
         {
-            if (debug) Debug.LogWarning($"[<color=#1F84A9>A</color><color=#A3A3A3>T</color><color=#2861B4>A</color> | <color={debugColor}>{nameof(Queue)}</color>] {value}");
+            Debug.LogWarning($"[<color=#1F84A9>A</color><color=#A3A3A3>T</color><color=#2861B4>A</color> | <color={debugColor}>{nameof(Queue)} ({debugLabel})</color>] {value}");
         }
         private void err(string value)
         {
-            if (debug) Debug.LogError($"[<color=#1F84A9>A</color><color=#A3A3A3>T</color><color=#2861B4>A</color> | <color={debugColor}>{nameof(Queue)}</color>] {value}");
+            Debug.LogError($"[<color=#1F84A9>A</color><color=#A3A3A3>T</color><color=#2861B4>A</color> | <color={debugColor}>{nameof(Queue)} ({debugLabel})</color>] {value}");
         }
     }
 }

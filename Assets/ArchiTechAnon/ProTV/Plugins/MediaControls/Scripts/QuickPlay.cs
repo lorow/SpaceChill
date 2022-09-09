@@ -1,29 +1,45 @@
 ﻿
+using System;
 using UdonSharp;
 using UnityEngine;
+using UnityEngine.Serialization;
 using UnityEngine.UI;
 using VRC.SDKBase;
 using VRC.Udon;
 
 namespace ArchiTech
 {
+    [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
     [DefaultExecutionOrder(-1)]
     public class QuickPlay : UdonSharpBehaviour
     {
         public TVManagerV2 tv;
-        public VRCUrl url = VRCUrl.Empty;
-        public VRCUrl altUrl = VRCUrl.Empty;
+        public Queue queue;
+        public VRCUrl url = new VRCUrl("");
+        public VRCUrl altUrl = new VRCUrl("");
         public string title;
         private VRCPlayerApi local;
+        private bool hasQueue;
         private bool init = false;
         private bool debug = false;
+        private string debugLabel;
         private string debugColor = "#ffaa66";
 
         public void _Initialize()
         {
             if (init) return;
-
+            if (tv == null) tv = transform.GetComponentInParent<TVManagerV2>();
+            if (tv == null) {
+                debugLabel = $"<Missing TV Ref>/{name}";
+                err("The TV reference was not provided. Please make sure the quickplay knows what TV to connect to.");
+                return;
+            }
+            debugLabel = $"{tv.gameObject.name}/{name}";
+            if (url == null) url = VRCUrl.Empty;
+            if (altUrl == null) altUrl = VRCUrl.Empty;
             local = Networking.LocalPlayer;
+            hasQueue = queue != null;
+            debug = tv.debug;
             tv._RegisterUdonSharpEventReceiverWithPriority(this, 200);
             init = true;
         }
@@ -31,18 +47,6 @@ namespace ArchiTech
         void Start()
         {
             _Initialize();
-            var shapes = GetComponentsInChildren(typeof(VRC_UiShape));
-            foreach (Component s in shapes)
-            {
-                var box = s.GetComponent<BoxCollider>();
-                var rect = s.GetComponent<RectTransform>();
-                if (box != null)
-                {
-                    log("Auto-adjusting Canvas collider");
-                    box.isTrigger = true;
-                    box.size = new Vector3(rect.sizeDelta.x, rect.sizeDelta.y, (rect.sizeDelta.x + rect.sizeDelta.y) / 2);
-                }
-            }
         }
 
         new void Interact()
@@ -52,7 +56,12 @@ namespace ArchiTech
 
         public void _Activate()
         {
-            tv._ChangeMediaToWithAlt(url, altUrl);
+            if (hasQueue){
+                queue.IN_URL = url;
+                queue.IN_ALT = altUrl;
+                queue.IN_TITLE = title;
+                queue._QueueMedia();
+            } else tv._ChangeMediaWithAltTo(url, altUrl);
         }
 
         public void _TvMediaStart()
@@ -64,15 +73,15 @@ namespace ArchiTech
 
         private void log(string value)
         {
-            if (debug) Debug.Log($"[<color=#1F84A9>A</color><color=#A3A3A3>T</color><color=#2861B4>A</color> | <color={debugColor}>{nameof(QuickPlay)} ({name})</color>] {value}");
+            if (debug) Debug.Log($"[<color=#1F84A9>A</color><color=#A3A3A3>T</color><color=#2861B4>A</color> | <color={debugColor}>{nameof(QuickPlay)} ({debugLabel})</color>] {value}");
         }
         private void warn(string value)
         {
-            if (debug) Debug.LogWarning($"[<color=#1F84A9>A</color><color=#A3A3A3>T</color><color=#2861B4>A</color> | <color={debugColor}>{nameof(QuickPlay)} ({name})</color>] {value}");
+            Debug.LogWarning($"[<color=#1F84A9>A</color><color=#A3A3A3>T</color><color=#2861B4>A</color> | <color={debugColor}>{nameof(QuickPlay)} ({debugLabel})</color>] {value}");
         }
         private void err(string value)
         {
-            if (debug) Debug.LogError($"[<color=#1F84A9>A</color><color=#A3A3A3>T</color><color=#2861B4>A</color> | <color={debugColor}>{nameof(QuickPlay)} ({name})</color>] {value}");
+            Debug.LogError($"[<color=#1F84A9>A</color><color=#A3A3A3>T</color><color=#2861B4>A</color> | <color={debugColor}>{nameof(QuickPlay)} ({debugLabel})</color>] {value}");
         }
     }
 }

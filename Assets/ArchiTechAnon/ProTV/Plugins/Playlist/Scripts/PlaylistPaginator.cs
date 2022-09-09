@@ -7,6 +7,7 @@ using VRC.Udon;
 
 namespace ArchiTech
 {
+    [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
     public class PlaylistPaginator : UdonSharpBehaviour
     {
         public Playlist playlist;
@@ -75,11 +76,11 @@ namespace ArchiTech
         }
         private void warn(string value)
         {
-            if (debug) Debug.LogWarning($"[<color=#1F84A9>A</color><color=#A3A3A3>T</color><color=#2861B4>A</color> | <color={debugColor}>{nameof(PlaylistPaginator)} ({debugLabel})</color>] {value}");
+            Debug.LogWarning($"[<color=#1F84A9>A</color><color=#A3A3A3>T</color><color=#2861B4>A</color> | <color={debugColor}>{nameof(PlaylistPaginator)} ({debugLabel})</color>] {value}");
         }
         private void err(string value)
         {
-            if (debug) Debug.LogError($"[<color=#1F84A9>A</color><color=#A3A3A3>T</color><color=#2861B4>A</color> | <color={debugColor}>{nameof(PlaylistPaginator)} ({debugLabel})</color>] {value}");
+            Debug.LogError($"[<color=#1F84A9>A</color><color=#A3A3A3>T</color><color=#2861B4>A</color> | <color={debugColor}>{nameof(PlaylistPaginator)} ({debugLabel})</color>] {value}");
         }
     }
 }

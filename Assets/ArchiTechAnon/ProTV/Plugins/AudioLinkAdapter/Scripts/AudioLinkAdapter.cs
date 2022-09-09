@@ -6,8 +6,21 @@ using VRC.Udon;
 
 namespace ArchiTech
 {
+    [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
     public class AudioLinkAdapter : UdonSharpBehaviour
     {
+#if !AUDIOLINK
+        [Header("AudioLink is not present in the project. AudioLink is required for this plugin.")] 
+        public string getAudioLinkHere = "https://github.com/llealloo/vrc-udon-audio-link/releases/latest";
+        private bool debug = true;
+        private string debugLabel;
+
+        void Start() {
+            debugLabel = $"<Missing AudioLink>/{name}";
+            err("AudioLink is not present in the project. AudioLink is required for this plugin.");
+            log("Get it here: https://github.com/llealloo/vrc-udon-audio-link/releases/latest");
+        }
+#else
         public TVManagerV2 tv;
         public VRCAudioLink.AudioLink audioLinkInstance;
         public string speakerName = "AudioLink";
@@ -19,11 +32,12 @@ namespace ArchiTech
         public float worldMusicFadeInTime = 4f;
         private float worldMusicVolume;
         private float worldMusicFadeAmount;
-        private int OUT_OnVideoPlayerChange_int_Index;
+        private int OUT_VIDEOPLAYER;
         private bool worldMusicActive = true;
         private bool hasWorldMusic = false;
         private bool init = false;
         private bool debug = false;
+        private string debugLabel;
 
         private void initialize()
         {
@@ -35,6 +49,14 @@ namespace ArchiTech
                     audioLinkInstance.audioSource = worldMusic;
                 worldMusicVolume = worldMusic.volume;
             }
+            if (tv == null) tv = transform.GetComponentInParent<TVManagerV2>();
+            if (tv == null)
+            {
+                debugLabel = $"<Missing TV Ref>/{name}";
+                err("The TV reference was not provided. Please make sure the audio link adapter knows what TV to connect to.");
+                return;
+            }
+            debugLabel = $"{tv.gameObject.name}/{name}";
             tv._RegisterUdonSharpEventReceiver(this);
             init = true;
         }
@@ -44,7 +66,9 @@ namespace ArchiTech
             initialize();
         }
 
-        void Update()
+        void Update() => _InternalUpdate();
+
+        public void _InternalUpdate()
         {
             if (hasWorldMusic)
             {
@@ -99,7 +123,7 @@ namespace ArchiTech
 
         public void _TvVideoPlayerChange()
         {
-            updateAudioSource(OUT_OnVideoPlayerChange_int_Index);
+            updateAudioSource(OUT_VIDEOPLAYER);
         }
 
         private void updateAudioSource(int videoPlayer)
@@ -120,18 +144,19 @@ namespace ArchiTech
             warn($"No audio source called {speakerName} was found connected to the {manager.gameObject.name} video manager.");
         }
 
+#endif
 
         private void log(string value)
         {
-            if (!debug) Debug.Log($"[<color=#1F84A9>A</color><color=#A3A3A3>T</color><color=#2861B4>A</color> | <color=#55ccaa>AudioLinkAdapter</color>] {value}");
+            if (debug) Debug.Log($"[<color=#1F84A9>A</color><color=#A3A3A3>T</color><color=#2861B4>A</color> | <color=#55ccaa>{nameof(AudioLinkAdapter)} ({debugLabel})</color>] {value}");
         }
         private void warn(string value)
         {
-            if (!debug) Debug.LogWarning($"[<color=#1F84A9>A</color><color=#A3A3A3>T</color><color=#2861B4>A</color> | <color=#55ccaa>AudioLinkAdapter</color>] {value}");
+            Debug.LogWarning($"[<color=#1F84A9>A</color><color=#A3A3A3>T</color><color=#2861B4>A</color> | <color=#55ccaa>{nameof(AudioLinkAdapter)} ({debugLabel})</color>] {value}");
         }
         private void err(string value)
         {
-            if (!debug) Debug.LogError($"[<color=#1F84A9>A</color><color=#A3A3A3>T</color><color=#2861B4>A</color> | <color=#55ccaa>AudioLinkAdapter</color>] {value}");
+            Debug.LogError($"[<color=#1F84A9>A</color><color=#A3A3A3>T</color><color=#2861B4>A</color> | <color=#55ccaa>{nameof(AudioLinkAdapter)} ({debugLabel})</color>] {value}");
         }
     }
 }

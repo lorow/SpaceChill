@@ -7,6 +7,7 @@ using VRC.Udon;
 
 namespace ArchiTech
 {
+    [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
     [DefaultExecutionOrder(-1)]
     public class SkyboxSwapper : UdonSharpBehaviour
     {
@@ -41,7 +42,7 @@ namespace ArchiTech
         public void _Initialize() {
             if (init) return;
 
-            if (tv == null) tv = transform.parent.GetComponent<TVManagerV2>();
+            if (tv == null) tv = transform.GetComponentInParent<TVManagerV2>();
             if (fallback == null) fallback = RenderSettings.skybox;
 
             hasBrightness = brightness != null;
@@ -65,6 +66,10 @@ namespace ArchiTech
         void Start()
         {
             _Initialize();
+        }
+
+        void OnDisable() {
+            revert();
         }
 
         // ========== Shader Toggles =========
@@ -150,11 +155,9 @@ namespace ArchiTech
         private void activate()
         {
             RenderSettings.skybox = skybox;
-            string[] meta = tv.urlMeta;
-            Debug.Log($"Meta: {meta}");
-            foreach (string opt in meta)
+            foreach (string option in tv.urlHashParams)
             {
-                switch (opt.ToLower())
+                switch (option.ToLower())
                 {
                     case "180": _Deg180(); break;
                     case "panoramic": _Panoramic(); break;

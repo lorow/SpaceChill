@@ -2,7 +2,7 @@
 
 The way that the architecture is setup is based on the pub/sub concept, but implemented using custom udon events. These events allow for the modular extension of the TV without having to get too into the nitty-gritty of the TV itself.
 
-## SUPPORT ME!
+## You can support me here
 <a href='https://ko-fi.com/I3I84I3Z8' target='_blank'><img height='36' style='border:0px;height:36px;' src='https://cdn.ko-fi.com/cdn/kofi2.png?v=2' border='0' alt='Support me at ko-fi.com' /></a>
 
 ## The Udon
@@ -17,23 +17,23 @@ To make a TV from scratch is not difficult. Just make sure to add any desired `V
 
 _There are more details in the [`Events Document`](./Events.md), but will briefly touch on a particular bit of architecture related to it._  
 
-With the new pub/sub style event system, there is a bit of a unique implementation for interacting with it. This was made in such a way to easily support Udon not written in U# (like uGraph).  
+With the pub/sub style event system, there is a bit of a unique implementation for interacting with it. This was made in such a way to easily support Udon not written in U# (like uGraph).  
 There are a few events that have to take some kind of input or output data to act upon. For example, trying to change the TV's active video from custom script. This is accomplished through some predefined variables. These variables ALWYAS come in the form of:  
-(`IN` or `OUT`) + `_` + correspondingEventName + `_` + variableType + `_` + meaningfulTerm
+(`IN` or `OUT`) + `_` + meaningfulTerm
 
 Coninuing the example, To change the active URL from a udon graph script, one would need to do the following in order:
 - Have a VRCUrl reference/instance ready (eg: `myVRCUrlInstance`)
-- Use the node and inputs UdonBehavior -> SetProgramVariable [ `tvReference`, "IN_ChangeVideo_VRCUrl_Url", `myVRCUrlInstance` ]
-- Use the node and inputs UdonBehavior -> SendCustomEvent [ `tvReference`, "_ChangeVideo" ]
+- Use the node and inputs UdonBehavior -> SetProgramVariable [ `tvReference`, "IN_URL", `myVRCUrlInstance` ]
+- Use the node and inputs UdonBehavior -> SendCustomEvent [ `tvReference`, "_RefreshMedia" ]
 
 And that's it. The specifics of this are that there is a handful of events that need some input data.  
-The input data variables need to be set before calling the corresponding event. In the case of the url change, it's the `IN_ChangeVideo_VRCUrl_Url`.
+The input data variables need to be set before calling the corresponding event. In the case of the url change, it's the `IN_URL`.
 
 Conversely, there are some events that the TV produces that intends to deliver some data to the subscribed behaviors. For example, if the TV's volume is modified at any point, it will attempt to do the following for each of the subscribed behaviors:
-- UdonBehavior -> SetProgramVariable [ `tvReference`, "OUT_TvVolumeChange_float_Percent", `percentValue` ]
+- UdonBehavior -> SetProgramVariable [ `tvReference`, "OUT_VOLUME", `percentValue` ]
 - UdonBehavior -> SendCustomEvent [ `tvReference`, "_TvVolumeChange" ]
 
-To receive the volume data, you would need a variable on your subscribed behavior with the name `OUT_TvVolumeChange_float_Percent` as well as a custom event (public void method for U#) that has the name `_TvVolumeChange`. You can then use the variable to do whatever you need to do.
+To receive the volume data, you would need a variable on your subscribed behavior with the name `OUT_VOLUME` as well as a custom event (public void method for U#) that has the name `_TvVolumeChange`. You can then use the variable to do whatever you need to do.
 
 There are only two pieces of data that do not follow this nomenclature. That is the `currentTime` and `localUrl` variables on the TV. Since these two variables are connected with the main pieces of synced data, it is better to get their values as needed, rather than rely on the event system to pass the data, especially for `currentTime` as that's updated almost every frame. Simply do `UdonBehavior -> GetProgramVariable [ tvReference, "currentTime" ]` or the `localUrl` equivalent.
 
@@ -49,7 +49,7 @@ For UdonGraph scripts, this is done with the following:
 - Create another variable of type UdonBehavior and make it not public. 
     This makes it automatically fill with the custom behavior's own reference, which is exactly what we need. Let's call it `selfRef`.
 - Drag the `selfRef` variable into the graph to produce a GET node.
-- Create node with parameters: UdonBehavior -> SetProgramVariable [ `tvReference`, "IN_RegisterUdonEventReceiver_UdonBehavior_Subscriber", `selfRef` ]
+- Create node with parameters: UdonBehavior -> SetProgramVariable [ `tvReference`, "IN_SUBSCRIBER", `selfRef` ]
 - Create node with parameters: UdonBehavior -> SendCustomEvent [ `tvReference`, "_RegisterUdonEventReceiver" ]
 - Create node: Events -> Event Start
 - Connect the Start event to the SetProgramVariable node and then connect SetProgramVariable to the SendCustomEvent node.

@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!687078895 &4343727234628468602
+--- !u!687078895 ;4343727234628468602
 SpriteAtlas:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -76,13 +76,13 @@ SpriteAtlas:
   m_PackedSpriteNamesToIndex:
   - Stessie - End Of Time (ft. Fokushi)
   - Stessie - Find Me Here (ft. Bien)
-  - Stessie & BLOOD CODE - Candy Heart
+  - Stessie ; BLOOD CODE - Candy Heart
   - Stessie - Celebrate
   - Stessie - Friends EP
   - Stessie - Ready
   - Stessie - Take Flight (ft. QORA)
   - Stessie - Together
-  - Jim Yosef & Stessie - Free
+  - Jim Yosef ; Stessie - Free
   - Stessie - High
   - Puppet - Cargo (Stessie Remix)
   - Stessie - Far Away

@@ -1,11 +1,12 @@
 ﻿using System;
-using UnityEngine;
-using UnityEngine.UI;
-using UnityEngine.Events;
+using System.IO;
+using System.Text;
+using UdonSharpEditor;
 using UnityEditor;
 using UnityEditor.Events;
-using UdonSharpEditor;
-using System.Text;
+using UnityEngine;
+using UnityEngine.Events;
+using UnityEngine.UI;
 using VRC.SDKBase;
 
 namespace ArchiTech.Editor
@@ -14,34 +15,56 @@ namespace ArchiTech.Editor
     public class PlaylistEditor : UnityEditor.Editor
     {
         private static string newEntryIndicator = "@";
+        private static string entryAltIndicator = "^";
         private static string entryImageIndicator = "/";
-        Playlist playlist;
+        private static string entryTagIndicator = "#";
+        Playlist script;
         TVManagerV2 tv;
         ScrollRect scrollView;
         RectTransform content;
         GameObject template;
+        Queue queue;
         bool shuffleOnLoad;
         bool autoplayList;
+        bool autoplayOnLoad;
+        bool loopPlaylist;
+        bool prioritizeOnInteract;
         bool startFromRandomEntry;
         bool continueWhereLeftOff;
-        bool autoplayOnVideoError;
         bool showUrls = true;
+        bool autofillAltURL;
+        string autofillFormat;
         VRCUrl[] urls;
+        VRCUrl[] alts;
         string[] titles;
+        string[] tags;
         Sprite[] images;
         int visibleCount;
         Vector2 scrollPos;
-        PlaylistAction updateMode = PlaylistAction.NOOP;
+        ChangeAction updateMode = ChangeAction.NOOP;
         bool manualToImport = false;
         TextAsset importSrc;
-        int perPage = 25;
+        int perPage = 10;
         int currentFocus;
+        int lastFocus;
         int entriesCount;
         int imagesCount;
         int targetEntry;
-        bool recache = true;
+        bool sanitize = true;
 
-        private enum PlaylistAction
+        VRCUrl[] currentPageUrls;
+        VRCUrl[] currentPageAlts;
+        string[] currentPageTitles;
+        string[] currentPageTags;
+        Sprite[] currentPageImages;
+        int currentPageStart;
+        int currentPageEnd;
+        bool recachePage = true;
+
+        int rawEntryCount;
+
+
+        private enum ChangeAction
         {
             NOOP, OTHER,
             MOVEUP, MOVEDOWN,
@@ -51,124 +74,210 @@ namespace ArchiTech.Editor
 
         public override void OnInspectorGUI()
         {
+            var stopwatch = System.Diagnostics.Stopwatch.StartNew();
             if (UdonSharpGUI.DrawDefaultUdonSharpBehaviourHeader(target)) return;
-            playlist = (Playlist)target;
-            scrollView = playlist.scrollView;
-            content = playlist.content;
-            template = playlist.template;
-
-            if (recache) cacheEntryInfo();
-
+            LoadData();
             EditorGUI.BeginChangeCheck();
-            showPlaylistProperties();
-            showPlaylistControls();
-            showPlaylistEntries();
-            if (EditorGUI.EndChangeCheck() && updateMode != PlaylistAction.NOOP)
+            RenderChangeCheck();
+            if (EditorGUI.EndChangeCheck())
             {
-                Debug.Log("Changes Detected");
-                Undo.RecordObject(playlist, "Modify Playlist Content");
-                if (updateMode != PlaylistAction.OTHER)
-                {
-                    updateScene();
-                    recache = true;
-                }
-                playlist.tv = tv;
-                playlist.scrollView = scrollView;
-                playlist.content = content;
-                playlist.template = template;
-                playlist.showUrls = showUrls;
-                playlist.shuffleOnLoad = shuffleOnLoad;
-                playlist.autoplayList = autoplayList;
-                playlist.startFromRandomEntry = startFromRandomEntry;
-                playlist.continueWhereLeftOff = continueWhereLeftOff;
-                playlist.autoplayOnVideoError = autoplayOnVideoError;
-                playlist.urls = urls;
-                playlist.titles = titles;
-                playlist.images = images;
-                playlist._EDITOR_importSrc = importSrc;
-                playlist._EDITOR_manualToImport = manualToImport;
-                updateMode = PlaylistAction.NOOP;
+                Undo.RecordObject(script, "Modify Playlist Content");
+                SaveData();
             }
-
+            EditorGUILayout.LabelField($"Inspector frametime: {stopwatch.ElapsedMilliseconds}ms");
         }
 
-        private void cacheEntryInfo()
+        private void LoadData()
         {
-            var oldUrls = playlist.urls;
-            if (oldUrls == null) oldUrls = new VRCUrl[0];
-            urls = new VRCUrl[oldUrls.Length];
-            Array.Copy(oldUrls, urls, oldUrls.Length);
-
-            var oldTitles = playlist.titles;
-            if (oldTitles == null || oldTitles.Length == 0) oldTitles = new string[oldUrls.Length];
-            titles = new string[oldTitles.Length];
-            Array.Copy(oldTitles, titles, oldTitles.Length);
-
-            var oldImages = playlist.images;
-            if (oldImages == null || oldImages.Length == 0) oldImages = new Sprite[oldUrls.Length];
-            images = new Sprite[oldImages.Length];
-            Array.Copy(oldImages, images, oldImages.Length);
-
-            recache = false;
-        }
-
-        private void showPlaylistProperties()
-        {
-            EditorGUILayout.Space();
-
-            tv = (TVManagerV2)EditorGUILayout.ObjectField("TV", playlist.tv, typeof(TVManagerV2), true);
-            if (tv != playlist.tv) updateMode = PlaylistAction.OTHER;
-            scrollView = (ScrollRect)EditorGUILayout.ObjectField("Playlist ScrollView", playlist.scrollView, typeof(ScrollRect), true);
-            if (scrollView != playlist.scrollView) updateMode = PlaylistAction.OTHER;
-            content = (RectTransform)EditorGUILayout.ObjectField("Playlist Item Container", playlist.content, typeof(RectTransform), true);
-            if (content != playlist.content) updateMode = PlaylistAction.OTHER;
-            template = (GameObject)EditorGUILayout.ObjectField("Playlist Item Template", playlist.template, typeof(GameObject), true);
-            if (template != playlist.template) updateMode = PlaylistAction.OTHER;
-            EditorGUILayout.BeginHorizontal();
-            EditorGUILayout.PrefixLabel("Shuffle Playlist on Load");
-            shuffleOnLoad = EditorGUILayout.Toggle(playlist.shuffleOnLoad);
-            if (shuffleOnLoad != playlist.shuffleOnLoad) updateMode = PlaylistAction.OTHER;
-            EditorGUILayout.EndHorizontal();
-            EditorGUILayout.BeginHorizontal();
-            EditorGUILayout.PrefixLabel("Autoplay?");
-            autoplayList = EditorGUILayout.Toggle(playlist.autoplayList);
-            if (autoplayList != playlist.autoplayList) updateMode = PlaylistAction.OTHER;
-            EditorGUILayout.EndHorizontal();
-
-            if (autoplayList)
+            script = (Playlist)target;
+            if (script.storage == null) script.storage = script.gameObject.GetComponentInChildren<PlaylistData>();
+            if (sanitize)
             {
-                EditorGUILayout.BeginHorizontal();
-                EditorGUILayout.Space();
-                EditorGUILayout.PrefixLabel("Start from random entry");
-                startFromRandomEntry = EditorGUILayout.Toggle(playlist.startFromRandomEntry);
-                if (startFromRandomEntry != playlist.startFromRandomEntry) updateMode = PlaylistAction.OTHER;
-                EditorGUILayout.EndHorizontal();
-                EditorGUILayout.BeginHorizontal();
-                EditorGUILayout.Space();
-                EditorGUILayout.PrefixLabel("Continue from last known entry");
-                continueWhereLeftOff = EditorGUILayout.Toggle(playlist.continueWhereLeftOff);
-                if (continueWhereLeftOff != playlist.continueWhereLeftOff) updateMode = PlaylistAction.OTHER;
-                EditorGUILayout.EndHorizontal();
-                EditorGUILayout.BeginHorizontal();
-                EditorGUILayout.Space();
-                EditorGUILayout.PrefixLabel("Skip to next entry on video error");
-                autoplayOnVideoError = EditorGUILayout.Toggle(playlist.autoplayOnVideoError);
-                if (autoplayOnVideoError != playlist.autoplayOnVideoError) updateMode = PlaylistAction.OTHER;
-                EditorGUILayout.EndHorizontal();
+                sanitize = false;
+                if (script.storage != null)
+                {
+                    urls = script.storage.urls;
+                    alts = script.storage.alts;
+                    titles = script.storage.titles;
+                    tags = script.storage.tags;
+                    images = script.storage.images;
+                }
+                else
+                {
+                    urls = script.urls;
+                    alts = script.alts;
+                    titles = script.titles;
+                    tags = script.tags;
+                    images = script.images;
+                }
+                urls = (VRCUrl[])NormalizeArray(urls, typeof(VRCUrl), 0);
+                rawEntryCount = urls.Length;
+                alts = (VRCUrl[])NormalizeArray(alts, typeof(VRCUrl), rawEntryCount);
+                titles = (string[])NormalizeArray(titles, typeof(string), rawEntryCount);
+                tags = (string[])NormalizeArray(tags, typeof(string), rawEntryCount);
+                images = (Sprite[])NormalizeArray(images, typeof(Sprite), rawEntryCount);
+            }
+        }
+
+        private void RenderNoChangeCheck() { }
+
+        private void RenderChangeCheck()
+        {
+            showProperties();
+            showListControls();
+            showListEntries();
+        }
+
+        private void SaveData()
+        {
+            if (updateMode == ChangeAction.NOOP) return; // don't save the data if current op was none
+            if (updateMode != ChangeAction.OTHER)
+            {
+                updateScene();
+                sanitize = true;
+                recachePage = true;
+            }
+            updateMode = ChangeAction.NOOP;
+
+            script.tv = tv;
+            script.scrollView = scrollView;
+            script.content = content;
+            script.template = template;
+            script.queue = queue;
+            script.showUrls = showUrls;
+            script.shuffleOnLoad = shuffleOnLoad;
+            script.autoplayList = autoplayList;
+            script.autoplayOnLoad = autoplayOnLoad;
+            script.loopPlaylist = loopPlaylist;
+            script.startFromRandomEntry = startFromRandomEntry;
+            script.continueWhereLeftOff = continueWhereLeftOff;
+            script.prioritizeOnInteract = prioritizeOnInteract;
+            if (script.storage != null)
+            {
+                script.storage.urls = urls;
+                script.storage.alts = alts;
+                script.storage.titles = titles;
+                script.storage.tags = tags;
+                script.storage.images = images;
+
+                script.urls = null;
+                script.alts = null;
+                script.titles = null;
+                script.tags = null;
+                script.images = null;
             }
             else
             {
-                continueWhereLeftOff = playlist.continueWhereLeftOff;
-                autoplayOnVideoError = playlist.autoplayOnVideoError;
+                script.urls = urls;
+                script.alts = alts;
+                script.titles = titles;
+                script.tags = tags;
+                script.images = images;
             }
-            EditorGUILayout.BeginHorizontal();
-            EditorGUILayout.PrefixLabel("Show urls in playlist?");
-            showUrls = EditorGUILayout.Toggle(playlist.showUrls);
-            if (showUrls != playlist.showUrls) updateMode = PlaylistAction.OTHER;
-            EditorGUILayout.EndHorizontal();
+            script._EDITOR_importSrc = importSrc;
+            script._EDITOR_manualToImport = manualToImport;
+            script._EDITOR_autofillAltURL = autofillAltURL;
+            script._EDITOR_autofillFormat = autofillFormat;
         }
 
-        private void showPlaylistControls()
+
+
+        private void showProperties()
+        {
+            EditorGUILayout.Space();
+            tv = (TVManagerV2)EditorGUILayout.ObjectField("TV", script.tv, typeof(TVManagerV2), true);
+            if (tv != script.tv) updateMode = ChangeAction.OTHER;
+            queue = (Queue)EditorGUILayout.ObjectField("Queue", script.queue, typeof(Queue), true);
+            if (queue != script.queue) updateMode = ChangeAction.OTHER;
+            scrollView = (ScrollRect)EditorGUILayout.ObjectField("Playlist ScrollView", script.scrollView, typeof(ScrollRect), true);
+            if (scrollView != script.scrollView) updateMode = ChangeAction.OTHER;
+            content = (RectTransform)EditorGUILayout.ObjectField("Playlist Item Container", script.content, typeof(RectTransform), true);
+            if (content != script.content) updateMode = ChangeAction.OTHER;
+            template = (GameObject)EditorGUILayout.ObjectField("Playlist Item Template", script.template, typeof(GameObject), true);
+            if (template != script.template) updateMode = ChangeAction.OTHER;
+            using (new EditorGUILayout.HorizontalScope())
+            {
+                EditorGUILayout.PrefixLabel("Shuffle Playlist on Load");
+                shuffleOnLoad = EditorGUILayout.Toggle(script.shuffleOnLoad);
+                if (shuffleOnLoad != script.shuffleOnLoad) updateMode = ChangeAction.OTHER;
+                EditorGUILayout.EndHorizontal();
+                EditorGUILayout.BeginHorizontal();
+                EditorGUILayout.PrefixLabel("Autoplay?");
+                autoplayList = EditorGUILayout.Toggle(script.autoplayList);
+                if (autoplayList != script.autoplayList) updateMode = ChangeAction.OTHER;
+            }
+
+            if (autoplayList)
+            {
+                using (new EditorGUILayout.HorizontalScope())
+                {
+                    EditorGUILayout.Space();
+                    EditorGUILayout.PrefixLabel("Autoplay on Load");
+                    autoplayOnLoad = EditorGUILayout.Toggle(script.autoplayOnLoad);
+                    if (autoplayOnLoad != script.autoplayOnLoad) updateMode = ChangeAction.OTHER;
+                }
+                using (new EditorGUILayout.HorizontalScope())
+                {
+                    EditorGUILayout.Space();
+                    EditorGUILayout.PrefixLabel("Start From Random Entry");
+                    startFromRandomEntry = EditorGUILayout.Toggle(script.startFromRandomEntry);
+                    if (startFromRandomEntry != script.startFromRandomEntry) updateMode = ChangeAction.OTHER;
+                }
+                using (new EditorGUILayout.HorizontalScope())
+                {
+                    EditorGUILayout.Space();
+                    EditorGUILayout.PrefixLabel("Loop Playlist");
+                    loopPlaylist = EditorGUILayout.Toggle(script.loopPlaylist);
+                    if (loopPlaylist != script.loopPlaylist) updateMode = ChangeAction.OTHER;
+                }
+                using (new EditorGUILayout.HorizontalScope())
+                {
+                    EditorGUILayout.Space();
+                    EditorGUILayout.PrefixLabel("Continue From Last Known Entry");
+                    continueWhereLeftOff = EditorGUILayout.Toggle(script.continueWhereLeftOff);
+                    if (continueWhereLeftOff != script.continueWhereLeftOff) updateMode = ChangeAction.OTHER;
+                }
+                using (new EditorGUILayout.HorizontalScope())
+                {
+                    EditorGUILayout.Space();
+                    EditorGUILayout.PrefixLabel("Prioritize Playlist on Interact");
+                    prioritizeOnInteract = EditorGUILayout.Toggle(script.prioritizeOnInteract);
+                    if (prioritizeOnInteract != script.prioritizeOnInteract) updateMode = ChangeAction.OTHER;
+                }
+            }
+            else
+            {
+                continueWhereLeftOff = script.continueWhereLeftOff;
+                prioritizeOnInteract = script.prioritizeOnInteract;
+            }
+            using (new EditorGUILayout.HorizontalScope())
+            {
+                EditorGUILayout.PrefixLabel("Show Urls in Playlist?");
+                showUrls = EditorGUILayout.Toggle(script.showUrls);
+                if (showUrls != script.showUrls) updateMode = ChangeAction.OTHER;
+            }
+            using (new EditorGUILayout.HorizontalScope())
+            {
+                EditorGUILayout.PrefixLabel("Autofill Quest Urls");
+                autofillAltURL = EditorGUILayout.Toggle(script._EDITOR_autofillAltURL);
+                if (autofillAltURL != script._EDITOR_autofillAltURL) {
+                    updateMode = ChangeAction.OTHER;
+                    if (!autofillAltURL) autofillFormat = "$URL"; // reset to default
+                }
+            }
+            if (autofillAltURL)
+            {
+                EditorGUILayout.HelpBox("Put $URL (uppercase is important) wherever you want the main url to be inserted. Eg: https://mydomain.tld/?url=$URL", MessageType.Info);
+                using (new EditorGUILayout.HorizontalScope())
+                {
+                    EditorGUILayout.PrefixLabel("Autofill Format");
+                    autofillFormat = EditorGUILayout.TextField(script._EDITOR_autofillFormat);
+                    if (autofillFormat != script._EDITOR_autofillFormat) updateMode = ChangeAction.OTHER;
+                }
+            }
+        }
+
+        private void showListControls()
         {
             EditorGUILayout.Space();
             EditorGUILayout.BeginHorizontal(); // 1
@@ -176,87 +285,117 @@ namespace ArchiTech.Editor
             EditorGUILayout.LabelField("Video Playlist Items", GUILayout.Width(120f), GUILayout.ExpandWidth(true));
             if (GUILayout.Button("Update Scene", GUILayout.MaxWidth(100f)))
             {
-                updateMode = PlaylistAction.UPDATEALL;
+                updateMode = ChangeAction.UPDATEALL;
             }
-            if (GUILayout.Button("Copy Playlist to Clipboard", GUILayout.ExpandWidth(false)))
+            using (new EditorGUILayout.HorizontalScope())
             {
-                GUIUtility.systemCopyBuffer = pickle();
+                EditorGUI.BeginDisabledGroup(manualToImport);
+                if (GUILayout.Button("Save", GUILayout.ExpandWidth(false)))
+                {
+                    // get where to save the file
+                    string defaultName = script._EDITOR_importSrc != null ? script._EDITOR_importSrc.name : "CustomPlaylist";
+                    string destination = EditorUtility.SaveFilePanelInProject("Playlist Export", defaultName, "txt", "Save the playlist in your assets folder");
+                    if (!string.IsNullOrWhiteSpace(destination))
+                    {
+                        Debug.Log($"Saving playlist to file {destination}");
+                        // write the playlist content
+                        File.WriteAllText(destination, pickle(), Encoding.UTF8);
+                        AssetDatabase.Refresh();
+                        // load the new playlist file into the import mode
+                        TextAsset t = AssetDatabase.LoadAssetAtPath<TextAsset>(destination);
+                        script._EDITOR_manualToImport = true;
+                        script._EDITOR_importSrc = t;
+                        updateMode = ChangeAction.OTHER;
+                    }
+                }
+                EditorGUI.EndDisabledGroup();
+                if (GUILayout.Button("Copy", GUILayout.ExpandWidth(false)))
+                {
+                    GUIUtility.systemCopyBuffer = pickle();
+                }
             }
             EditorGUILayout.EndVertical(); // end 2
             EditorGUILayout.Space();
             EditorGUILayout.BeginVertical(); // 2
             string detection = "";
-            if (importSrc != null && playlist._EDITOR_manualToImport)
+            if (importSrc != null && script._EDITOR_manualToImport)
                 detection = $" | Detected: {entriesCount} urls with {imagesCount} images";
-            manualToImport = EditorGUILayout.ToggleLeft($"Load From Text File{detection}", playlist._EDITOR_manualToImport);
-            if (manualToImport != playlist._EDITOR_manualToImport) updateMode = PlaylistAction.OTHER;
+            manualToImport = EditorGUILayout.ToggleLeft($"Load From Text File{detection}", script._EDITOR_manualToImport);
+            if (manualToImport != script._EDITOR_manualToImport) updateMode = ChangeAction.OTHER;
             if (manualToImport)
             {
-                EditorGUILayout.BeginHorizontal(); // 3
-                importSrc = (TextAsset)EditorGUILayout.ObjectField(playlist._EDITOR_importSrc, typeof(TextAsset), false, GUILayout.MaxWidth(300f));
-                if (importSrc != playlist._EDITOR_importSrc)
+                using (new EditorGUILayout.HorizontalScope())
                 {
-                    updateMode = PlaylistAction.OTHER;
-                    entriesCount = 0;
-                    imagesCount = 0;
-                }
-                if (importSrc != null)
-                {
-                    if (entriesCount == 0) entriesCount = countEntries(importSrc.text);
-                    if (imagesCount == 0) imagesCount = countImages(importSrc.text);
-
-                    if (GUILayout.Button("Import", GUILayout.ExpandWidth(false)))
+                    importSrc = (TextAsset)EditorGUILayout.ObjectField(script._EDITOR_importSrc, typeof(TextAsset), false, GUILayout.MaxWidth(300f));
+                    if (importSrc != script._EDITOR_importSrc)
                     {
-                        parseContent(importSrc.text);
-                        updateMode = PlaylistAction.UPDATEALL;
+                        updateMode = ChangeAction.OTHER;
+                        entriesCount = 0;
+                        imagesCount = 0;
+                    }
+                    if (importSrc != null)
+                    {
+                        if (entriesCount == 0) entriesCount = countEntries(importSrc.text);
+                        if (imagesCount == 0) imagesCount = countImages(importSrc.text);
+
+                        if (GUILayout.Button("Import", GUILayout.ExpandWidth(false)))
+                        {
+                            parseContent(importSrc.text);
+                            updateMode = ChangeAction.UPDATEALL;
+                        }
                     }
                 }
-                EditorGUILayout.EndHorizontal(); // end 3
             }
             else
             {
-                importSrc = playlist._EDITOR_importSrc;
-                EditorGUILayout.BeginHorizontal(); // 3
-                if (GUILayout.Button("Add Entry", GUILayout.MaxWidth(100f)))
+                importSrc = script._EDITOR_importSrc;
+                using (new EditorGUILayout.HorizontalScope())
                 {
-                    updateMode = PlaylistAction.ADD;
-                }
+                    if (GUILayout.Button("Add Entry", GUILayout.MaxWidth(100f)))
+                    {
+                        updateMode = ChangeAction.ADD;
+                    }
 
-                EditorGUI.BeginDisabledGroup(urls.Length == 0); // 4
-                if (GUILayout.Button("Remove All", GUILayout.MaxWidth(100f)))
-                {
-                    updateMode = PlaylistAction.REMOVEALL;
+                    EditorGUI.BeginDisabledGroup(rawEntryCount == 0);
+                    if (GUILayout.Button("Remove All", GUILayout.MaxWidth(100f)))
+                    {
+                        updateMode = ChangeAction.REMOVEALL;
+                    }
+                    EditorGUI.EndDisabledGroup();
                 }
-                EditorGUI.EndDisabledGroup(); // end 4
-                EditorGUILayout.EndHorizontal(); // end 3
             }
 
-            EditorGUILayout.BeginHorizontal(); // 3
-            var urlCount = urls.Length;
+            var urlCount = rawEntryCount;
             var currentPage = currentFocus / perPage;
             var maxPage = urlCount / perPage;
             var oldFocus = currentFocus;
-            EditorGUI.BeginDisabledGroup(currentPage == 0); // end 4
-            if (GUILayout.Button("<<")) currentFocus -= perPage;
-            EditorGUI.EndDisabledGroup(); // end 4
-            EditorGUI.BeginDisabledGroup(currentFocus == 0); // 4
-            if (GUILayout.Button("<")) currentFocus -= 1;
-            EditorGUI.EndDisabledGroup(); // end 4
-            // offset the slider's internal value range by one so that the numbers match up visually with the list
-            currentFocus = EditorGUILayout.IntSlider(currentFocus + 1, 1, urlCount, GUILayout.ExpandWidth(true)) - 1;
-            GUILayout.Label($"/ {urlCount}");
+            using (new EditorGUILayout.HorizontalScope())
+            {
+                EditorGUI.BeginDisabledGroup(currentPage == 0);
+                if (GUILayout.Button("<<")) currentFocus -= perPage;
+                EditorGUI.EndDisabledGroup();
+                EditorGUI.BeginDisabledGroup(currentFocus == 0);
+                if (GUILayout.Button("<")) currentFocus -= 1;
+                EditorGUI.EndDisabledGroup();
+                currentFocus = EditorGUILayout.IntSlider(currentFocus, 0, urlCount - 1, GUILayout.ExpandWidth(true));
+                if (currentFocus != lastFocus)
+                {
+                    recachePage = true;
+                    lastFocus = currentFocus;
+                }
+                GUILayout.Label($"/ {urlCount}");
 
-            EditorGUI.BeginDisabledGroup(currentFocus == urlCount); // 4
-            if (GUILayout.Button(">")) currentFocus += 1;
-            EditorGUI.EndDisabledGroup(); // end 4
-            EditorGUI.BeginDisabledGroup(currentPage == maxPage); // 4
-            if (GUILayout.Button(">>")) currentFocus += perPage;
-            EditorGUI.EndDisabledGroup(); // end 4
-            EditorGUILayout.EndHorizontal(); // end 3
+                EditorGUI.BeginDisabledGroup(currentFocus == urlCount);
+                if (GUILayout.Button(">")) currentFocus += 1;
+                EditorGUI.EndDisabledGroup();
+                EditorGUI.BeginDisabledGroup(currentPage == maxPage);
+                if (GUILayout.Button(">>")) currentFocus += perPage;
+                EditorGUI.EndDisabledGroup();
+            }
 
             if (oldFocus != currentFocus)
             {
-                updateMode = PlaylistAction.UPDATEVIEW;
+                updateMode = ChangeAction.UPDATEVIEW;
             }
 
             EditorGUILayout.EndVertical(); // end 2
@@ -293,14 +432,21 @@ namespace ArchiTech.Editor
             string[] lines = text.Split('\n');
             int count = countEntries(text);
             urls = new VRCUrl[count];
+            alts = new VRCUrl[count];
             titles = new string[count];
+            tags = new string[count];
             images = new Sprite[count];
             count = -1;
+            bool foundAlt = false;
+            bool foundTagString = false;
+            bool foundImage = false;
+            bool foundTitle = false;
+            VRCUrl currentAlt = VRCUrl.Empty;
             string currentTitle = "";
-            Sprite currentImage = null;
             uint missingTitles = 0;
             foreach (string l in lines)
             {
+                foundTitle = currentTitle.Length > 0;
                 var line = l.Trim();
                 if (line.StartsWith(newEntryIndicator))
                 {
@@ -313,18 +459,34 @@ namespace ArchiTech.Editor
                         }
                         titles[count] = currentTitle.Trim();
                         currentTitle = "";
-                        currentImage = null;
+                        foundAlt = false;
+                        foundTagString = false;
+                        foundImage = false;
+                        foundTitle = false;
                     }
                     count++;
                     urls[count] = new VRCUrl(line.Substring(newEntryIndicator.Length).Trim());
+                    if (autofillAltURL) alts[count] = new VRCUrl(autofillFormat.Replace("$URL", urls[count].Get()));
                     continue;
                 }
                 if (count == -1) continue;
-                if (line.StartsWith(entryImageIndicator) && currentImage == null && currentTitle == "")
+                if (!foundTitle && !foundAlt && line.StartsWith(entryAltIndicator))
                 {
+                    foundAlt = true;
+                    alts[count] = new VRCUrl(line.Substring(entryAltIndicator.Length).Trim());
+                    continue;
+                }
+                if (!foundTitle && !foundImage && line.StartsWith(entryImageIndicator))
+                {
+                    foundImage = true;
                     string assetFile = line.Substring(entryImageIndicator.Length).Trim();
-                    currentImage = (Sprite)AssetDatabase.LoadAssetAtPath(assetFile, typeof(Sprite));
-                    images[count] = currentImage;
+                    images[count] = (Sprite)AssetDatabase.LoadAssetAtPath(assetFile, typeof(Sprite));
+                    continue;
+                }
+                if (!foundTitle && !foundTagString && line.StartsWith(entryTagIndicator))
+                {
+                    foundTagString = true;
+                    tags[count] = sanitizeTagString(line.Substring(entryTagIndicator.Length).Trim());
                     continue;
                 }
                 if (currentTitle.Length > 0) currentTitle += '\n';
@@ -348,60 +510,124 @@ namespace ArchiTech.Editor
         private string pickle()
         {
             StringBuilder s = new StringBuilder();
-            for (int i = 0; i < playlist.urls.Length; i++)
+            for (int i = 0; i < urls.Length; i++)
             {
-                var url = playlist.urls[i];
+                var url = urls[i];
                 s.AppendLine("@" + url);
-                if (i < playlist.images.Length)
-                {
-                    var image = playlist.images[i];
-                    if (image != null) s.AppendLine("/" + AssetDatabase.GetAssetPath(image.texture));
-                }
-                if (i < playlist.titles.Length)
-                {
-                    var title = playlist.titles[i];
-                    if (title != null) s.AppendLine(title + "\n");
-                }
+
+                var alt = alts[i];
+                if (!string.IsNullOrWhiteSpace(alt.Get())) s.AppendLine("^" + alt);
+
+                var image = images[i];
+                if (image != null) s.AppendLine("/" + AssetDatabase.GetAssetPath(image.texture));
+
+                var tag = tags[i];
+                if (!string.IsNullOrWhiteSpace(tag)) s.AppendLine("#" + tag);
+
+                var title = titles[i];
+                if (!string.IsNullOrWhiteSpace(title)) s.AppendLine(title);
+
+                s.AppendLine("");
             }
             return s.ToString();
         }
 
-        private void showPlaylistEntries()
+        private int recacheListPage()
         {
-            var urlCount = urls.Length;
             var currentPage = currentFocus / perPage;
-            var maxPage = urlCount / perPage;
-            var pageStart = currentPage * perPage;
-            var pageEnd = Math.Min(urlCount, pageStart + perPage);
+            var maxPage = rawEntryCount / perPage;
+            currentPageStart = currentPage * perPage;
+            currentPageEnd = Math.Min(rawEntryCount, currentPageStart + perPage);
+
+            var pageLength = currentPageEnd - currentPageStart;
+            currentPageUrls = new VRCUrl[pageLength];
+            currentPageAlts = new VRCUrl[pageLength];
+            currentPageTitles = new string[pageLength];
+            currentPageTags = new string[pageLength];
+            currentPageImages = new Sprite[pageLength];
+            Array.Copy(urls, currentPageStart, currentPageUrls, 0, pageLength);
+            Array.Copy(alts, currentPageStart, currentPageAlts, 0, pageLength);
+            Array.Copy(titles, currentPageStart, currentPageTitles, 0, pageLength);
+            Array.Copy(tags, currentPageStart, currentPageTags, 0, pageLength);
+            Array.Copy(images, currentPageStart, currentPageImages, 0, pageLength);
+            recachePage = false;
+            return currentPageStart;
+        }
+
+        private void showListEntries()
+        {
+            if (recachePage) recacheListPage();
             var height = Mathf.Min(330f, perPage * 55f) + 15f; // cap size at 330 + 15 for spacing for the horizontal scroll bar
             EditorGUILayout.Space();
             scrollPos = EditorGUILayout.BeginScrollView(scrollPos, GUILayout.Height(height)); // 1
             EditorGUI.BeginDisabledGroup(manualToImport); // 2
-            for (var i = pageStart; i < pageEnd; i++)
+            for (var pageIndex = 0; pageIndex < currentPageUrls.Length; pageIndex++)
             {
+                int rawIndex = currentPageStart + pageIndex;
                 EditorGUILayout.BeginHorizontal();  // 3
                 EditorGUILayout.BeginVertical();    // 4
-
+                bool mainUrlUpdated = false;
                 // URL field management
-                EditorGUILayout.BeginHorizontal(); // 5
-                EditorGUILayout.LabelField($"Url {i}", GUILayout.MaxWidth(100f), GUILayout.ExpandWidth(false));
-                var url = new VRCUrl(EditorGUILayout.TextField(urls[i].Get(), GUILayout.ExpandWidth(true)));
-                if (url.Get() != urls[i].Get()) updateMode = PlaylistAction.UPDATESELF;
-                urls[i] = url;
-                EditorGUILayout.EndHorizontal(); // end 5
+                using (new EditorGUILayout.HorizontalScope())
+                {
+                    EditorGUILayout.LabelField($"PC Url {rawIndex}", GUILayout.MaxWidth(100f), GUILayout.ExpandWidth(false));
+                    var oldUrl = currentPageUrls[pageIndex] ?? VRCUrl.Empty;
+                    var url = new VRCUrl(EditorGUILayout.TextField(oldUrl.Get(), GUILayout.ExpandWidth(true)));
+                    if (url.Get() != oldUrl.Get())
+                    {
+                        updateMode = ChangeAction.UPDATESELF;
+                        urls[rawIndex] = url;
+                        mainUrlUpdated = true;
+                    }
+                }
+
+                // ALT field management
+                using (new EditorGUILayout.HorizontalScope())
+                {
+                    EditorGUILayout.LabelField($"  Quest Url", GUILayout.MaxWidth(100f), GUILayout.ExpandWidth(false));
+                    var oldAlt = currentPageAlts[pageIndex] ?? VRCUrl.Empty;
+                    var alt = new VRCUrl(EditorGUILayout.TextField(oldAlt.Get(), GUILayout.ExpandWidth(true)));
+                    if (mainUrlUpdated && autofillAltURL) {
+                        alt = new VRCUrl(autofillFormat.Replace("$URL", urls[rawIndex].Get()));
+                    }
+                    if (alt.Get() != oldAlt.Get())
+                    {
+                        updateMode = ChangeAction.UPDATESELF;
+                        alts[rawIndex] = alt;
+                    }
+                }
 
                 // TITLE field management
-                EditorGUILayout.BeginHorizontal(); // 5
-                EditorGUILayout.LabelField("  Description", GUILayout.MaxWidth(100f), GUILayout.ExpandWidth(false));
-                var title = EditorGUILayout.TextArea(titles[i], GUILayout.Width(250f), GUILayout.ExpandWidth(true));
-                if (title != titles[i]) updateMode = PlaylistAction.UPDATESELF;
-                titles[i] = title;
-                EditorGUILayout.EndHorizontal(); // end 5
+                using (new EditorGUILayout.HorizontalScope())
+                {
+                    EditorGUILayout.LabelField("  Title", GUILayout.MaxWidth(100f), GUILayout.ExpandWidth(false));
+                    var title = EditorGUILayout.TextArea(currentPageTitles[pageIndex], GUILayout.Width(250f), GUILayout.ExpandWidth(true));
+                    if (title != currentPageTitles[pageIndex])
+                    {
+                        updateMode = ChangeAction.UPDATESELF;
+                        titles[rawIndex] = title.Trim();
+                    }
+                }
+
+                // TAGS field management
+                using (new EditorGUILayout.HorizontalScope())
+                {
+                    EditorGUILayout.LabelField("  Tags", GUILayout.MaxWidth(100f), GUILayout.ExpandWidth(false));
+                    var tagString = EditorGUILayout.TextArea(currentPageTags[pageIndex], GUILayout.Width(250f), GUILayout.ExpandWidth(true));
+                    if (tagString != currentPageTags[pageIndex])
+                    {
+                        updateMode = ChangeAction.UPDATESELF;
+                        tags[rawIndex] = sanitizeTagString(tagString);
+                    }
+                }
 
                 EditorGUILayout.EndVertical(); // end 4
-                var image = (Sprite)EditorGUILayout.ObjectField(images[i], typeof(Sprite), false, GUILayout.Height(50), GUILayout.Width(50));
-                if (image != images[i]) updateMode = PlaylistAction.UPDATESELF;
-                images[i] = image;
+                var image = (Sprite)EditorGUILayout.ObjectField(currentPageImages[pageIndex], typeof(Sprite), false, GUILayout.Height(75), GUILayout.Width(60));
+                if (image != currentPageImages[pageIndex])
+                {
+                    updateMode = ChangeAction.UPDATESELF;
+                    images[rawIndex] = image;
+                }
                 if (!manualToImport)
                 {
                     // Playlist entry actions
@@ -409,28 +635,28 @@ namespace ArchiTech.Editor
                     if (GUILayout.Button("Remove"))
                     {
                         // Cannot modify urls list within loop else index error occurs
-                        targetEntry = i;
-                        updateMode = PlaylistAction.REMOVE;
+                        targetEntry = rawIndex;
+                        updateMode = ChangeAction.REMOVE;
                     }
 
                     // Playlist entry ordering
-                    EditorGUILayout.BeginHorizontal(); // 5
-                    EditorGUI.BeginDisabledGroup(i == 0); // 6
-                    if (GUILayout.Button("Up"))
+                    using (new EditorGUILayout.HorizontalScope())
                     {
-                        targetEntry = i;
-                        updateMode = PlaylistAction.MOVEUP;
+                        EditorGUI.BeginDisabledGroup(rawIndex == 0);
+                        if (GUILayout.Button("Up"))
+                        {
+                            targetEntry = rawIndex;
+                            updateMode = ChangeAction.MOVEUP;
+                        }
+                        EditorGUI.EndDisabledGroup();
+                        EditorGUI.BeginDisabledGroup(rawIndex + 1 == rawEntryCount);
+                        if (GUILayout.Button("Down"))
+                        {
+                            targetEntry = rawIndex;
+                            updateMode = ChangeAction.MOVEDOWN;
+                        }
+                        EditorGUI.EndDisabledGroup();
                     }
-                    EditorGUI.EndDisabledGroup(); // end 6
-                    EditorGUI.BeginDisabledGroup(i + 1 == urls.Length); // 6
-                    if (GUILayout.Button("Down"))
-                    {
-                        targetEntry = i;
-                        updateMode = PlaylistAction.MOVEDOWN;
-                    }
-                    EditorGUI.EndDisabledGroup(); // end 6
-                    EditorGUILayout.EndHorizontal(); // end 5
-
                     EditorGUILayout.EndVertical(); // end 4
                 }
                 EditorGUILayout.EndHorizontal(); // end 3
@@ -440,11 +666,37 @@ namespace ArchiTech.Editor
             EditorGUILayout.EndScrollView(); // end 1
         }
 
+        private string sanitizeTagString(string tagString)
+        {
+            // sanitize the tags to reduce the number of externs required for udon processing
+            var tagList = tagString.Split(',');
+            for (int k = 0; k < tagList.Length; k++)
+            {
+                var tag = tagList[k];
+                tag = tag.ToLower();
+                if (tag.Contains(":"))
+                {
+                    string tGroup = "", tValue = "";
+                    int idx = tag.IndexOf(':');
+                    if (idx > -1)
+                    {
+                        tGroup = tag.Substring(0, idx).Trim();
+                        tValue = tag.Substring(idx + 1).Trim();
+                        tag = tGroup + ':' + tValue;
+                    }
+                    else tag = tag.Trim();
+                    tagList[k] = tag;
+                }
+                else tagList[k] = tag.Trim();
+            }
+            return string.Join(",", tagList);
+        }
+
         #region Scene Updates
 
         private void updateScene()
         {
-            Debug.Log("Updating Scene");
+            Debug.Log($"Updating Scene. Mode {updateMode}");
             if (scrollView?.viewport == null)
             {
                 Debug.LogError("ScrollRect or associated viewport is null. Ensure they are connected in the inspector.");
@@ -452,98 +704,105 @@ namespace ArchiTech.Editor
             }
             switch (updateMode)
             {
-                case PlaylistAction.ADD: addItem(); break;
-                case PlaylistAction.MOVEUP: moveItem(targetEntry, targetEntry - 1); break;
-                case PlaylistAction.MOVEDOWN: moveItem(targetEntry, targetEntry + 1); break;
-                case PlaylistAction.REMOVE: removeItem(targetEntry); break;
-                case PlaylistAction.REMOVEALL: removeAll(); break;
+                case ChangeAction.ADD: addItems(); break;
+                case ChangeAction.MOVEUP: moveItems(targetEntry, targetEntry - 1); break;
+                case ChangeAction.MOVEDOWN: moveItems(targetEntry, targetEntry + 1); break;
+                case ChangeAction.REMOVE: removeItems(targetEntry); break;
+                case ChangeAction.REMOVEALL: removeAll(); break;
                 default: break;
             }
             targetEntry = -1;
             switch (updateMode)
             {
-                case PlaylistAction.UPDATEVIEW:
-                case PlaylistAction.UPDATESELF: updateContents(); break;
+                case ChangeAction.UPDATEVIEW:
+                case ChangeAction.UPDATESELF: updateContents(); break;
                 default: rebuildScene(); break;
             }
         }
 
-        private void addItem()
+        private void addItems()
         {
-            Debug.Log($"Adding playlist item {urls.Length + 1}");
-            var oldUrls = urls;
-            var oldTitles = titles;
-            var oldImages = images;
-            urls = new VRCUrl[oldUrls.Length + 1];
-            titles = new string[oldTitles.Length + 1];
-            images = new Sprite[oldImages.Length + 1];
-            int i = 0;
-            for (; i < oldUrls.Length; i++)
-            {
-                urls[i] = oldUrls[i];
-                titles[i] = oldTitles[i];
-                images[i] = oldImages[i];
-            }
-            urls[i] = VRCUrl.Empty;
+            var newIndex = urls.Length;
+            Debug.Log($"Adding playlist item. New size {newIndex + 1}");
+            urls = (VRCUrl[])AddArrayItem(urls);
+            alts = (VRCUrl[])AddArrayItem(alts);
+            tags = (string[])AddArrayItem(tags);
+            titles = (string[])AddArrayItem(titles);
+            images = (Sprite[])AddArrayItem(images);
+            // Make sure the urls default to an empty instead of null
+            urls[newIndex] = VRCUrl.Empty;
+            alts[newIndex] = VRCUrl.Empty;
         }
 
-        private void removeItem(int index)
+        private void removeItems(int index)
         {
-            Debug.Log($"Removing playlist item {index + 1}: {titles[index]}");
-            var oldUrls = urls;
-            var oldTitles = titles;
-            var oldImages = images;
-            urls = new VRCUrl[oldUrls.Length - 1];
-            titles = new string[oldTitles.Length - 1];
-            images = new Sprite[oldImages.Length - 1];
-            int offset = 0;
-            for (int i = 0; i < urls.Length; i++)
-            {
-                if (i == index)
-                {
-                    offset = 1;
-                }
-                urls[i] = oldUrls[i + offset];
-                titles[i] = oldTitles[i + offset];
-                images[i] = oldImages[i + offset];
-            }
+            Debug.Log($"Removing playlist item {index}: {titles[index]}");
+            urls = (VRCUrl[])RemoveArrayItem(urls, index);
+            alts = (VRCUrl[])RemoveArrayItem(alts, index);
+            tags = (string[])RemoveArrayItem(tags, index);
+            titles = (string[])RemoveArrayItem(titles, index);
+            images = (Sprite[])RemoveArrayItem(images, index);
         }
 
-        private void moveItem(int from, int to)
+        private void moveItems(int from, int to)
         {
             // no change needed
             if (from == to) return;
-            Debug.Log($"Moving playlist item {from + 1} -> {to + 1}");
-            // cache the source index
-            var fromUrl = urls[from];
-            var fromTitle = titles[from];
-            var fromImage = images[from];
-            // determines the direction to shift
-            int direction = from < to ? 1 : -1;
-            // calculate the actual start and end values for the loop
-            int start = Math.Min(from, to);
-            int end = start + Math.Abs(to - from);
-            for (int i = start; i <= end; i++)
-            {
-                // don't assign the target values yet
-                if (i == to) continue;
-                urls[i] = urls[i + direction];
-                titles[i] = titles[i + direction];
-                images[i] = images[i + direction];
-            }
-            // assign the target values now
-            urls[to] = fromUrl;
-            titles[to] = fromTitle;
-            images[to] = fromImage;
+            Debug.Log($"Moving playlist item {from} -> {to}");
+
+            urls = (VRCUrl[])MoveArrayItem(urls, from, to);
+            alts = (VRCUrl[])MoveArrayItem(alts, from, to);
+            tags = (string[])MoveArrayItem(tags, from, to);
+            titles = (string[])MoveArrayItem(titles, from, to);
+            images = (Sprite[])MoveArrayItem(images, from, to);
         }
 
         private void removeAll()
         {
             Debug.Log($"Removing all {urls.Length} playlist items");
             urls = new VRCUrl[0];
+            alts = new VRCUrl[0];
+            tags = new string[0];
             titles = new string[0];
             images = new Sprite[0];
         }
+
+
+        #region Array Helper Methods
+        protected System.Array NormalizeArray(System.Array stale, System.Type type, int normalizedLength)
+        {
+            if (stale == null || normalizedLength > 0 && stale.Length != normalizedLength) stale = System.Array.CreateInstance(type, normalizedLength);
+            System.Array fresh = System.Array.CreateInstance(type, stale.Length);
+            System.Array.Copy(stale, fresh, stale.Length);
+            return fresh;
+        }
+        protected System.Array AddArrayItem(System.Array stale)
+        {
+            System.Array fresh = System.Array.CreateInstance(stale.GetType().GetElementType(), stale.Length + 1);
+            System.Array.Copy(stale, fresh, stale.Length);
+            return fresh;
+        }
+
+        protected System.Array RemoveArrayItem(System.Array stale, int index)
+        {
+            System.Array fresh = System.Array.CreateInstance(stale.GetType().GetElementType(), stale.Length - 1);
+            System.Array.Copy(stale, 0, fresh, 0, index);
+            System.Array.Copy(stale, index + 1, fresh, index, stale.Length - index - 1);
+            return fresh;
+        }
+
+        protected System.Array MoveArrayItem(System.Array arr, int from, int to)
+        {
+            System.Object moving = arr.GetValue(from);
+            // shift element leftward by shifting affected elements to the right
+            if (to < from) System.Array.Copy(arr, to, arr, to + 1, from - to);
+            // shift element rightward by shifting affected elements to the left
+            else System.Array.Copy(arr, from + 1, arr, from, to - from);
+            arr.SetValue(moving, to);
+            return arr;
+        }
+
+        #endregion
 
         public void rebuildScene()
         {
@@ -584,7 +843,7 @@ namespace ArchiTech.Editor
             entry.name = $"Entry ({content.childCount})";
             entry.transform.SetAsLastSibling();
 
-            var behavior = UdonSharpEditorUtility.GetBackingUdonBehaviour(playlist);
+            var behavior = UdonSharpEditorUtility.GetBackingUdonBehaviour(script);
             var button = entry.GetComponentInChildren<Button>();
 
             if (button == null)
@@ -605,7 +864,7 @@ namespace ArchiTech.Editor
             UnityAction<bool> interactable = System.Delegate.CreateDelegate(typeof(UnityAction<bool>), button, "set_interactable") as UnityAction<bool>;
             UnityAction<string> switchTo = new UnityAction<string>(behavior.SendCustomEvent);
             UnityEventTools.AddBoolPersistentListener(button.onClick, interactable, false);
-            UnityEventTools.AddStringPersistentListener(button.onClick, switchTo, nameof(playlist._SwitchToDetected));
+            UnityEventTools.AddStringPersistentListener(button.onClick, switchTo, nameof(script._SwitchToDetected));
             UnityEventTools.AddBoolPersistentListener(button.onClick, interactable, true);
             entry.SetActive(true);
         }
@@ -628,7 +887,7 @@ namespace ArchiTech.Editor
             float Y = 0f;
             // TODO Take the left-right margins into account for spacing
             // should be able to make the assumption that all entries are the same structure (thus width/height) as template
-            Rect tmpl = ((RectTransform)playlist.template.transform).rect;
+            Rect tmpl = ((RectTransform)script.template.transform).rect;
             float entryHeight = tmpl.height;
             float entryWidth = tmpl.width;
             float listHeight = entryHeight;
@@ -743,10 +1002,10 @@ namespace ArchiTech.Editor
             // clear old listners
             while (eventRegister.GetPersistentEventCount() > 0)
                 UnityEventTools.RemovePersistentListener(eventRegister, 0);
-            var playlistEvents = UdonSharpEditorUtility.GetBackingUdonBehaviour(playlist);
+            var playlistEvents = UdonSharpEditorUtility.GetBackingUdonBehaviour(script);
             var customEvent = new UnityAction<string>(playlistEvents.SendCustomEvent);
 
-            UnityEventTools.AddStringPersistentListener(eventRegister, customEvent, nameof(playlist._UpdateView));
+            UnityEventTools.AddStringPersistentListener(eventRegister, customEvent, nameof(script._UpdateView));
         }
 
         #endregion

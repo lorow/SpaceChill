@@ -1,13 +1,13 @@
 ﻿using System;
 using UdonSharp;
 using UnityEngine;
-using VRC.SDKBase;
-using VRC.Udon;
 using UnityEngine.UI;
 using VRC.SDK3.Components.Video;
+using VRC.SDKBase;
 
 namespace ArchiTech
 {
+    [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
     [DefaultExecutionOrder(-1)]
     public class Playlist : UdonSharpBehaviour
     {
@@ -16,64 +16,100 @@ namespace ArchiTech
         [HideInInspector] public RectTransform content;
         [HideInInspector] public GameObject template;
         [HideInInspector] public TVManagerV2 tv;
+        [HideInInspector] public Queue queue;
         [HideInInspector] public bool shuffleOnLoad = false;
         [HideInInspector] public bool autoplayList = false;
+        [HideInInspector] public bool prioritizeOnInteract = true;
+        [HideInInspector] public bool autoplayOnLoad = true;
+        [HideInInspector] public bool loopPlaylist = true;
         [HideInInspector] public bool startFromRandomEntry = false;
         [HideInInspector] public bool continueWhereLeftOff = true;
         [HideInInspector] public bool autoplayOnVideoError = true;
         [HideInInspector] public bool showUrls;
         [HideInInspector] public VRCUrl[] urls;
+        [HideInInspector] public VRCUrl[] alts;
         [HideInInspector] public string[] titles;
+        [HideInInspector] public string[] tags;
         [HideInInspector] public Sprite[] images;
+        [HideInInspector] public PlaylistData storage;
         [NonSerialized] public int viewOffset;
+        [NonSerialized] public int SWITCH_TO_INDEX = -1;
         // entry caches
         private RectTransform[] entryCache;
         private Button[] buttonCache;
         private Text[] urlCache;
         private Text[] titleCache;
         private Image[] imageCache;
-        // a 1 to 1 array corresponding to each URL specifying whether the element should be filtered (aka hidden) in the views.
+        // A 1 to 1 array corresponding to each original entry specifying whether the element should be filtered (aka hidden) in the views.
         private bool[] hidden;
         // an array of the same size as the urls that stores corresponding references to the indexes within the urls array.
         // the order of this array is what gets modified when the playlist gets sorted.
-        private int[] rawView = new int[0];
-        // an array of a variable size (length of rawView or less) that represents the list of url indexes that are visible for rendering in the current view
-        // this array also contains values which correspond to the indexes of the URL list, which may be non-sequential based on the rawView order
+        private int[] sortView = new int[0];
+        // an array of a variable size (length of sortView or less) that represents the list of url indexes that are visible for rendering in the current view
+        // this array also contains values which correspond to the indexes of the URL list, which may be non-sequential based on the sortView order
         private int[] filteredView = new int[0];
         // an array that represents the visible render shown in the scene based on the filteredView array
         // unlike the previous two, this array's contents corresponds to indexes of the filteredView array
-        // eg: to get the actual URL based on a particular entry of the current view, you'd access it via urls[filteredView[currentView]]
+        // eg: to get the actual URL based on a particular entry of the current view, you'd access it via urls[filteredView[currentView[index]]]
         private int[] currentView = new int[0];
-        private int nextRawViewIndex = 0;
-        private int currentRawViewIndex = -1;
-        private VideoError OUT_TvVideoPlayerError_VideoError_Error;
+        private int nextSortViewIndex = 0;
+        private int currentSortViewIndex = -1;
+        private VideoError OUT_ERROR;
         private bool isLoading = false;
         private bool updateTVLabel = false;
         private Slider loading;
         private float loadingBarDamp;
         private float loadingPercent;
         private Canvas[] canvases;
-        private Collider[] colliders;
         private bool hasLoading;
         private bool hasNoTV;
+        private bool hasQueue;
         private bool skipScrollbar;
-        private string label;
+        private string debugLabel;
         [NonSerialized] public bool init = false;
         private bool debug = true;
         private string debugColor = "#ff8811";
         [HideInInspector] public TextAsset _EDITOR_importSrc;
         [HideInInspector] public bool _EDITOR_manualToImport;
+        [HideInInspector] public bool _EDITOR_autofillAltURL;
+        [HideInInspector] public string _EDITOR_autofillFormat = "$URL";
+
+        // Getter Helpers
+        public bool[] Hidden { get => hidden; }
+        public int[] SortView { get => sortView; }
+        public int[] FilteredView { get => filteredView; }
+        public int CurrentEntryIndex { get => currentSortViewIndex == -1 ? -1 : sortView[currentSortViewIndex]; }
+        public int NextEntryIndex { get => currentSortViewIndex == -1 ? -1 : sortView[nextSortViewIndex]; }
+        public VRCUrl CurrentEntryMainUrl { get => currentSortViewIndex == -1 ? VRCUrl.Empty : urls[sortView[currentSortViewIndex]]; }
+        public VRCUrl CurrentEntryAltUrl { get => currentSortViewIndex == -1 ? VRCUrl.Empty : alts[sortView[currentSortViewIndex]]; }
+        public string CurrentEntryTags { get => currentSortViewIndex == -1 ? string.Empty : tags[sortView[currentSortViewIndex]]; }
+        public string CurrentEntryInfo { get => currentSortViewIndex == -1 ? string.Empty : titles[sortView[currentSortViewIndex]]; }
+        public Sprite CurrentEntryImage { get => currentSortViewIndex == -1 ? null : images[sortView[currentSortViewIndex]]; }
+
+
 
         public void _Initialize()
         {
             if (init) return;
             template.SetActive(false);
+            if (storage != null)
+            {
+                urls = storage.urls;
+                alts = storage.alts;
+                titles = storage.titles;
+                tags = storage.tags;
+                images = storage.images;
+            }
+            cacheEntryRefs();
             hidden = new bool[urls.Length];
-            initRawView();
-            if (shuffleOnLoad) shuffle(rawView, 3);
+            sortView = new int[urls.Length];
+            _ResetSortView();
+            if (shuffleOnLoad) shuffle(sortView, 3);
             cacheFilteredView();
-            if (tv == null) tv = transform.parent.GetComponent<TVManagerV2>();
+            if (tv == null) tv = transform.GetComponentInParent<TVManagerV2>();
             hasNoTV = tv == null;
+            hasQueue = queue != null;
+
 
             if (titles.Length != urls.Length)
             {
@@ -81,45 +117,79 @@ namespace ArchiTech
             }
             if (hasNoTV)
             {
-                label = "No TV Connected";
+                debugLabel = $"<Missing TV Ref>/{name}";
                 err("The TV reference was not provided. Please make sure the playlist knows what TV to connect to.");
+            }
+            else if (urls.Length == 0)
+            {
+                debugLabel = $"{tv.gameObject.name}/{name}";
+                warn("No entries in the playlist.");
             }
             else
             {
+                debug = tv.debug;
                 if (autoplayList)
                 {
-                    nextRawViewIndex = currentRawViewIndex = 0;
+                    nextSortViewIndex = currentSortViewIndex = 0;
                     if (startFromRandomEntry)
-                        nextRawViewIndex = currentRawViewIndex = Mathf.FloorToInt(UnityEngine.Random.Range(0f, 1f) * rawView.Length - 1);
-                    tv.autoplayURL = urls[rawView[nextRawViewIndex]];
-                    pickNext();
+                        nextSortViewIndex = currentSortViewIndex = Mathf.FloorToInt(UnityEngine.Random.Range(0f, 1f) * (sortView.Length - 1));
+                    if (autoplayOnLoad && Networking.LocalPlayer.isMaster)
+                    {
+                        int nextIndex = sortView[nextSortViewIndex];
+                        if (hasQueue)
+                        {
+                            // if something else has not yet prepared an entry for the queue, go ahead
+                            var inurl = queue.IN_URL;
+                            if (inurl == null || string.IsNullOrWhiteSpace(inurl.Get()))
+                            {
+                                queue.IN_URL = urls[nextIndex];
+                                queue.IN_ALT = alts[nextIndex];
+                                queue.IN_TITLE = titles[nextIndex];
+                                queue.SendCustomEventDelayedSeconds(nameof(Queue._QueueMedia), 3f);
+                                pickNext();
+                            }
+                        }
+                        else
+                        {
+                            // if something else has not yet assigned the autoplay, go ahead
+                            if (tv.autoplayURL == null || string.IsNullOrWhiteSpace(tv.autoplayURL.Get()))
+                            {
+                                tv.autoplayURL = urls[nextIndex];
+                                tv.autoplayURLAlt = alts[nextIndex];
+                                pickNext();
+                            }
+                        }
+                    }
                 }
-                tv._RegisterUdonSharpEventReceiver(this);
-                label = $"{tv.gameObject.name}/{name}";
+                tv._RegisterUdonSharpEventReceiverWithPriority(this, 120);
+                debugLabel = $"{tv.gameObject.name}/{name}";
+                init = true;
+                _SeekView(sortViewIndexToFilteredViewIndex(nextSortViewIndex));
             }
             init = true;
+            canvases = GetComponentsInChildren<Canvas>();
         }
 
         void Start()
         {
             _Initialize();
-            cacheEntryRefs();
-            _SeekView(rawToFiltered(nextRawViewIndex));
-            var shapes = (Component[])GetComponentsInChildren(typeof(VRC_UiShape));
-            foreach (Component c in shapes)
-            {
-                var box = c.GetComponent<BoxCollider>();
-                var rect = c.GetComponent<RectTransform>();
-                if (box != null)
-                {
-                    log("Auto-adjusting Canvas collider");
-                    box.isTrigger = true;
-                    box.size = new Vector3(rect.sizeDelta.x, rect.sizeDelta.y, 0);
-                }
-            }
         }
 
-        void LateUpdate()
+        void OnEnable()
+        {
+            _Initialize();
+            foreach (Canvas c in canvases) c.enabled = true;
+        }
+
+        void OnDisable()
+        {
+            _Initialize();
+            foreach (Canvas c in canvases) c.enabled = false;
+        }
+
+        void LateUpdate() => _InternalUpdate();
+
+        public void _InternalUpdate()
         {
             if (isLoading)
             {
@@ -138,14 +208,15 @@ namespace ArchiTech
         public void _TvMediaStart()
         {
             if (hasNoTV) return;
-            if (!updateTVLabel) currentRawViewIndex = findRawViewIndex();
-            if (currentRawViewIndex > -1)
+            // only handle updating the TV label once the video has been loaded successfully to avoid losing the title from the previous video
+            if (updateTVLabel) { } else currentSortViewIndex = findSortViewIndex();
+            if (currentSortViewIndex > -1)
             {
-                string title = titles[rawView[currentRawViewIndex]];
+                string title = titles[sortView[currentSortViewIndex]];
                 if (title != string.Empty)
                     tv.localLabel = title;
-                else if (!showUrls)
-                    tv.localLabel = "--Playlist Video--";
+                else if (showUrls) { }
+                else tv.localLabel = "--Playlist Video--";
             }
             updateTVLabel = false;
         }
@@ -153,17 +224,19 @@ namespace ArchiTech
         public void _TvMediaEnd()
         {
             if (hasNoTV) return;
-            if (autoplayList && !tv.loading && isTVOwner()) _SwitchTo(nextRawViewIndex);
+            if (autoplayList && !tv.loading && isTVOwner())
+                if (loopPlaylist || nextSortViewIndex != 0)
+                    _SwitchTo(nextSortViewIndex);
         }
 
         public void _TvMediaChange()
         {
             if (hasNoTV) return;
-            log("Media Change");
+            // log("Media Change");
             if (autoplayList && !continueWhereLeftOff)
             {
-                if (tv.url.Get() != urls[rawView[nextRawViewIndex]].Get())
-                    nextRawViewIndex = 0;
+                if (tv.urlMain.Get() != urls[sortView[wrap(nextSortViewIndex - 1)]].Get())
+                    nextSortViewIndex = 0;
             }
             retargetActive();
         }
@@ -171,12 +244,19 @@ namespace ArchiTech
         public void _TvVideoPlayerError()
         {
             if (hasNoTV) return;
-            if (!autoplayOnVideoError || OUT_TvVideoPlayerError_VideoError_Error == VideoError.RateLimited) return; // TV auto-reloads on ratelimited, don't skip current video.
-            if (autoplayList && tv.url.Get() == urls[rawView[nextRawViewIndex]].Get())
+            if (autoplayList) { } else return;
+            if (tv.errorOccurred) { } else return; // only proceed if the tv signals that an error has actually occurred.
+            if (tv.urlMain.Get() == urls[sortView[wrap(nextSortViewIndex - 1)]].Get())
             {
-                pickNext(); // this changes the value of nextRawViewIndex
-                tv._DelayedChangeMediaTo(urls[rawView[nextRawViewIndex]]);
-                pickNext();
+                if (!loopPlaylist || nextSortViewIndex != 0)
+                {
+                    int rawIndex = sortView[nextSortViewIndex];
+                    currentSortViewIndex = nextSortViewIndex;
+                    updateTVLabel = true;
+                    log($"Error detected. Switching to entry {rawIndex}: {urls[rawIndex]}");
+                    tv._DelayedChangeMediaWithAltTo(urls[rawIndex], alts[rawIndex]);
+                    pickNext();
+                }
             }
         }
 
@@ -206,14 +286,14 @@ namespace ArchiTech
 
         public void _Next()
         {
-            nextRawViewIndex = wrap(nextRawViewIndex + 1);
-            _SwitchTo(nextRawViewIndex);
+            nextSortViewIndex = wrap(nextSortViewIndex + 1);
+            _SwitchTo(nextSortViewIndex);
         }
 
         public void _Previous()
         {
-            nextRawViewIndex = wrap(nextRawViewIndex - 2);
-            _SwitchTo(nextRawViewIndex);
+            nextSortViewIndex = wrap(nextSortViewIndex - 2);
+            _SwitchTo(nextSortViewIndex);
         }
 
         public void _SwitchToDetected()
@@ -223,9 +303,9 @@ namespace ArchiTech
             {
                 if (!buttonCache[i].interactable)
                 {
-                    int rawViewIndex = Array.IndexOf(rawView, currentViewToListIndex(i));
-                    log($"Detected view index {i}. Switching to list index {rawViewIndex}.");
-                    _SwitchTo(rawViewIndex);
+                    int sortViewIndex = Array.IndexOf(sortView, currentViewIndexToRawIndex(i));
+                    log($"Detected view index {i}. Switching to list index {sortViewIndex}.");
+                    _SwitchTo(sortViewIndex);
                     return;
                 }
             }
@@ -244,9 +324,18 @@ namespace ArchiTech
 
         public void _Shuffle()
         {
-            shuffle(rawView, 3);
-            cacheFilteredView(); // must recache the filtered view after a shuffle to update to the new rawView order
-            _SeekView(filteredToRaw(currentRawViewIndex));
+            log("Randomizing sort");
+            shuffle(sortView, 3);
+            cacheFilteredView(); // must recache the filtered view after a shuffle to update to the new sortView order
+            _SeekView(0);
+        }
+
+        public void _ResetSort()
+        {
+            log("Resetting sort to default");
+            _ResetSortView();
+            cacheFilteredView(); // must recache the filtered view after a shuffle to update to the new sortView order
+            _SeekView(0);
         }
 
         public void _AutoPlay()
@@ -254,10 +343,11 @@ namespace ArchiTech
             if (autoplayList) return; // already autoplay, skip
             autoplayList = true;
             if (startFromRandomEntry)
-                nextRawViewIndex = Mathf.FloorToInt(UnityEngine.Random.Range(0f, 1f) * rawView.Length - 1);
+                nextSortViewIndex = Mathf.FloorToInt(UnityEngine.Random.Range(0f, 1f) * sortView.Length - 1);
             else pickNext();
-            if (tv.stateSync != 1 && !tv.loading) {
-                _SwitchTo(nextRawViewIndex);
+            if (tv.stateSync != 1 && !tv.loading)
+            {
+                _SwitchTo(nextSortViewIndex);
             }
         }
 
@@ -266,46 +356,72 @@ namespace ArchiTech
             autoplayList = false;
         }
 
-        public void _ToggleAutoPlay() {
+        public void _ToggleAutoPlay()
+        {
             if (autoplayList) _ManualPlay();
             else _AutoPlay();
         }
 
-        public void _ChangeAutoPlayTo(bool active) {
+        public void _ChangeAutoPlayTo(bool active)
+        {
             if (active) _AutoPlay();
             else _ManualPlay();
         }
 
         // === Public Helper Methods
 
-        public void _SwitchTo(int rawViewIndex)
+        public void _Switch()
         {
-            if (isLoading || hasNoTV) return; // wait until the current video loading finishes/fails
-            if (rawViewIndex >= rawView.Length)
-                err($"Playlist Item {rawViewIndex} doesn't exist.");
-            else if (rawViewIndex == -1) { } // do nothing
+            if (SWITCH_TO_INDEX > -1)
+            {
+                _SwitchTo(SWITCH_TO_INDEX);
+                SWITCH_TO_INDEX = -1;
+            }
+        }
+
+        public void _SwitchTo(int sortViewIndex)
+        {
+            if (hasNoTV) return; // wait until the current video loading finishes/fails
+            if (!hasQueue) if (isLoading) return; // if not using a queue, wait until the tv finishes loading before playing another video
+            if (sortViewIndex >= sortView.Length)
+                err($"Playlist Item {sortViewIndex} doesn't exist.");
+            else if (sortViewIndex == -1) { } // do nothing
             else
             {
-                nextRawViewIndex = currentRawViewIndex = rawViewIndex;
-                log($"Switching to playlist item {rawViewIndex}");
-                tv._ChangeMediaTo(urls[rawView[nextRawViewIndex]]);
-                updateTVLabel = true;
+                nextSortViewIndex = currentSortViewIndex = sortViewIndex;
+                log($"Switching to playlist item {sortViewIndex}");
+                int index = sortView[nextSortViewIndex];
+                if (hasQueue)
+                {
+                    queue.IN_URL = urls[index];
+                    queue.IN_ALT = alts[index];
+                    string title = titles[index];
+                    if (title != string.Empty) queue.IN_TITLE = title;
+                    queue._QueueMedia();
+                }
+                else
+                {
+                    if (prioritizeOnInteract)
+                        tv._SetUdonSharpSubscriberPriorityToHigh(this);
+                    tv._ChangeMediaWithAltTo(urls[index], alts[index]);
+                    updateTVLabel = true;
+                }
                 pickNext();
             }
         }
 
-        public void _SeekView(int filteredIndex)
+        public void _SeekView(int filteredViewIndex)
         {
-            if (!init) return;
+            if (!init || filteredViewIndex == -1) return;
             // log("Seek View");
-            filteredIndex = Mathf.Clamp(filteredIndex, 0, filteredView.Length - 1);
+            filteredViewIndex = Mathf.Clamp(filteredViewIndex, 0, filteredView.Length - 1);
             if (scrollView.verticalScrollbar != null)
             {
                 skipScrollbar = true;
-                scrollView.verticalScrollbar.value = 1 - ((float)filteredIndex) / filteredView.Length;
+                scrollView.verticalScrollbar.value = 1 - ((float)filteredViewIndex) / filteredView.Length;
                 skipScrollbar = false;
             }
-            seekView(filteredIndex);
+            seekView(filteredViewIndex);
             retargetActive();
         }
 
@@ -318,7 +434,7 @@ namespace ArchiTech
             }
             hidden = hide;
             cacheFilteredView();
-
+            // since the filtered array changed size, recalculate the total entries height
             Rect max = scrollView.viewport.rect;
             Rect item = ((RectTransform)template.transform).rect;
             var horizontalCount = Mathf.FloorToInt(max.width / item.width);
@@ -329,21 +445,26 @@ namespace ArchiTech
 
             scrollView.content.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, contentHeight);
             _SeekView(0);
+        }
 
+        public void _UpdateSort()
+        {
+            cacheFilteredView();
+            _SeekView(0);
         }
 
         // === Helper Methods ===
 
-        public void shuffle(int[] view, int cycles)
+        private void shuffle(int[] view, int cycles)
         {
             for (int j = 0; j < cycles; j++)
-                Utilities.ShuffleArray(view);
+                VRC.SDKBase.Utilities.ShuffleArray(view);
         }
 
-        private void initRawView()
+        // prepare the sortView with the default index mapping
+        public void _ResetSortView()
         {
-            rawView = new int[urls.Length];
-            for (int i = 0; i < urls.Length; i++) rawView[i] = i;
+            for (int i = 0; i < sortView.Length; i++) sortView[i] = i;
         }
 
         // TODO change the logic so that filteredView has a persistent array that only modifies the internal values
@@ -355,14 +476,16 @@ namespace ArchiTech
         private void cacheFilteredView()
         {
             var count = 0;
-            for (int i = 0; i < rawView.Length; i++)
-                if (!hidden[rawView[i]]) count++;
+            // determine how many non-hidden items there are
+            for (int i = 0; i < sortView.Length; i++)
+                if (!hidden[sortView[i]]) count++;
             var cache = new int[count];
             count = 0;
-            for (int i = 0; i < rawView.Length; i++)
+            // compose new array with the non-hidden entry indexs
+            for (int i = 0; i < sortView.Length; i++)
             {
-                var rawItem = rawView[i];
-                if (!hidden[rawItem]) cache[count++] = rawItem;
+                var index = sortView[i];
+                if (!hidden[index]) cache[count++] = index;
             }
             filteredView = cache;
         }
@@ -396,11 +519,13 @@ namespace ArchiTech
         public void seekView(int filteredViewIndex)
         {
             // modifies the scope of the view, cache the offset for later use
-            viewOffset = calculateViewOffset(filteredViewIndex);
+            viewOffset = calculateFilteredViewOffset(filteredViewIndex);
             updateCurrentView(viewOffset);
         }
 
-        private int calculateViewOffset(int rawOffset)
+        // Takes in the current index and calculates a rounded value based on the horizontal count
+        // This ensures that elements don't incidentally shift horizontally and only vertically while scrolling
+        private int calculateFilteredViewOffset(int filteredViewIndex)
         {
             Rect max = scrollView.viewport.rect;
             Rect item = ((RectTransform)template.transform).rect;
@@ -414,7 +539,7 @@ namespace ArchiTech
             if (maxRow == 0) maxRow = 1;
 
             var maxOffset = maxRow * horizontalCount;
-            var currentRow = rawOffset / horizontalCount; // int DIV causes stepped values, good
+            var currentRow = filteredViewIndex / horizontalCount; // int DIV causes stepped values, good
             var currentOffset = currentRow * horizontalCount;
             // currentOffset will be smaller than maxOffset when the scroll limit has not yet been reached
             var targetOffset = Mathf.Min(currentOffset, maxOffset);
@@ -426,7 +551,7 @@ namespace ArchiTech
         {
             currentView = new int[content.childCount];
             int numOfUrls = filteredView.Length;
-            string _log = "None";
+            // string _log = "None";
             for (int i = 0; i < content.childCount; i++)
             {
                 if (filteredViewIndex >= numOfUrls)
@@ -436,37 +561,37 @@ namespace ArchiTech
                     currentView[i] = -1;
                     continue;
                 }
-                if (i == 0) _log = $"{filteredView[filteredViewIndex]}";
-                else _log += $", {filteredView[filteredViewIndex]}";
+                // if (i == 0) _log = $"{filteredView[filteredViewIndex]}";
+                // else _log += $", {filteredView[filteredViewIndex]}";
                 var entry = content.GetChild(i);
                 entry.gameObject.SetActive(true);
                 // update entry contents
+                var index = filteredView[filteredViewIndex];
                 var url = urlCache[i];
-                if (showUrls && url != null) url.text = urls[filteredView[filteredViewIndex]].Get();
+                if (showUrls && url != null) url.text = urls[index].Get();
                 var title = titleCache[i];
-                if (title != null) title.text = titles[filteredView[filteredViewIndex]];
+                if (title != null) title.text = titles[index];
                 var image = imageCache[i];
                 if (image != null)
                 {
-                    var imageEntry = images[filteredView[filteredViewIndex]];
+                    var imageEntry = images[index];
                     image.sprite = imageEntry;
                     image.gameObject.SetActive(imageEntry != null);
                 }
                 currentView[i] = filteredViewIndex;
                 filteredViewIndex++;
             }
-            log(_log);
+            // log(_log);
         }
 
         private void retargetActive()
         {
             // if autoplay is disabled, try to see if the current media matches one on the playlist, if so, indicate loading
             if (hasLoading) loading.value = 0f;
-            int found = findTargetViewIndex();
+            int found = findCurrentViewIndex();
             // cache the found index's Slider component, otherwise null
             if (found > -1)
             {
-                // log($"Media index found within view at entry {found}");
                 loading = content.GetChild(found).GetComponentInChildren<Slider>();
                 hasLoading = loading != null;
                 if (hasLoading) loading.value = loadingPercent;
@@ -479,17 +604,18 @@ namespace ArchiTech
             }
         }
 
-        private int findTargetViewIndex()
+        private int findCurrentViewIndex()
         {
             if (hasNoTV) return -1;
-            var url = tv.url.Get();
+            var url = tv.urlMain.Get();
             // if the current index is playing on the TV and not hidden, 
             //  return either it's position in the current view, or -1 if it's not visible in the current view
-            if (currentRawViewIndex > -1)
+            if (currentSortViewIndex > -1)
             {
-                var rawItem = rawView[currentRawViewIndex];
-                if (urls[rawItem].Get() == url && !hidden[rawItem])
-                    return Array.IndexOf(currentView, Array.IndexOf(filteredView, rawItem));
+                var rawIndex = sortView[currentSortViewIndex];
+                if (urls[rawIndex].Get() == url)
+                    if (!hidden[rawIndex])
+                        return Array.IndexOf(currentView, Array.IndexOf(filteredView, rawIndex));
             }
 
             // then if the current index IS hidden or IS NOT playing on the TV, 
@@ -497,7 +623,7 @@ namespace ArchiTech
             // do not need to check for hidden here as current view already has that taken into account
             for (int i = 0; i < currentView.Length; i++)
             {
-                var listIndex = currentViewToListIndex(i);
+                var listIndex = currentViewIndexToRawIndex(i);
                 if (listIndex > -1 && urls[listIndex].Get() == url)
                 {
                     // log($"List index {listIndex} matches TV url at view index {i}");
@@ -508,57 +634,62 @@ namespace ArchiTech
             return -1;
         }
 
-        private int findRawViewIndex()
+        private int findSortViewIndex()
         {
-            var len = rawView.Length;
-            var url = tv.url.Get();
+            var len = sortView.Length;
+            var url = tv.urlMain.Get();
             for (int i = 0; i < len; i++)
             {
-                var rawItem = rawView[i];
-                if (urls[rawItem].Get() == url)
+                var rawIndex = sortView[i];
+                if (urls[rawIndex].Get() == url)
                     return i;
             }
             return -1;
         }
 
-        private int currentViewToListIndex(int index)
+        // take a given index (typically derived from the button a player clicks on in the UI)
+        // and reverse the values through the arrays to get the original list index.
+        private int currentViewIndexToRawIndex(int index)
         {
             if (index == -1) return -1;
             if (index >= currentView.Length) return -1;
-            if (currentView[index] == -1) return -1;
-            if (currentView[index] >= filteredView.Length) return -1;
-            return filteredView[currentView[index]];
+            int filteredViewIndex = currentView[index];
+            if (filteredViewIndex == -1) return -1;
+            if (filteredViewIndex >= filteredView.Length) return -1;
+            return filteredView[filteredViewIndex];
         }
 
-        private int filteredToRaw(int filteredIndex)
+        private int filteredViewIndexToSortViewIndex(int filteredViewIndex)
         {
-            return Array.IndexOf(rawView, filteredView[filteredIndex]);
+            if (filteredViewIndex == -1) return -1;
+            return Array.IndexOf(sortView, filteredView[filteredViewIndex]);
         }
 
-        private int rawToFiltered(int rawIndex)
+        private int sortViewIndexToFilteredViewIndex(int sortViewIndex)
         {
-            return Array.IndexOf(filteredView, rawView[rawIndex]);
+            if (sortViewIndex == -1) return -1;
+            return Array.IndexOf(filteredView, sortView[sortViewIndex]);
         }
 
 
         private void pickNext()
         {
-            var nextPossibleIndex = nextRawViewIndex;
+            var nextPossibleIndex = nextSortViewIndex;
             do
             {
-                if (nextPossibleIndex != nextRawViewIndex)
+                if (nextPossibleIndex != nextSortViewIndex)
                     log($"Item {nextPossibleIndex} is missing, skipping");
                 nextPossibleIndex = wrap(nextPossibleIndex + 1);
-                if (nextRawViewIndex == nextPossibleIndex) break; // exit if the entire list has been traversed
-            } while (urls[rawView[nextPossibleIndex]].Get() == VRCUrl.Empty.Get());
+                if (nextSortViewIndex == nextPossibleIndex) break; // exit if the entire list has been traversed
+            } while (urls[sortView[nextPossibleIndex]].Get() == VRCUrl.Empty.Get());
             log($"Next playlist item {nextPossibleIndex}");
-            nextRawViewIndex = nextPossibleIndex;
+            nextSortViewIndex = nextPossibleIndex;
         }
 
         private int wrap(int value)
         {
-            if (value < 0) value = rawView.Length + value; // adds a negative
-            else if (value >= rawView.Length) value = value - rawView.Length; // subtracts the full length
+            if (value < 0) value = sortView.Length + value; // adds a negative
+            else if (value >= sortView.Length) value = value - sortView.Length; // subtracts the full length
             return value;
         }
 
@@ -566,15 +697,15 @@ namespace ArchiTech
 
         private void log(string value)
         {
-            if (debug) Debug.Log($"[<color=#1F84A9>A</color><color=#A3A3A3>T</color><color=#2861B4>A</color> | <color={debugColor}>{nameof(Playlist)} ({label})</color>] {value}");
+            if (debug) Debug.Log($"[<color=#1F84A9>A</color><color=#A3A3A3>T</color><color=#2861B4>A</color> | <color={debugColor}>{nameof(Playlist)} ({debugLabel})</color>] {value}");
         }
         private void warn(string value)
         {
-            if (debug) Debug.LogWarning($"[<color=#1F84A9>A</color><color=#A3A3A3>T</color><color=#2861B4>A</color> | <color={debugColor}>{nameof(Playlist)} ({label})</color>] {value}");
+            Debug.LogWarning($"[<color=#1F84A9>A</color><color=#A3A3A3>T</color><color=#2861B4>A</color> | <color={debugColor}>{nameof(Playlist)} ({debugLabel})</color>] {value}");
         }
         private void err(string value)
         {
-            if (debug) Debug.LogError($"[<color=#1F84A9>A</color><color=#A3A3A3>T</color><color=#2861B4>A</color> | <color={debugColor}>{nameof(Playlist)} ({label})</color>] {value}");
+            Debug.LogError($"[<color=#1F84A9>A</color><color=#A3A3A3>T</color><color=#2861B4>A</color> | <color={debugColor}>{nameof(Playlist)} ({debugLabel})</color>] {value}");
         }
     }
 }

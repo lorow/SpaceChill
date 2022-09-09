@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
@@ -28,12 +28,16 @@ namespace ArchiTech.UdonSharpVideoInternal
         {
             string[] splitPath = Application.persistentDataPath.Split('/', '\\');
             youtubeDLPath = string.Join("\\", splitPath.Take(splitPath.Length - 2)) + "\\VRChat\\VRChat\\Tools\\youtube-dl.exe";
-            //youtubeDLPath = "D:/Merlin/Desktop/youtube-dl.exe";
-            
+
             if (!File.Exists(youtubeDLPath))
             {
-                Debug.LogWarning("[USharpVideo YTDL] Unable to find VRC YouTube-dl installation, URLs will not be resolved.");
-                return;
+                // new YTDL version coming with the VRChat UI 1.5 update 
+                youtubeDLPath = string.Join("\\", splitPath.Take(splitPath.Length - 2)) + "\\VRChat\\VRChat\\Tools\\yt-dlp.exe";
+                if (!File.Exists(youtubeDLPath))
+                {
+                    Debug.LogWarning("[YTDL] Unable to find VRC YouTube-dl installation, URLs will not be resolved.");
+                    return;
+                }
             }
 
             VRCUnityVideoPlayer.StartResolveURLCoroutine = ResolveURLCallback;
