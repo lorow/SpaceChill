@@ -1,0 +1,20 @@
+Swimming settings
+Enable swimming
+Mute swimming sounds
+Swim speed
+For world creators
+Advanced settings
+Advanced swimming settings
+Movement stick speed
+(VR) Hands speed
+(Full body) Legs speed
+Simple swimming controls (can always hold trigger)
+Use hands for direction
+Auto-tread water
+Use legs for swimming (Full body only)
+More accurate legs swimming movement
+Physics settings
+Water drag
+Underwater gravity
+Buoyancy at surface
+SwimSystem is created by Hirabiki\nGet yours for your world on BOOTH
