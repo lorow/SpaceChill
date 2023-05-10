@@ -8,8 +8,8 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: FancyBookShelfUpper 1
-  m_Shader: {fileID: 4800000, guid: 917b37092bae034459c28c00a3a19b54, type: 3}
-  m_ShaderKeywords: VIGNETTE_MASKED _NORMALMAP _SMOOTHNESS_TEXTURE_ALBEDO_CHANNEL_A
+  m_Shader: {fileID: 4800000, guid: 075dbc3edcecd8747919086245d79325, type: 3}
+  m_ShaderKeywords: VIGNETTE_MASKED _BAKERY_NONE _LIGHTMAPSPECULAR _NORMALMAP
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
@@ -81,6 +81,10 @@ Material:
         m_Offset: {x: 0, y: 0}
     - _CubeMap:
         m_Texture: {fileID: 8900000, guid: 1f79f71b84fc2844bb81e9ae4f5bc384, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _DFG:
+        m_Texture: {fileID: 2800000, guid: b6b1f1fa6be1ce54f8bcd5428c160a28, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _DecalMask:
@@ -311,6 +315,18 @@ Material:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    - _RNM0:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _RNM1:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _RNM2:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     - _RedTexure:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
@@ -428,6 +444,7 @@ Material:
     - _AlphaMod: 0
     - _AlphaPremultiply: 0
     - _AlphaToMask: 0
+    - _AlphaToMaskMode: 0
     - _AngleCompareTo: 0
     - _AngleMinAlpha: 0
     - _AngleType: 0
@@ -514,12 +531,15 @@ Material:
     - _BackFaceHueShift: 0
     - _BackFaceReplaceAlpha: 0
     - _BackFaceTextureUV: 0
+    - _Bakery: 0
     - _BaseColor_Step: 0.5
     - _BaseShade_Feather: 0.0001
     - _BlendOp: 0
     - _BlendOpAlpha: 0
     - _BumpMapUV: 0
     - _BumpScale: 1
+    - _BumpShadowHardness: 50
+    - _BumpShadowHeightScale: 0.2
     - _CameraAngleMax: 90
     - _CameraAngleMin: 45
     - _Clearcoat: 1
@@ -535,6 +555,7 @@ Material:
     - _ColorMask: 15
     - _ContinuousDissolve: 0
     - _Cull: 2
+    - _CullMode: 2
     - _Cutoff: 0.5
     - _DebugCameraData: 0
     - _DebugEnabled: 0
@@ -713,6 +734,7 @@ Material:
     - _EnableSSS: 0
     - _EnableSpecular: 0
     - _EnableSpecular1: 0
+    - _ExposureOcclusion: 0.2
     - _FlipbookAdd: 0
     - _FlipbookAlphaControlsFinalAlpha: 0
     - _FlipbookColorReplaces: 0
@@ -777,6 +799,7 @@ Material:
     - _IgnoreFog: 0
     - _Inverse_Clipping: 0
     - _InvertSmoothness: 0
+    - _LTCGI: 0
     - _LightingAOTexUV: 0
     - _LightingAdditiveDetailStrength: 1
     - _LightingAdditiveEnable: 0
@@ -811,6 +834,8 @@ Material:
     - _LightingUncapped: 0
     - _LightingWrappedNormalization: 0
     - _LightingWrappedWrap: 0
+    - _LightmapSpecular: 1
+    - _LightmapSpecularMaxSmoothness: 1
     - _LineWidth: 0
     - _LockTooltip: 0
     - _MainAlphaToCoverage: 0
@@ -869,6 +894,7 @@ Material:
     - _Mode: 0
     - _ModelAngleMax: 90
     - _ModelAngleMin: 45
+    - _NormalMapShadows: 0
     - _OcclusionStrength: 1
     - _OffsetFactor: 0
     - _OffsetUnits: 0
@@ -976,6 +1002,8 @@ Material:
     - _ScrollingEmission1: 0
     - _ShadeColor_Step: 0
     - _ShaderOptimizerEnabled: 0
+    - _ShaderUIWarning0: -0
+    - _ShaderUIWarning1: -0
     - _ShadowMix: 0
     - _ShadowMixThreshold: 0.5
     - _ShadowMixWidthMod: 0.5
@@ -1067,6 +1095,8 @@ Material:
     - _ZWrite: 1
     - _commentIfZero_EnableOutlinePass: 0
     - _glitterFrequencyLinearEmissive: 20
+    - _specularAntiAliasingThreshold: 0.25
+    - _specularAntiAliasingVariance: 0.15
     - footer_discord: 0
     - footer_github: 0
     - footer_patreon: 0
