@@ -30,9 +30,9 @@ ModelImporter:
     animationWrapMode: 0
     extraExposedTransformPaths: []
     extraUserProperties:
-    - '#BAKERY{"meshName":["hallway","pool stairs 2","Roof","beam","beam.002","poo
-      stairs 1","pool ","beam.005","stairs to pool","movie room","entry hall","beam.003","beam.001","main
-      wallway","beam.004","Entry hall.008","main wallway.001"],"padding":[17,31,7,36,36,29,5,36,9,9,10,36,36,12,36,10,16],"unwrapper":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]}'
+    - '#BAKERY{"meshName":["main wallway.001","Entry hall.008","beam.004","main wallway","beam.001","beam.003","entry
+      hall","movie room","stairs to pool","beam.005","pool ","poo stairs 1","beam.002","beam","Roof","pool
+      stairs 2","hallway"],"padding":[16,10,36,12,36,36,10,9,9,36,5,26,36,36,7,31,17],"unwrapper":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]}'
     clipAnimations: []
     isReadable: 0
   meshes:

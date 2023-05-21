@@ -29,7 +29,12 @@ ModelImporter:
     animationScaleError: 0.5
     animationWrapMode: 0
     extraExposedTransformPaths: []
-    extraUserProperties: []
+    extraUserProperties:
+    - '#BAKERY{"meshName":["sunkenSofa","corner bottom lowpoly left","long top cusion
+      lowpolly left","corner bottom cusion lowpoly right","long bottom Manual Retopo.001","corner
+      bottom retopo","corner bottom cusion lowpoly leftside","long bottom cusion
+      lowpolly bottom right.001","long bottom cusion lowpolly bottom right","corner
+      bottom cusion lowpoly rightside"],"padding":[41,155,55,144,60,106,136,45,75,142],"unwrapper":[0,0,0,0,0,0,0,0,0,0]}'
     clipAnimations: []
     isReadable: 0
   meshes:
@@ -45,7 +50,7 @@ ModelImporter:
     importLights: 1
     fileIdsGeneration: 2
     swapUVChannels: 0
-    generateSecondaryUV: 0
+    generateSecondaryUV: 1
     useFileUnits: 1
     keepQuads: 0
     weldVertices: 1
