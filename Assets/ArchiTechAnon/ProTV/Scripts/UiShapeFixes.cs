@@ -16,8 +16,10 @@ namespace ArchiTech.ProTV
                 if (box != null)
                 {
                     var rect = (RectTransform)uiShape.transform;
-                    box.isTrigger = true;
-                    box.size = new Vector3(rect.sizeDelta.x, rect.sizeDelta.y, 0);
+                    var sizeDelta = rect.sizeDelta;
+                    var pivot = rect.pivot;
+                    box.center = new Vector3((-pivot.x + 0.5f) * sizeDelta.x, (-pivot.y + 0.5f) * sizeDelta.y, 0);
+                    box.size = new Vector3(sizeDelta.x, sizeDelta.y, 0);
                 }
             }
         }

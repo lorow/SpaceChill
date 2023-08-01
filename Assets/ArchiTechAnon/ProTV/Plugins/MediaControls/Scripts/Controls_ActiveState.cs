@@ -253,13 +253,8 @@ namespace ArchiTech
             if (hasSeek)
             {
                 // to prevent recursion, don't update the seek value, just update the handle's visual position
-                if (isLive) { }
-                else
-                {
-                    skipSeek = true;
-                    seek.value = timestamp / duration; // normalize times to the range of start and end times.
-                    skipSeek = false;
-                }
+                if (isLive || duration == 0) { }
+                else seek.SetValueWithoutNotify(timestamp / duration); // normalize times to the range of start and end times.
             }
             if (hasCurrentTime)
                 currentTime.text = getReadableTime(timestamp);
@@ -278,8 +273,9 @@ namespace ArchiTech
                         {
                             var rect = (RectTransform)t;
                             box.isTrigger = true;
-                            box.size = new Vector3(rect.sizeDelta.x, rect.sizeDelta.y, 0);
-                            box.center = new Vector3(0, rect.sizeDelta.y / 2, 0);
+                            var sizeDelta = rect.sizeDelta;
+                            box.size = new Vector3(sizeDelta.x, sizeDelta.y, 0);
+                            box.center = new Vector3(0, sizeDelta.y / 2, 0);
                         }
                         // assign the cached sort order value and move the dropdown in front of the blocker element
                         c.sortingOrder = videoPlayerSwapOrder;

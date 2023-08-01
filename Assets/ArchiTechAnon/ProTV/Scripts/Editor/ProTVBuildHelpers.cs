@@ -121,6 +121,7 @@ namespace ArchiTech.Editor
 #if !UDONSHARP // U# 0.x support
                 tv = tv.GetUdonSharpComponent<TVManagerV2>();
 #endif
+                if (!tv.gameObject.activeInHierarchy) continue; // skip tvs that are not enabled by default
                 bool hasAutoplay = !string.IsNullOrWhiteSpace(tv.autoplayURL.Get()) || !string.IsNullOrWhiteSpace(tv.autoplayURLAlt.Get());
                 if (!hasAutoplay)
                 {

@@ -1,8 +1,6 @@
-﻿
-using System;
+﻿using System;
 using JetBrains.Annotations;
 using UdonSharp;
-using UnityEditor;
 using UnityEngine;
 using VRC.SDK3.Components.Video;
 using VRC.SDK3.Video.Components.Base;
@@ -51,18 +49,21 @@ namespace ArchiTech
 
         // Sets value as a VideoError type
         private const string OUT_ERROR = "OUT_ERROR";
+
         // Sets value as a float type
         private const string OUT_VOLUME = "OUT_VOLUME";
+
         // Sets value as an int type
         private const string OUT_VIDEOPLAYER = "OUT_VIDEOPLAYER";
+
         // Sets value as an int type
         private const string OUT_OWNER = "OUT_OWNER";
 
-        private readonly char[] SPLIT_QUERY = new char[] { '?' };
-        private readonly char[] SPLIT_QUERY_PARAM = new char[] { '&' };
-        private readonly char[] SPLIT_HASH = new char[] { '#' };
-        private readonly char[] SPLIT_HASH_PARAM = new char[] { ';' };
-        private readonly char[] SPLIT_VALUE = new char[] { '=' };
+        private readonly char[] SPLIT_QUERY = { '?' };
+        private readonly char[] SPLIT_QUERY_PARAM = { '&' };
+        private readonly char[] SPLIT_HASH = { '#' };
+        private readonly char[] SPLIT_HASH_PARAM = { ';' };
+        private readonly char[] SPLIT_VALUE = { '=' };
 
 
         // === Event input variables (update these from external udon graphs. U# should use the corresponding parameterized methods instead) ===
@@ -74,12 +75,16 @@ namespace ArchiTech
 
         // parameter for _ChangeVideo event
         [NonSerialized] public VRCUrl IN_URL = VRCUrl.Empty;
+
         [NonSerialized] public VRCUrl IN_ALT = VRCUrl.Empty;
+
         // parameter for _ChangeVolume event, expects it to be a normalized float between 0f and 1f
         [NonSerialized] public float IN_VOLUME = 0f;
+
         // parameter for _ChangeSeekTime event
         // parameter for the _ChangeSeekPercent event, expects it to be a normalized float between 0f and 1f
         [NonSerialized] public float IN_SEEK = 0f;
+
         // paramter for _ChangeVideoPlayer event
         [NonSerialized] public int IN_VIDEOPLAYER = -1;
         [NonSerialized] public UdonBehaviour IN_SUBSCRIBER;
@@ -88,6 +93,7 @@ namespace ArchiTech
 
 
         // enum values for state/stateSync/currentState
+        private const int WAITING = -1;
         private const int STOPPED = 0;
         private const int PLAYING = 1;
         private const int PAUSED = 2;
@@ -97,6 +103,7 @@ namespace ArchiTech
 
         [Header("Autoplay Settings")]
 
+        //
         [Tooltip("This is the URL to set as automatically playing when the first user joins a new instance. This has no bearing on an existing instance as the TV has already been syncing data after the initial point.")]
         public VRCUrl autoplayURL = new VRCUrl("");
 
@@ -109,8 +116,10 @@ namespace ArchiTech
 
         [Header("Default TV Settings")]
 
+        //
         [Tooltip("The volume that the TV starts off at.")]
-        [Range(0f, 1f)] public float initialVolume = 0.3f;
+        [Range(0f, 1f)]
+        public float initialVolume = 0.3f;
 
         [Tooltip("The player (based on the VideoManagers list below) for the TV to start off on.")]
         public int initialPlayer = 0;
@@ -130,7 +139,7 @@ namespace ArchiTech
         public float automaticResyncInterval = 300f;
 
         [Tooltip("Time difference allowed between owner's synced seek time and the local seek time while the video is paused locally. Can be thought of as a 'frame preview' of what's currently playing. It's good to have this at a higher value, NOT recommended to have this value less than 1.0")]
-        public float pausedResyncThreshold = 5.0f;
+        public float pausedResyncThreshold = float.PositiveInfinity;
 
         [Tooltip("Flag that determines whether the current video player selection will be synced across users.")]
         public bool syncVideoPlayerSelection = false;
@@ -138,6 +147,7 @@ namespace ArchiTech
 
         [Header("Media Load Options")]
 
+        //
         [Tooltip("Flag to specify if the media should play immediately after it's been loaded. Unchecked means the media must be manually played to start.")]
         public bool playVideoAfterLoad = true;
 
@@ -155,13 +165,12 @@ namespace ArchiTech
         // Helps against malicious users in the edge case. 
         [Tooltip("This option enables the instance master to have admin powers for the TV. Leaving enabled should be perfectly acceptable in most cases.")]
         public bool allowMasterControl = true;
+
         [Tooltip("Determines if the video player starts off as locked down to master only. Good for worlds that do public events and similar.")]
         public bool lockedByDefault = false;
 
 
-        [Header("Error/Retry Options")]
-
-        [Min(0), Tooltip("The number of times a url should retry if no explicit retry amount is specified for a given url.")]
+        [Header("Error/Retry Options")] [Min(0), Tooltip("The number of times a url should retry if no explicit retry amount is specified for a given url.")]
         public int defaultRetryCount = 0;
 
         [Min(5f), Tooltip("Amount of time (in seconds) to wait before reloading the media after an error occurs if the url specifies infinite retries.")]
@@ -173,6 +182,7 @@ namespace ArchiTech
 
         [Header("Misc Options")]
 
+        //
         [Tooltip("Set this flag to have the TV auto-hide the initial video player after initialization. This is useful for preventing the video player from auto-showing itself when an autoplay video starts.")]
         public bool startHidden = false;
 
@@ -188,25 +198,23 @@ namespace ArchiTech
         // This is auto-populated during the build phase
         [HideInInspector] public float autoplayStartOffset = 0f;
 
-        // public TextAsset versionFile;
-
-        // [SerializeField, HideInInspector] 
-        // private string version = AssetDatabase.LoadAssetAtPath<TextAsset>("Assets/ArchiTechAnon/ProTV/VERSION.md").text.Trim();
-
         [Space]
 
         // Storage for all event subscriber behaviors. 
         // Due to some odd type issues, it requires being stored as a list of components instead of UdonBehaviors.
         // All possible events that this TV triggers will be sent to ALL targets in order of addition
         private Component[] eventTargets;
+
         private Component[] skipTargets;
         private byte[] eventTargetWeights;
 
         // === Video Manager control ===
         // assigned when the active manager switches to the next one.
         private VideoManagerV2 prevManager;
+
         // main manager reference that everything operates off of.
         [NonSerialized] public VideoManagerV2 activeManager;
+
         // assigned when the user selects a manager to switch to.
         private VideoManagerV2 nextManager;
 
@@ -214,10 +222,12 @@ namespace ArchiTech
 
         private TVManagerV2ManualSync syncData;
 
-        [NonSerialized][UdonSynced] public float syncTime = 0f;
+        [NonSerialized] [UdonSynced] public float syncTime = 0f;
         [NonSerialized] public float currentTime;
         [UdonSynced] private int lagCompSync;
+
         private float lagComp;
+
         // ownerState/localState values: 0 = stopped, 1 = playing, 2 = paused
         // ownerState is the value that is synced
         // localState is the sync tracking counterpart (used to detect state change from the owner)
@@ -227,17 +237,21 @@ namespace ArchiTech
         // For eg: Someone isn't interested in most videos, but still wants to know what is playing, so they pause it and let it do the pausedThreshold resync (every 5 seconds)
         //      One could simply mute the video, yes, but some people might not want the distraction of an active video playing if they happen to be in front of a mirror
         //      where the TV is reflected. This allows a much more comfortable "keep track of" mode for those users.
-        [NonSerialized] public int stateSync = STOPPED;
+        [NonSerialized] public int stateSync = WAITING;
+
         // state of the owner user
-        [NonSerialized] public int state = STOPPED;
+        [NonSerialized] public int state = WAITING;
+
         // state of the local user
-        [NonSerialized] public int currentState = STOPPED;
+        [NonSerialized] public int currentState = WAITING;
         [NonSerialized] public VRCUrl url = VRCUrl.Empty;
         [NonSerialized] public VRCUrl urlMain = VRCUrl.Empty;
         [NonSerialized] public VRCUrl urlMainSync = VRCUrl.Empty;
         [NonSerialized] public VRCUrl urlAlt = VRCUrl.Empty;
         [NonSerialized] public VRCUrl urlAltSync = VRCUrl.Empty;
+
         [NonSerialized] public bool useAlternateUrl = false;
+
         // a miscellaneous string that is used to describe the current video. 
         // Allows for different extensions to share things like custom video titles in a centralized way.
         // Is automatically by default the current URL's full domain name.
@@ -257,9 +271,12 @@ namespace ArchiTech
 
         // === Fields for tracking internal state ===
         [NonSerialized] public float startTime;
+
         [NonSerialized] public float endTime;
+
         // actual length of the loaded media
         [NonSerialized] public float mediaLength;
+
         // amount of the time that the video is set to play for (basically endTime minus startTime)
         [NonSerialized] public float videoDuration;
         [NonSerialized] public int loop;
@@ -278,15 +295,18 @@ namespace ArchiTech
         // This value is always assigned as: Time.realtimeSinceStartup + someOffsetValue;
         // It is checked using this structure: if (Time.realtimeSinceStartup < waitUntil) { waitIsOver(); }
         private float waitUntil = 0f;
+
         // Time to seek to at time sync check
         // This value is set for a couple different reasons.
         // If the video player is switching locally to a different player, it will use Mathf.Epsilon to signal seemless seek time for the player being swapped to.
         // If the video URL contains a t=, startat=, starttime=, or start= hash params, it will assign that value so to start the video at that point once it's loaded.
         private float jumpToTime = 0f;
+
         // This flag simply enables the local player to be paused without forcing hard-sync to the owner's state.
         // This results in a pause that, when the owner pauses then plays, it won't foroce the local player to unpause unintentionally.
         // This flag cooperates with the pausedThreshold constant to enable resyncing every 5 seconds without actually having the video playing.
         private bool locallyPaused = false;
+
         // Flag to check if an error occured. When true, it will prevent auto-reloading of the video.
         // Player will need to be forced to refresh by intentionally pressing (calling the method) Play.
         // The exception to this rule is when the error is of RateLimited type. 
@@ -317,9 +337,15 @@ namespace ArchiTech
         private float nextUrlAttemptAllowed;
         [NonSerialized] public bool retrying = false;
         private bool retryingWithAlt = false;
+
         private bool retriedWithAlt = false;
+
         // private bool postInit = false;
-        private bool isOwner { get => Networking.IsOwner(gameObject); }
+        private bool isOwner
+        {
+            get => Networking.IsOwner(gameObject);
+        }
+
         private bool lockedByInstanceOwner = false;
         private bool hasActiveManager = false;
         private bool hasLocalPlayer = false;
@@ -333,6 +359,7 @@ namespace ArchiTech
         private bool interactionState = true;
         public bool debug = true;
         [NonSerialized] public bool init = false;
+        [NonSerialized] public bool tvInit = false;
         private const string EMPTY = "";
 
         private void initialize()
@@ -356,20 +383,14 @@ namespace ArchiTech
                         noManagers = false;
                     }
                 }
+
                 if (noManagers)
                 {
                     err("No video managers available. Make sure any desired video managers are properly associated with the TV, otherwise the TV will not work.");
                     return;
                 }
             }
-            if (!syncToOwner || isOwner)
-            {
-                if (autoplayURL == null) autoplayURL = VRCUrl.Empty;
-                if (autoplayURLAlt == null) autoplayURLAlt = VRCUrl.Empty;
-                IN_URL = urlMain = urlMainSync = autoplayURL;
-                IN_ALT = urlAlt = urlAltSync = autoplayURLAlt;
-                localLabel = autoplayLabel;
-            }
+
             // determine initial locked state
             if (lockedByDefault)
             {
@@ -383,13 +404,12 @@ namespace ArchiTech
             nextManager = videoManagers[videoPlayer];
             if (isOwner) videoPlayerSync = videoPlayer;
             volume = initialVolume;
-            nextManager._ChangeVolume(volume);
-            if (startWith2DAudio) _AudioMode2d();
-            else _AudioMode3d();
+            if (nextManager.autoManageVolume)
+                nextManager._ChangeVolume(volume);
+            if (nextManager.autoManageAudioMode)
+                if (startWith2DAudio) _AudioMode2d();
+                else _AudioMode3d();
             if (startHidden) manuallyHidden = true;
-            // re-enable event sending for the on ready event
-            sendEvents = eventTargets != null && eventTargets.Length > 0;
-            forwardEvent(EVENT_READY);
             if (startDisabled) gameObject.SetActive(false);
             if (isOwner) syncData._RequestSync();
             // make the script wait a few seconds before trying to fetch the video data for the first time.
@@ -405,13 +425,13 @@ namespace ArchiTech
 
         private void cacheSyncData()
         {
-            if (hasSyncData) return;
-            else
+            if (!hasSyncData)
             {
                 syncData = transform.GetComponentInChildren<TVManagerV2ManualSync>(true);
                 hasSyncData = syncData != null;
                 if (hasSyncData) { }
                 else err("MISSING TVManagerV2ManualSync component. Please ensure there is a child object with this component attached. The TV will not work properly without it.");
+
                 syncData._SetTV(this);
             }
         }
@@ -443,8 +463,10 @@ namespace ArchiTech
                         if (!stopMediaWhenDisabled)
                             activeManager.videoPlayer.SetTime(jumpToTime);
                     }
+
                     SendCustomNetworkEvent(NetworkEventTarget.All, nameof(ALL_OwnerEnabled));
                 }
+
                 _Play();
             }
         }
@@ -463,8 +485,10 @@ namespace ArchiTech
                         reloadCache = activeManager.videoPlayer.GetTime();
                         reloadStart = Time.realtimeSinceStartup;
                     }
+
                     SendCustomNetworkEvent(NetworkEventTarget.All, nameof(ALL_OwnerDisabled));
                 }
+
                 if (stopMediaWhenDisabled) _Stop();
                 else _Pause();
             }
@@ -475,7 +499,11 @@ namespace ArchiTech
         public void _InternalUpdate()
         {
             // has not yet been initialized or is playmode without cyanemu
-            if (init) if (hasLocalPlayer) { } else return; else return;
+            if (init)
+                if (hasLocalPlayer) { }
+                else return;
+            else return;
+
             var time = Time.realtimeSinceStartup;
             // wait until the timeout has cleard
             if (time < waitUntil) return;
@@ -488,8 +516,11 @@ namespace ArchiTech
                     string pMan = prevManager == null ? "null" : prevManager.gameObject.name;
                     log($"Manager swap: Next '{nMan}' -> Active '{aMan}' -> Prev '{pMan}'");
                 }
+
                 // When player is loading, but stopped, force stop any loading and prioritize the player swap
-                if (loading) if (currentState == STOPPED) _Stop();
+                if (loading)
+                    if (currentState == STOPPED)
+                        _Stop();
                 prevManager = activeManager;
                 activeManager = nextManager;
                 if (prevManager == null)
@@ -497,10 +528,27 @@ namespace ArchiTech
                 hasActiveManager = true;
                 activeInitialized = true;
                 refreshAfterWait = false; // if both options are active, disable the wait reload to prevent duplicate refreshing
-                _RefreshMedia();
+                if (!tvInit)
+                {
+                    tvInit = true;
+                    if (!syncToOwner || isOwner)
+                    {
+                        if (autoplayURL == null) autoplayURL = VRCUrl.Empty;
+                        if (autoplayURLAlt == null) autoplayURLAlt = VRCUrl.Empty;
+                        IN_URL = urlMain = urlMainSync = autoplayURL;
+                        IN_ALT = urlAlt = urlAltSync = autoplayURLAlt;
+                        localLabel = autoplayLabel;
+                    }
+                    forwardEvent(EVENT_READY);
+                }
+
+                forwardVariable(OUT_VIDEOPLAYER, videoPlayer);
+                forwardEvent(EVENT_VIDEOPLAYERCHANGE);
+                if (!loading) _RefreshMedia();
                 return; // video has been refreshed, hold till next Update call
             }
-            else if (refreshAfterWait)
+
+            if (refreshAfterWait)
             {
                 log("Refresh video via update local");
                 refreshAfterWait = false;
@@ -510,11 +558,16 @@ namespace ArchiTech
                 _RefreshMedia();
                 return;
             }
+
             // activeManager has not been fully init'd yet, skip current cycle.
-            if (activeInitialized) { } else return;
+            if (activeInitialized) { }
+            else return;
+
             // when video player is switching (as denoted by the epsilon jump time), use the prevManager reference.
             BaseVRCVideoPlayer vp = jumpToTime == EPSILON ? prevManager.videoPlayer : activeManager.videoPlayer;
-            if (VRC.SDKBase.Utilities.IsValid(vp)) { } else return; // video player has been unloaded, game is closing
+            if (VRC.SDKBase.Utilities.IsValid(vp)) { }
+            else return; // video player has been unloaded, game is closing
+
             if (mediaEnded) { } // media has ended, nothing to skip and time doesn't need to be updated
             else if (syncTime == Mathf.Infinity)
             {
@@ -522,6 +575,8 @@ namespace ArchiTech
                 endMedia(vp);
                 return;
             }
+            // wait until manual loop has cleared before checking for the currentTime
+            else if (manualLoop) { }
             else
             {
                 currentTime = vp.GetTime();
@@ -559,6 +614,7 @@ namespace ArchiTech
                     else currentTime += 0.05f; // anything smaller than this won't be registered by AVPro for some reason...
                     vp.SetTime(currentTime);
                 }
+
                 return;
             }
 
@@ -578,6 +634,7 @@ namespace ArchiTech
                         vp.SetTime(currentTime);
                     }
                 }
+
                 syncTime = currentTime;
             }
             else if (loading) // skip other time checks if TV is loading a video
@@ -589,24 +646,21 @@ namespace ArchiTech
                     _OnVideoPlayerError(VideoError.PlayerError);
                 }
             }
-            else if (currentState != STOPPED && !ownerError)
+            else if (currentState > STOPPED && !ownerError)
             {
                 var compSyncTime = syncTime + lagComp;
                 if (compSyncTime > endTime) compSyncTime = endTime;
                 float syncDelta = Mathf.Abs(currentTime - compSyncTime);
-                if (currentState == PLAYING)
+                if (enforceSyncTime)
                 {
                     // sync time enforcement check should ONLY be for when the video is playing
                     // Also helps fix audio/video desync/drift in most cases.
-                    if (enforceSyncTime)
+                    if (time >= syncEnforceWait)
                     {
-                        if (time >= syncEnforceWait)
-                        {
-                            currentTime = compSyncTime;
-                            log($"Sync enforcement requested. Updating to {compSyncTime}");
-                            vp.SetTime(currentTime);
-                            enforceSyncTime = false;
-                        }
+                        currentTime = compSyncTime;
+                        log($"Sync enforcement requested. Updating to {compSyncTime}");
+                        vp.SetTime(currentTime);
+                        enforceSyncTime = false;
                     }
                 }
                 // video sync enforcement will always occur for paused mode as the user expects the video to not be active, so we can skip forward as needed.
@@ -629,6 +683,7 @@ namespace ArchiTech
                 {
                     // owner when loop is active
                     vp.SetTime(startTime);
+                    mediaEnded = false;
                     syncTime = currentTime = startTime;
                     forwardEvent(EVENT_MEDIALOOP);
                     if (loop < int.MaxValue)
@@ -641,7 +696,6 @@ namespace ArchiTech
                 {
                     if (shouldLoop)
                     {
-
                         if (syncToOwner && syncTime >= currentTime)
                         {
                             log("sync is enabled but sync time hasn't been passed, skip");
@@ -650,6 +704,7 @@ namespace ArchiTech
                         {
                             // non-owner when owner has loop (causing the sync time to start over)
                             vp.SetTime(startTime);
+                            mediaEnded = false;
                             // update current time to start time so this only executes once, prevents accidental spam
                             currentTime = startTime;
                             forwardEvent(EVENT_MEDIALOOP);
@@ -682,6 +737,12 @@ namespace ArchiTech
             vp.SetTime(endTime);
             currentState = PAUSED;
             currentTime = syncTime = endTime;
+            if (isOwner)
+            {
+                stateSync = state = currentState;
+                syncData._RequestSync();
+            }
+
             // once media has finished, any reload info  should be zeroed
             jumpToTime = 0f;
             reloadCache = 0f;
@@ -689,32 +750,41 @@ namespace ArchiTech
             forwardEvent(EVENT_MEDIAEND);
         }
 
-        new void OnPreSerialization()
+        public override void OnPreSerialization()
         {
             lagCompSync = Networking.GetServerTimeInMilliseconds();
         }
 
-        new void OnDeserialization()
+        public override void OnDeserialization()
         {
             lagComp = (Networking.GetServerTimeInMilliseconds() - lagCompSync) * 0.001f;
         }
 
-        new void OnOwnershipTransferred(VRCPlayerApi p)
+        public override void OnOwnershipTransferred(VRCPlayerApi p)
         {
             if (isOwner) syncData._RequestSync();
+            logAlways($"Owner changed to {p.displayName}");
             forwardVariable(OUT_OWNER, p.playerId);
             forwardEvent(EVENT_OWNERCHANGE);
         }
 
+        public override bool OnOwnershipRequest(VRCPlayerApi requestingPlayer, VRCPlayerApi requestedOwner)
+        {
+            return !locked || _CheckPrivilegedUser(requestingPlayer);
+        }
+
         public void _PostDeserialization()
         {
-            if (syncToOwner) { } else return;
+            if (syncToOwner) { }
+            else return;
+
             if (syncVideoPlayerSelection && videoPlayer != videoPlayerSync)
             {
                 log($"Video Player swap via deserialization {videoPlayer} -> {videoPlayerSync}");
                 videoPlayer = videoPlayerSync;
                 changeVideoPlayer();
             }
+
             if (locked != lockedSync)
             {
                 log($"Lock change via deserialization {locked} -> {lockedSync}");
@@ -722,6 +792,7 @@ namespace ArchiTech
                 lockedByInstanceOwner = locked && Networking.GetOwner(gameObject).isInstanceOwner;
                 forwardEvent(locked ? EVENT_LOCK : EVENT_UNLOCK);
             }
+
             if (ownerError != ownerErrorSync)
             {
                 ownerError = ownerErrorSync;
@@ -731,13 +802,14 @@ namespace ArchiTech
                     return; // do not change local state if owner has error
                 }
             }
+
             if (urlRevision != urlRevisionSync)
             {
                 log($"URL change via deserialization {urlRevision} -> {urlRevisionSync}");
                 urlRevision = urlRevisionSync;
                 queueRefresh(0f);
             }
-            if (loading) return; // do not allow certain actions to occur while a video is loading
+
             // late join first deserialization, wait until initial wait time is complete
             if (Time.realtimeSinceStartup < waitUntil) return;
 
@@ -745,16 +817,18 @@ namespace ArchiTech
             {
                 log($"State change via deserialization {state} -> {stateSync}");
                 state = stateSync;
+                if (loading) return; // do not allow certain actions to occur while a video is loading
                 switch (state)
                 {
                     // always enforce stopping
                     case STOPPED:
-                        _Stop();
+                        if (currentState == WAITING) play();
+                        else _Stop();
                         break;
                     // allow the local player to be paused if owner is playing
                     case PLAYING:
                         if (locallyPaused) { }
-                        else _Play();
+                        else play();
                         break;
                     // pause for the local player
                     case PAUSED:
@@ -763,12 +837,12 @@ namespace ArchiTech
                         // _Pause event.
                         pause();
                         break;
-                    default: break;
                 }
             }
+
             // Give the syncTime enough time to catch up before running the time sync logic
             // This mitigates certain issues when switching videos
-            queueSync(0.3f);
+            if (!manualLoop) queueSync(0.3f);
         }
 
 
@@ -792,7 +866,7 @@ namespace ArchiTech
                     if (isLive) warn("Stream is either offline or the URL is incorrect.");
                     warn("Unable to load. Media maybe unavailable, protected, region-locked or the URL is wrong.");
                 }
-                else if (error == VideoError.PlayerError)
+                else
                 {
                     if (isLive) warn("Livestream has stopped.");
                     else warn("Unexpected error with the media playback.");
@@ -812,6 +886,7 @@ namespace ArchiTech
                         retryCount--;
                         log($"{retryCount} retries remaining.");
                     }
+
                     currentState = PAUSED;
                     // if flag is enabled, flip flop the useAlternateUrl flag once.
                     // if that again fails, flip flop once more and then don't flip any more until success or a new URL is input
@@ -823,11 +898,14 @@ namespace ArchiTech
                             if (retryingWithAlt) retriedWithAlt = true;
                             else retryingWithAlt = true;
                         }
+
                     queueRefresh(retryDelay);
                 }
+
                 setLoadingState(false);
             }
             else setLoadingState(false);
+
             if (isOwner) syncData._RequestSync();
             forwardVariable(OUT_ERROR, error);
             forwardEvent(EVENT_VIDEOPLAYERERROR);
@@ -849,7 +927,7 @@ namespace ArchiTech
                 prepareMedia();
                 startMedia();
             }
-            else if (buffering)
+            else if (buffering && (Networking.IsOwner(gameObject) || !loadingSync || ownerErrorSync))
             {
                 // Event was called buffer flag is set. Buffering has ended
                 log("Buffering complete.");
@@ -860,11 +938,9 @@ namespace ArchiTech
             {
                 log($"Allowing video to buffer for {bufferDelayAfterLoad} seconds.");
                 // timeout is exceeded while the buffer flag is unset. Buffering has started, call delayed event
+                if (!buffering) prepareMedia();
+                SendCustomEventDelayedSeconds(nameof(_OnVideoPlayerReady), buffering ? 1f : bufferDelayAfterLoad);
                 buffering = true;
-                prepareMedia();
-                SendCustomEventDelayedSeconds(nameof(_OnVideoPlayerReady), bufferDelayAfterLoad);
-                // queue up a force resync to help avoid some a/v desync
-                queueSync(bufferDelayAfterLoad + 3f);
             }
             else
             {
@@ -894,8 +970,10 @@ namespace ArchiTech
                         forwardEvent(activeManager.audio3d ? EVENT_AUDIOMODE3D : EVENT_AUDIOMODE2D);
                         forwardEvent(activeManager.muted ? EVENT_MUTE : EVENT_UNMUTE);
                     }
+
                     prevManager = activeManager;
                 }
+
                 if (jumpToTime == EPSILON)
                 {
                     // If jumptime is still epsilon, a non-switching reload occurred. Calculate new jump time, including buffer delay.
@@ -903,6 +981,7 @@ namespace ArchiTech
                     jumpToTime = reloadCache + diff + bufferDelayAfterLoad;
                     if (jumpToTime > endTime) jumpToTime = endTime;
                 }
+
                 log($"[{activeManager.gameObject.name}] Now Playing: {url}");
                 string urlStr = url.Get();
                 // caution: slightly cursed. It works only because we only care about the url domain.
@@ -911,17 +990,20 @@ namespace ArchiTech
                 if (localLabel == EMPTY) localLabel = getUrlDomain(urlStr);
                 forwardEvent(EVENT_MEDIASTART);
             }
+
             if (mute) { }
             else if (manuallyHidden) { }
             else activeManager._UnMute();
+
             if (endTime <= startTime)
             {
-                log("endTime preceeds startTime. Updating.");
+                log("endTime precedes startTime. Updating.");
                 startTime = 0f; // invalid start time given, zero-out
             }
+
             if (jumpToTime < startTime)
             {
-                log("jumpToTime preceeds startTime. Updating.");
+                log("jumpToTime precedes startTime. Updating.");
                 jumpToTime = startTime;
             }
 
@@ -931,6 +1013,7 @@ namespace ArchiTech
                 activeManager.videoPlayer.SetTime(jumpToTime);
                 jumpToTime = 0f;
             }
+
             videoLoaded = true;
             errorOccurred = false;
             locallyPaused = false;
@@ -943,19 +1026,26 @@ namespace ArchiTech
 
         private void startMedia()
         {
-            state = currentState = playVideoAfterLoad ? PLAYING : PAUSED;
             if (loading)
             {
                 if (isOwner)
                 {
-                    stateSync = currentState;
+                    stateSync = playVideoAfterLoad ? PLAYING : PAUSED;
                     syncData._RequestSync();
                 }
+
                 setLoadingState(false);
             }
 
-            if (playVideoAfterLoad)
+            state = stateSync;
+            if (stateSync == PAUSED || locallyPaused)
             {
+                currentState = PAUSED;
+                forwardEvent(EVENT_PAUSE);
+            }
+            else
+            {
+                currentState = PLAYING;
                 activeManager.videoPlayer.Play();
                 forwardEvent(EVENT_PLAY);
             }
@@ -1040,12 +1130,15 @@ namespace ArchiTech
         [PublicAPI]
         public void _RefreshMedia()
         {
-            if (init) { } else return;
+            if (init) { }
+            else return;
+
             if (loading)
             {
                 warn("Cannot change to another media while loading.");
                 return; // disallow refreshing media while TV is loading another video
             }
+
             if (_IsPrivilegedUser())
             {
                 // if the owner has an error, take back ownership to fix sync
@@ -1059,6 +1152,7 @@ namespace ArchiTech
                 IN_URL = VRCUrl.Empty;
                 IN_ALT = VRCUrl.Empty;
             }
+
             // compare input URL and previous URL
             if (IN_URL == null) IN_URL = VRCUrl.Empty;
             if (IN_ALT == null) IN_ALT = VRCUrl.Empty;
@@ -1068,7 +1162,7 @@ namespace ArchiTech
             bool newAltUrl = urlAltStr != EMPTY && urlAltStr != urlAlt.Get();
             if (newMainUrl || newAltUrl)
             {
-                // when new URls are detected, grab ownership to handle the sync data
+                // when new URLs are detected, grab ownership to handle the sync data
                 takeOwnership();
                 syncData._RequestSync();
                 // update relavent URL data
@@ -1076,6 +1170,7 @@ namespace ArchiTech
                 urlAltSync = urlAlt = IN_ALT;
                 urlRevision++;
                 urlRevisionSync = urlRevision;
+                stateSync = PLAYING;
                 // reset the alternate URL flag back to default
                 useAlternateUrl = isQuest;
                 // new URL, reset the retry flags
@@ -1084,17 +1179,15 @@ namespace ArchiTech
                 retriedWithAlt = false;
             }
             // URLs are not changing, thus a reload is taking place
-            else if (currentState != STOPPED)
+            else if (currentState > STOPPED)
             {
                 reloadStart = Time.realtimeSinceStartup;
                 // if epsilon is set prior to this point, there is a video swap going on. Use previous manager time instead.
-                if (jumpToTime == EPSILON)
-                    reloadCache = prevManager.videoPlayer.GetTime();
-                else reloadCache = activeManager.videoPlayer.GetTime();
+                reloadCache = jumpToTime == EPSILON ? prevManager.videoPlayer.GetTime() : activeManager.videoPlayer.GetTime();
                 // skip timestamp continuity if the video is a retry attempt after an error
-                if (retrying) jumpToTime = 0f;
-                else jumpToTime = EPSILON;
+                jumpToTime = retrying ? 0f : EPSILON;
             }
+
             IN_URL = VRCUrl.Empty;
             IN_ALT = VRCUrl.Empty;
 
@@ -1103,6 +1196,7 @@ namespace ArchiTech
                 urlMain = urlMainSync;
                 urlAlt = urlAltSync;
             }
+
             urlMainStr = urlMain.Get();
             urlAltStr = urlAlt.Get();
 
@@ -1112,6 +1206,7 @@ namespace ArchiTech
                 urlMain = VRCUrl.Empty;
                 urlMainStr = EMPTY;
             }
+
             if (urlAltStr == null)
             {
                 urlAlt = VRCUrl.Empty;
@@ -1124,6 +1219,7 @@ namespace ArchiTech
                 urlAlt = urlMain;
                 urlAltStr = urlMainStr;
             }
+
             if (urlMainStr == EMPTY)
             {
                 urlMain = urlAlt;
@@ -1135,6 +1231,7 @@ namespace ArchiTech
                 log("No URLs present. Skip.");
                 return;
             }
+
             url = useAlternateUrl ? urlAlt : urlMain;
             bool willLoadDifferentVideo = url.Get().GetHashCode() != mediaHash;
             log($"[{nextManager.gameObject.name}] loading URL: {url}");
@@ -1158,14 +1255,21 @@ namespace ArchiTech
                                 retryCount = 1;
                     cacheMediaChangeInfo();
                 }
+
                 nextManager.videoPlayer.LoadURL(url);
                 nextUrlAttemptAllowed = Time.realtimeSinceStartup + 6f;
             }
-            if (willLoadDifferentVideo) forwardEvent(EVENT_MEDIACHANGE);
+
+            if (willLoadDifferentVideo)
+            {
+                jumpToTime = 0f;
+                forwardEvent(EVENT_MEDIACHANGE);
+            }
         }
 
         [Obsolete]
         public bool _CanTakeControl() => _IsPrivilegedUser();
+
         [PublicAPI]
         public bool _IsPrivilegedUser()
         {
@@ -1173,50 +1277,60 @@ namespace ArchiTech
             else // ensure local player has been cached.
             {
                 localPlayer = Networking.LocalPlayer;
-                hasLocalPlayer = true;
+                hasLocalPlayer = VRC.SDKBase.Utilities.IsValid(localPlayer);
             }
-            if (hasLocalPlayer)
-            {
-                string details = "";
-                bool allow = !syncToOwner;
-                if (debug) details = $"Is the TV not syncing to the owner? {allow}\n";
-                if (!allow)
-                {
-                    allow = localPlayer.isMaster;
-                    if (debug) details = $"Is the user the Master? {allow}\n";
-                }
-                if (allow)
-                {
-                    allow = allowMasterControl;
-                    if (debug) details += $"And is master control enabled? {allow}\n";
-                }
-                if (allow)
-                {
-                    allow = !lockedByInstanceOwner;
-                    if (debug) details += $"And TV isn't locked by instance owner? {allow}\n";
-                }
-                if (!allow)
-                {
-                    cacheSyncData();
-                    allow = syncData._CheckWhitelist();
-                    if (debug) details += $"Is the user on the whitelist? {allow}\n";
-                }
-                if (!allow)
-                {
-                    allow = localPlayer.isInstanceOwner;
-                    if (debug) details += $"Is user is instance owner? {allow}\n";
-                }
-                if (debug)
-                {
-                    details = $"Is the user privileged enough? {allow}\n" + details;
-                    log(details);
-                }
-                return allow;
-            }
+
+            if (hasLocalPlayer) return _CheckPrivilegedUser(localPlayer);
+
             log("No local player available.");
             return false;
         }
 
+        public bool _CheckPrivilegedUser(VRCPlayerApi p)
+        {
+            if (!VRC.SDKBase.Utilities.IsValid(p)) return false;
+            string details = "";
+            bool allow = !syncToOwner;
+            if (debug) details += $"Is the TV not syncing to the owner? {allow}\n";
+            if (!allow)
+            {
+                allow = p.isMaster;
+                if (debug) details = $"Is the user the Master? {allow}\n";
+            }
+
+            if (allow)
+            {
+                allow = allowMasterControl;
+                if (debug) details += $"And is master control enabled? {allow}\n";
+            }
+
+            if (allow)
+            {
+                allow = !lockedByInstanceOwner;
+                if (debug) details += $"And TV isn't locked by instance owner? {allow}\n";
+            }
+
+            if (!allow)
+            {
+                cacheSyncData();
+                allow = syncData._CheckWhitelist(p);
+                if (debug) details += $"Is the user on the whitelist? {allow}\n";
+            }
+
+            if (!allow)
+            {
+                allow = p.isInstanceOwner;
+                if (debug) details += $"Is user is instance owner? {allow}\n";
+            }
+
+            if (debug)
+            {
+                details = $"Checking user privilege ({p.displayName}). Are they allowed? {allow}\n" + details;
+                log(details);
+            }
+
+            return allow;
+        }
 
         public void _ChangeMedia() => _RefreshMedia();
 
@@ -1263,7 +1377,9 @@ namespace ArchiTech
         [PublicAPI]
         public void _ChangeVideoPlayer()
         {
-            if (init) { } else return;
+            if (init) { }
+            else return;
+
             // no need to change if same is picked
             if (IN_VIDEOPLAYER == videoPlayer) return;
             // do not allow changing resolution while a video is loading.
@@ -1272,11 +1388,13 @@ namespace ArchiTech
                 IN_VIDEOPLAYER = videoPlayer;
                 return;
             }
+
             if (IN_VIDEOPLAYER >= videoManagers.Length)
             {
                 err($"Video Player swap value too large: Expected value between 0 and {videoManagers.Length - 1} - Actual {IN_VIDEOPLAYER}");
                 return;
             }
+
             // special condition for time jump between switching video players
             if (hasActiveManager) jumpToTime = EPSILON;
             bool changed = false;
@@ -1298,6 +1416,7 @@ namespace ArchiTech
                 changed = true;
                 videoPlayer = IN_VIDEOPLAYER;
             }
+
             changeVideoPlayer();
             if (changed) log($"Switching to: [{nextManager.gameObject.name}]");
             IN_VIDEOPLAYER = -1;
@@ -1307,8 +1426,6 @@ namespace ArchiTech
         {
             nextManager = videoManagers[videoPlayer];
             jumpToTime = EPSILON;
-            forwardVariable(OUT_VIDEOPLAYER, videoPlayer);
-            forwardEvent(EVENT_VIDEOPLAYERCHANGE);
         }
 
         [PublicAPI]
@@ -1323,39 +1440,51 @@ namespace ArchiTech
         {
             if (currentState == PLAYING) _Pause();
             else if (currentState == PAUSED) _Play();
-            else if (currentState == STOPPED) _RefreshMedia();
+            else if (currentState <= STOPPED) _RefreshMedia();
         }
 
         [PublicAPI]
         public void _Play()
         {
-            if (init) { } else return;
-            if (currentState == STOPPED)
+            if (init) { }
+            else return;
+
+            // if owner is paused, prevent non-owner from playing video if they are syncing to owner
+            if (syncToOwner && state == PAUSED && !isOwner) return;
+            play();
+        }
+
+        private void play()
+        {
+            if (currentState <= STOPPED)
             {
                 log("Refresh video via Play");
                 _RefreshMedia();
                 return;
             }
-            // if owner is paused, prevent non-owner from playing video if they are syncing to owner
-            if (syncToOwner && state == PAUSED && !isOwner) return;
+
             var vp = hasActiveManager ? activeManager.videoPlayer : nextManager.videoPlayer;
             if (isOwner)
             {
                 stateSync = state = PLAYING;
                 syncData._RequestSync();
             }
-            // if media is at end and user forces play, force loop the media one time if the media isn't in a stopped state
-            if (mediaEnded && currentState != STOPPED)
+
+            // if media is at end and user forces play, force loop the media one time
+            if (mediaEnded)
             {
+                mediaEnded = false;
                 manualLoop = true;
                 currentTime = syncTime = startTime;
                 vp.SetTime(startTime);
                 forwardEvent(EVENT_MEDIALOOP);
             }
+            // only run a delayed resync when it's not manually looped
+            else queueSync(0.2f);
+
             vp.Play();
             currentState = PLAYING;
             locallyPaused = false;
-            queueSync(0.2f);
             forwardEvent(EVENT_PLAY);
         }
 
@@ -1365,10 +1494,13 @@ namespace ArchiTech
             locallyPaused = true; // flag to determine if pause was locally triggered
             pause();
         }
+
         private void pause()
         {
-            if (init) { } else return;
-            if (currentState == STOPPED) return; // nothing to pause
+            if (init) { }
+            else return;
+
+            if (currentState <= STOPPED) return; // nothing to pause
             var vp = hasActiveManager ? activeManager.videoPlayer : nextManager.videoPlayer;
             vp.Pause();
             if (isOwner)
@@ -1376,6 +1508,10 @@ namespace ArchiTech
                 stateSync = state = PAUSED;
                 syncData._RequestSync();
             }
+
+            // only run a delayed resync when it's not locally paused
+            if (!locallyPaused) queueSync(0.2f);
+
             currentState = PAUSED;
             forwardEvent(EVENT_PAUSE);
         }
@@ -1396,6 +1532,7 @@ namespace ArchiTech
                 forwardEvent(EVENT_LOADINGSTOP);
                 return;
             }
+
             activeManager._Stop();
             if (isOwner)
             {
@@ -1404,6 +1541,7 @@ namespace ArchiTech
                 activeManager.videoPlayer.SetTime(0f);
                 syncData._RequestSync();
             }
+
             currentState = STOPPED;
             setLoadingState(false);
             locallyPaused = false;
@@ -1452,11 +1590,11 @@ namespace ArchiTech
             if (!hasActiveManager) return;
             if (stopMediaWhenHidden)
             {
-
                 if (isOwner) SendCustomNetworkEvent(NetworkEventTarget.All, nameof(ALL_OwnerDisabled));
                 _Stop();
             }
             else activeManager._Hide();
+
             manuallyHidden = true;
         }
 
@@ -1487,7 +1625,8 @@ namespace ArchiTech
             queueRefresh(0f);
         }
 
-        [Obsolete] public void _UseAltUrl() => _UseQuestUrl();
+        [Obsolete]
+        public void _UseAltUrl() => _UseQuestUrl();
 
         [PublicAPI]
         public void _UseQuestUrl()
@@ -1511,6 +1650,7 @@ namespace ArchiTech
             activeManager._Mute();
             forwardEvent(EVENT_MUTE);
         }
+
         [PublicAPI]
         public void _UnMute()
         {
@@ -1519,6 +1659,7 @@ namespace ArchiTech
             activeManager._UnMute();
             forwardEvent(EVENT_UNMUTE);
         }
+
         [PublicAPI]
         public void _ToggleMute()
         {
@@ -1527,6 +1668,7 @@ namespace ArchiTech
             activeManager._ChangeMute(mute);
             forwardEvent(mute ? EVENT_MUTE : EVENT_UNMUTE);
         }
+
         [PublicAPI]
         public void _ChangeMuteTo(bool mute)
         {
@@ -1535,6 +1677,7 @@ namespace ArchiTech
             activeManager._ChangeMute(mute);
             forwardEvent(mute ? EVENT_MUTE : EVENT_UNMUTE);
         }
+
         [PublicAPI]
         public void _ChangeVolume()
         {
@@ -1545,6 +1688,7 @@ namespace ArchiTech
             forwardEvent(EVENT_VOLUMECHANGE);
             IN_VOLUME = 0f;
         }
+
         // equivalent to: udonBehavior.SetProgramVariable("IN_VOLUME", (float) volumePercent); udonBehavior.SendCustomEvent("_ChangeVolume");
         [PublicAPI]
         public void _ChangeVolumeTo(float volume)
@@ -1552,6 +1696,7 @@ namespace ArchiTech
             IN_VOLUME = volume;
             _ChangeVolume();
         }
+
         [PublicAPI]
         public void _AudioMode3d()
         {
@@ -1560,6 +1705,7 @@ namespace ArchiTech
             else nextManager._Use3dAudio();
             forwardEvent(EVENT_AUDIOMODE3D);
         }
+
         [PublicAPI]
         public void _AudioMode2d()
         {
@@ -1568,6 +1714,7 @@ namespace ArchiTech
             else nextManager._Use2dAudio();
             forwardEvent(EVENT_AUDIOMODE2D);
         }
+
         [PublicAPI]
         public void _ChangeAudioModeTo(bool audio3d)
         {
@@ -1576,6 +1723,7 @@ namespace ArchiTech
             else nextManager._ChangeAudioMode(audio3d);
             forwardEvent(audio3d ? EVENT_AUDIOMODE3D : EVENT_AUDIOMODE2D);
         }
+
         [PublicAPI]
         public void _ToggleAudioMode()
         {
@@ -1587,6 +1735,7 @@ namespace ArchiTech
         {
             if (syncToOwner) queueSync(0f);
         }
+
         [PublicAPI]
         public void _Sync()
         {
@@ -1594,6 +1743,7 @@ namespace ArchiTech
             enforceSyncTime = true;
             forwardEvent(EVENT_SYNC);
         }
+
         [PublicAPI]
         public void _DeSync()
         {
@@ -1601,12 +1751,14 @@ namespace ArchiTech
             enforceSyncTime = false;
             forwardEvent(EVENT_DESYNC);
         }
+
         [PublicAPI]
         public void _ChangeSyncTo(bool sync)
         {
             if (sync) _Sync();
             else _DeSync();
         }
+
         public void _ToggleSync()
         {
             _ChangeSyncTo(!syncToOwner);
@@ -1616,7 +1768,9 @@ namespace ArchiTech
         [PublicAPI]
         public void _ChangeSeekTime()
         {
-            if (hasActiveManager) { } else return;
+            if (hasActiveManager) { }
+            else return;
+
             var vp = activeManager.videoPlayer;
             float dur = vp.GetDuration();
             // inifinty and 0 are livestreams, they cannot adjust seek time.
@@ -1625,6 +1779,7 @@ namespace ArchiTech
             IN_SEEK = 0f;
             SendCustomNetworkEvent(NetworkEventTarget.All, nameof(ALL_ManualQuickSeek));
         }
+
         [PublicAPI]
         public void _ChangeSeekTimeTo(float seconds)
         {
@@ -1641,6 +1796,7 @@ namespace ArchiTech
             IN_SEEK = (endTime - startTime) * IN_SEEK + startTime;
             _ChangeSeekTime();
         }
+
         [PublicAPI]
         public void _ChangeSeekPercentTo(float seekPercent)
         {
@@ -1657,6 +1813,7 @@ namespace ArchiTech
             if (isLive) enforceSyncTime = true;
             else _ChangeSeekTimeTo(activeManager.videoPlayer.GetTime() + 10f);
         }
+
         [PublicAPI]
         public void _SeekBackward()
         {
@@ -1680,6 +1837,7 @@ namespace ArchiTech
                 }
             }
         }
+
         [PublicAPI]
         public void _UnLock()
         {
@@ -1695,12 +1853,14 @@ namespace ArchiTech
                 }
             }
         }
+
         [PublicAPI]
         public void _ChangeLockTo(bool lockActive)
         {
             if (lockActive) _Lock();
             else _UnLock();
         }
+
         [PublicAPI]
         public void _ToggleLock()
         {
@@ -1731,6 +1891,7 @@ namespace ArchiTech
                         interactable.enabled = newState;
                 }
             }
+
             interactionState = newState;
         }
 
@@ -1747,11 +1908,13 @@ namespace ArchiTech
                 skipTargets = new Component[0];
                 eventTargetWeights = new byte[0];
             }
+
             int index = 0;
             for (; index < eventTargetWeights.Length; index++)
             {
                 if (IN_PRIORITY < eventTargetWeights[index]) break;
             }
+
             log($"Expanding event register to {eventTargets.Length + 1}: Adding {IN_SUBSCRIBER.gameObject.name}");
             // eventTargets = (Component[])AddArrayItem(eventTargets, index, IN_SUBSCRIBER);
             // skipTargets = (Component[])AddArrayItem(skipTargets, index, null);
@@ -1772,14 +1935,16 @@ namespace ArchiTech
                 eventTargets[i + offset] = _targets[i];
                 eventTargetWeights[i + offset] = _weights[i];
             }
+
             eventTargets[index] = IN_SUBSCRIBER;
             eventTargetWeights[index] = IN_PRIORITY;
             // forward the ready state for the freshly registered subscriber if the TV is already initialized
-            if (init)
+            if (tvInit)
             {
                 IN_SUBSCRIBER.SendCustomEvent(EVENT_READY);
                 log($"Forwarding event {EVENT_READY} to 1 listeners");
             }
+
             IN_SUBSCRIBER = null;
             IN_PRIORITY = defaultPriority;
         }
@@ -1813,6 +1978,7 @@ namespace ArchiTech
                 skipTargets = (Component[])RemoveArrayItem(skipTargets, index);
                 eventTargetWeights = (byte[])RemoveArrayItem(eventTargetWeights, index);
             }
+
             sendEvents = eventTargets.Length > 0;
             IN_SUBSCRIBER = null;
         }
@@ -1835,6 +2001,7 @@ namespace ArchiTech
                 eventTargets[index] = IN_SUBSCRIBER;
                 skipTargets[index] = null;
             }
+
             IN_SUBSCRIBER = null;
         }
 
@@ -1856,6 +2023,7 @@ namespace ArchiTech
                 eventTargets[index] = null;
                 skipTargets[index] = IN_SUBSCRIBER;
             }
+
             IN_SUBSCRIBER = null;
         }
 
@@ -1872,6 +2040,7 @@ namespace ArchiTech
             shiftPriority(IN_SUBSCRIBER, 0);
             IN_SUBSCRIBER = null;
         }
+
         [PublicAPI]
         public void _SetUdonSharpSubscriberPriorityToFirst(UdonSharpBehaviour target) => shiftPriority((UdonBehaviour)(Component)target, 0);
 
@@ -1881,6 +2050,7 @@ namespace ArchiTech
             shiftPriority(IN_SUBSCRIBER, 1);
             IN_SUBSCRIBER = null;
         }
+
         [PublicAPI]
         public void _SetUdonSharpSubscriberPriorityToHigh(UdonSharpBehaviour target) => shiftPriority((UdonBehaviour)(Component)target, 1);
 
@@ -1890,6 +2060,7 @@ namespace ArchiTech
             shiftPriority(IN_SUBSCRIBER, 2);
             IN_SUBSCRIBER = null;
         }
+
         [PublicAPI]
         public void _SetUdonSharpSubscriberPriorityToLow(UdonSharpBehaviour target) => shiftPriority((UdonBehaviour)(Component)target, 2);
 
@@ -1899,6 +2070,7 @@ namespace ArchiTech
             shiftPriority(IN_SUBSCRIBER, 3);
             IN_SUBSCRIBER = null;
         }
+
         [PublicAPI]
         public void _SetUdonSharpSubscriberPriorityToLast(UdonSharpBehaviour target) => shiftPriority((UdonBehaviour)(Component)target, 3);
 
@@ -1909,7 +2081,7 @@ namespace ArchiTech
             int newLength = oldLength + 1;
             if (index > oldLength) index = oldLength; // prevent out of bounds issue
             if (index < 0) index = newLength + index; // enable negative indexes
-            System.Array fresh = System.Array.CreateInstance(typeof(System.Object), newLength);
+            System.Array fresh = System.Array.CreateInstance(typeof(object), newLength);
             // copy from start to the index
             System.Array.Copy(stale, 0, fresh, 0, index);
             // if element was anything but the last element, copy the remainder after the index
@@ -1923,7 +2095,7 @@ namespace ArchiTech
             int oldLength = stale.Length;
             if (oldLength == 0) return stale; // nothing to remove
             int newLength = oldLength - 1;
-            System.Array fresh = System.Array.CreateInstance(typeof(System.Object), newLength);
+            System.Array fresh = System.Array.CreateInstance(typeof(object), newLength);
             if (newLength == 0) return fresh; // new array has nothing to copy
             if (index > newLength) index = newLength; // prevent out of bounds issue
             if (index < 0) index = oldLength + index; // enable negative indexes
@@ -1944,6 +2116,7 @@ namespace ArchiTech
                 skipTargets = new Component[0];
                 eventTargetWeights = new byte[0];
             }
+
             int oldIndex = Array.IndexOf(eventTargets, target);
             if (oldIndex == -1) oldIndex = Array.IndexOf(skipTargets, target);
             if (oldIndex == -1)
@@ -1951,6 +2124,7 @@ namespace ArchiTech
                 err("Unable to find matching subscriber. Please ensure the behaviour has been registered first.");
                 return;
             }
+
             log($"Updating priority for {target.gameObject.name}");
             int newIndex = getNewWeightIndex(oldIndex, mode);
             if (newIndex == oldIndex)
@@ -1958,6 +2132,7 @@ namespace ArchiTech
                 log("No priority change required. Skipping");
                 return;
             }
+
             // detect left vs right vs no shifting
             int left = oldIndex, right = newIndex, shift = 0;
             if (newIndex < oldIndex)
@@ -1972,6 +2147,7 @@ namespace ArchiTech
                 right = newIndex;
                 shift = -1;
             }
+
             Component t = eventTargets[oldIndex];
             Component s = skipTargets[oldIndex];
             byte w = eventTargetWeights[oldIndex];
@@ -2000,7 +2176,8 @@ namespace ArchiTech
             {
                 byte weight = eventTargetWeights[oldIndex];
                 for (; newIndex > -1; newIndex--)
-                    if (eventTargetWeights[newIndex] < weight) break;
+                    if (eventTargetWeights[newIndex] < weight)
+                        break;
                 if (newIndex == -1) newIndex = 0; // all weights to the left were the same value. Set to start of array index.
             }
             // LOW
@@ -2008,11 +2185,13 @@ namespace ArchiTech
             {
                 byte weight = eventTargetWeights[oldIndex];
                 for (; newIndex < len; newIndex++)
-                    if (eventTargetWeights[newIndex] > weight) break;
+                    if (eventTargetWeights[newIndex] > weight)
+                        break;
                 if (newIndex == len) newIndex = len - 1; // all weights to the right were the same value. Set to end of array index.
             }
             // LAST
             else if (mode == 3) newIndex = len - 1;
+
             return newIndex;
         }
 
@@ -2027,6 +2206,7 @@ namespace ArchiTech
                 var p = eventTargetWeights[i];
                 _log += $"{n} [{p}], ";
             }
+
             log(_log);
         }
 
@@ -2064,7 +2244,7 @@ namespace ArchiTech
 
         public void ALL_ManualQuickSeek()
         {
-            if (!isOwner && syncToOwner) queueSync(1f);
+            if (!isOwner && syncToOwner) queueSync(0.2f);
         }
 
         public void ALL_ManualSeek()
@@ -2101,8 +2281,10 @@ namespace ArchiTech
                         count++;
                         ((UdonBehaviour)target).SendCustomEvent(eventName);
                     }
+
                 log($"Forwarding event {eventName} to {count} listeners");
             }
+
             releaseEvent(eventName);
         }
 
@@ -2117,6 +2299,7 @@ namespace ArchiTech
                         count++;
                         ((UdonBehaviour)target).SetProgramVariable(variableName, value);
                     }
+
                 log($"Forwarding variable {variableName} to {count} listeners");
             }
         }
@@ -2131,6 +2314,7 @@ namespace ArchiTech
                 if (haltedEvents[i] == eventName) return false;
                 if (insert == -1 && haltedEvents[i] == null) insert = i;
             }
+
             haltedEvents[insert] = eventName;
             return true;
         }
@@ -2149,6 +2333,7 @@ namespace ArchiTech
             {
                 loadingWait = Time.realtimeSinceStartup + maxAllowedLoadingTime;
             }
+
             loading = yes;
             if (isOwner) loadingSync = loading;
             if (loading) forwardEvent(EVENT_LOADING);
@@ -2163,7 +2348,7 @@ namespace ArchiTech
             // strip everything after the first slash
             s = s[1].Split(new char[] { '/' }, 2, System.StringSplitOptions.None);
             // just to be sure, strip everything after the question mark if one is present
-            s = s[0].Split(new char[] { '?' }, 2, System.StringSplitOptions.None);
+            s = s[0].Split(SPLIT_QUERY, 2, System.StringSplitOptions.None);
             // return the url's domain value
             return s[0];
         }
@@ -2172,7 +2357,7 @@ namespace ArchiTech
         {
             string param = getUrlQueryParam(url, name);
             int value;
-            return System.Int32.TryParse(param, out value) ? value : _default;
+            return int.TryParse(param, out value) ? value : _default;
         }
 
 
@@ -2190,6 +2375,7 @@ namespace ArchiTech
                 string[] p = param.Split(SPLIT_VALUE, 2, System.StringSplitOptions.None);
                 if (p[0] == name) return p[1];
             }
+
             // if one can't be found, return an empty string
             return EMPTY;
         }
@@ -2202,6 +2388,7 @@ namespace ArchiTech
                 urlHashParams = new string[0];
                 return;
             }
+
             hashParams = hashParams[1].Split(SPLIT_HASH_PARAM);
             int paramCount = hashParams.Length;
             urlHashParams = new string[paramCount];
@@ -2214,8 +2401,9 @@ namespace ArchiTech
                     urlHashValues[i] = split[1].Trim();
                 else urlHashValues[i] = EMPTY;
             }
-            log(String.Join(", ", urlHashParams));
-            log(String.Join(", ", urlHashValues));
+
+            log(string.Join(", ", urlHashParams));
+            log(string.Join(", ", urlHashValues));
         }
 
         private bool hasUrlHashParam(string name)
@@ -2229,10 +2417,10 @@ namespace ArchiTech
             if (index > -1)
             {
                 string val = urlHashValues[index];
-                if (val == EMPTY) return _default;
-                else return val;
+                return val == EMPTY ? _default : val;
             }
-            else return EMPTY;
+
+            return EMPTY;
         }
 
 
@@ -2240,10 +2428,17 @@ namespace ArchiTech
         {
             if (debug) Debug.Log($"[<color=#1F84A9>A</color><color=#A3A3A3>T</color><color=#2861B4>A</color> | <color=#00ff00>{nameof(TVManagerV2)} ({name})</color>] {value}");
         }
+
+        private void logAlways(string value)
+        {
+            Debug.Log($"[<color=#1F84A9>A</color><color=#A3A3A3>T</color><color=#2861B4>A</color> | <color=#00ff00>{nameof(TVManagerV2)} ({name})</color>] {value}");
+        }
+
         private void warn(string value)
         {
             Debug.LogWarning($"[<color=#1F84A9>A</color><color=#A3A3A3>T</color><color=#2861B4>A</color> | <color=#00ff00>{nameof(TVManagerV2)} ({name})</color>] {value}");
         }
+
         private void err(string value)
         {
             Debug.LogError($"[<color=#1F84A9>A</color><color=#A3A3A3>T</color><color=#2861B4>A</color> | <color=#00ff00>{nameof(TVManagerV2)} ({name})</color>] {value}");

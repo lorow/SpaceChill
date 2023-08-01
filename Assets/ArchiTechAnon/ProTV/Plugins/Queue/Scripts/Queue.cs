@@ -281,7 +281,7 @@ namespace ArchiTech
             if (index > -1 && (localPlayer.playerId == owners[index] || tv._IsPrivilegedUser()))
             {
                 if (!isOwner) Networking.SetOwner(localPlayer, gameObject);
-                if (index == 0 && matchCurrentUrl(true))
+                if (index == 0 && _MatchCurrentUrl(true))
                 {
                     log("Removing active queue item.");
                     tv._Stop();
@@ -344,7 +344,7 @@ namespace ArchiTech
             { // only allow the TV owner to act if the tv is locked
                 if (requestedByMe)
                 { // only allow self-requested NEXT calls when the TV is locked.
-                    if (matchCurrentUrl(true))
+                    if (_MatchCurrentUrl(true))
                     { // if the current url is in the TV, switch to the next URL
                         if (!isOwner) Networking.SetOwner(localPlayer, gameObject);
                         nextURL();
@@ -354,9 +354,9 @@ namespace ArchiTech
             }
             else
             {
-                if (matchCurrentUrl(true))
+                if (_MatchCurrentUrl(true))
                 { // if the current url is in the TV
-                    if (isOwner && checkNextUrl(false) || localPlayer.playerId == owners[1])
+                    if (isOwner && _CheckNextUrl(false) || localPlayer.playerId == owners[1])
                     {
                         // allow pass through for queue owner if there isn't another media in queue
                         //      This allows for media end to clear the last url from the queue
@@ -368,7 +368,7 @@ namespace ArchiTech
                 }
                 else
                 {
-                    if (checkCurrentUrl(true) && localPlayer.playerId == owners[0])
+                    if (_CheckCurrentUrl(true) && localPlayer.playerId == owners[0])
                     {
                         // if there is a URL in the queue, make the owner of that queue entry play the video
                         play();
@@ -384,7 +384,7 @@ namespace ArchiTech
         public void _TvMediaChange()
         {
             // if the tv media changes and the current URL does not match, collapse the entries
-            if (isOwner && matchCurrentUrl(false))
+            if (isOwner && _MatchCurrentUrl(false))
                 collapseEntries();
         }
 
@@ -393,7 +393,7 @@ namespace ArchiTech
             noActiveMedia = true;
             if (isTVOwner())
             {
-                if (matchCurrentUrl(true)) // urls[0] matches the tv url
+                if (_MatchCurrentUrl(true)) // urls[0] matches the tv url
                     requestNext(); // attempt queueing the next media
                 else play(); // attempt to play urls[0]
             }
@@ -424,7 +424,7 @@ namespace ArchiTech
         {
             // ONLY enable loading if the current url matches
             if (hasLoadingBar) loadingBar.value = 0f;
-            if (matchCurrentUrl(true))
+            if (_MatchCurrentUrl(true))
                 isLoading = true;
         }
 
@@ -465,7 +465,7 @@ namespace ArchiTech
 
         private void playNext()
         {
-            if (matchCurrentUrl(true)) nextURL();
+            if (_MatchCurrentUrl(true)) nextURL();
             play();
         }
 
@@ -504,9 +504,9 @@ namespace ArchiTech
         }
 
 
-        private bool matchCurrentUrl(bool shouldMatch) => urlMatch(urls[0], shouldMatch);
-        private bool checkCurrentUrl(bool shouldExist) => urlExist(urls[0], shouldExist);
-        private bool checkNextUrl(bool shouldExist) => urlExist(urls[1], shouldExist);
+        public bool _MatchCurrentUrl(bool shouldMatch) => urlMatch(urls[0], shouldMatch);
+        public bool _CheckCurrentUrl(bool shouldExist) => urlExist(urls[0], shouldExist);
+        public bool _CheckNextUrl(bool shouldExist) => urlExist(urls[1], shouldExist);
 
         private void collapseEntries()
         {

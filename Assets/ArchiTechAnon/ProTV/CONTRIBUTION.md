@@ -16,6 +16,7 @@ If you wish to help contribute to making this asset the best in the meta-verse, 
 - EvanTheFloydian (for doing such a stellar job on the 2.3 promo video)
 - iigo (video screen shader code help)
 - OctoFloofy (reporting many issues and assistance with testing/debugging)
+- JokerIsPunk (various bug reports)
 
 ## Tools Used
 - Merlin (UdonSharp)

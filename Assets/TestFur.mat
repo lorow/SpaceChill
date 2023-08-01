@@ -1123,6 +1123,8 @@ Material:
     - _ScrollingEmission1: 0
     - _ShadeColor_Step: 0
     - _ShaderOptimizerEnabled: 0
+    - _ShaderUIWarning0: -0
+    - _ShaderUIWarning1: -0
     - _ShadowMix: 0
     - _ShadowMixThreshold: 0.5
     - _ShadowMixWidthMod: 0.5

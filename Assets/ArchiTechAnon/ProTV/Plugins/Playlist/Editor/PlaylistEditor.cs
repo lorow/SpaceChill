@@ -83,6 +83,7 @@ namespace ArchiTech.Editor
             {
                 Undo.RecordObject(script, "Modify Playlist Content");
                 SaveData();
+                PrefabUtility.RecordPrefabInstancePropertyModifications(script);
             }
             EditorGUILayout.LabelField($"Inspector frametime: {stopwatch.ElapsedMilliseconds}ms");
         }
@@ -513,16 +514,16 @@ namespace ArchiTech.Editor
             for (int i = 0; i < urls.Length; i++)
             {
                 var url = urls[i];
-                s.AppendLine("@" + url);
+                s.AppendLine(newEntryIndicator + url);
 
                 var alt = alts[i];
-                if (!string.IsNullOrWhiteSpace(alt.Get())) s.AppendLine("^" + alt);
+                if (!string.IsNullOrWhiteSpace(alt.Get())) s.AppendLine(entryAltIndicator + alt);
 
                 var image = images[i];
-                if (image != null) s.AppendLine("/" + AssetDatabase.GetAssetPath(image.texture));
+                if (image != null) s.AppendLine(entryImageIndicator + AssetDatabase.GetAssetPath(image.texture));
 
                 var tag = tags[i];
-                if (!string.IsNullOrWhiteSpace(tag)) s.AppendLine("#" + tag);
+                if (!string.IsNullOrWhiteSpace(tag)) s.AppendLine(entryTagIndicator + tag);
 
                 var title = titles[i];
                 if (!string.IsNullOrWhiteSpace(title)) s.AppendLine(title);
@@ -844,7 +845,7 @@ namespace ArchiTech.Editor
             entry.transform.SetAsLastSibling();
 
             var behavior = UdonSharpEditorUtility.GetBackingUdonBehaviour(script);
-            var button = entry.GetComponentInChildren<Button>();
+            var button = entry.GetComponentInChildren<Button>(true);
 
             if (button == null)
             {
@@ -855,6 +856,9 @@ namespace ArchiTech.Editor
                 nav.mode = Navigation.Mode.None;
                 button.navigation = nav;
             }
+
+            var loading = entry.GetComponentInChildren<Slider>(true);
+            if (loading != null) loading.SetValueWithoutNotify(0f);
 
             // clear old listners
             while (button.onClick.GetPersistentEventCount() > 0)
@@ -992,6 +996,9 @@ namespace ArchiTech.Editor
                         imageSet = true;
                     }
                 }
+
+                var loading = entry.GetComponentInChildren<Slider>(true);
+                if (loading != null) loading.SetValueWithoutNotify(0f);
                 playlistIndex++;
             }
         }

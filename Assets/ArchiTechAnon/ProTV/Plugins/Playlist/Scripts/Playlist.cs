@@ -226,7 +226,8 @@ namespace ArchiTech
             if (hasNoTV) return;
             if (autoplayList && !tv.loading && isTVOwner())
                 if (loopPlaylist || nextSortViewIndex != 0)
-                    _SwitchTo(nextSortViewIndex);
+                    if (!hasQueue || queue._CheckNextUrl(false))
+                        _SwitchTo(nextSortViewIndex);
         }
 
         public void _TvMediaChange()
@@ -316,8 +317,10 @@ namespace ArchiTech
             if (!init || skipScrollbar) return;
             log("Update View");
             int filteredViewIndex = 0;
-            if (scrollView.verticalScrollbar != null)
+            // must have scrollbar and scrollbar must be visible
+            if (scrollView.verticalScrollbar != null && scrollView.content.rect.height > scrollView.viewport.rect.height)
                 filteredViewIndex = Mathf.FloorToInt((1f - scrollView.verticalScrollbar.value) * filteredView.Length);
+
             seekView(filteredViewIndex);
             retargetActive();
         }
@@ -391,6 +394,8 @@ namespace ArchiTech
                 nextSortViewIndex = currentSortViewIndex = sortViewIndex;
                 log($"Switching to playlist item {sortViewIndex}");
                 int index = sortView[nextSortViewIndex];
+                if (prioritizeOnInteract)
+                    tv._SetUdonSharpSubscriberPriorityToHigh(this);
                 if (hasQueue)
                 {
                     queue.IN_URL = urls[index];
@@ -401,9 +406,8 @@ namespace ArchiTech
                 }
                 else
                 {
-                    if (prioritizeOnInteract)
-                        tv._SetUdonSharpSubscriberPriorityToHigh(this);
-                    tv._ChangeMediaWithAltTo(urls[index], alts[index]);
+                    if (tv.tvInit) tv._ChangeMediaWithAltTo(urls[index], alts[index]);
+                    else tv._DelayedChangeMediaWithAltTo(urls[index], alts[index]);
                     updateTVLabel = true;
                 }
                 pickNext();

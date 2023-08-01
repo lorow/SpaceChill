@@ -11,6 +11,92 @@ Structure used for this document:
 ### Fixed
 ```
 
+## 2.3.14 (2023-07-17)
+## Fixed
+- [ Core ] Fix race condition which can cause late-joiners to not correctly sync the initial video load.
+
+## 2.3.13 (2023-04-01)
+### Fixed
+- [ Playlist ] Fix for playlist prefabs not properly retaining data assigned to them.
+  - This should make it so you no longer are required to unpack the prefab.
+
+### Changed
+- [ Core ] Tentative fix for issues where late joiners sometime fail to load a video if the TV has an autoplay url assigned on build.
+- [ Core ] Additional security checks.
+
+
+## 2.3.12 (2022-12-07)
+### Added
+- [ Core ] Add option `secureWhitelist` to enable or disable purging of the whitelist during start. For security reasons, this is enabled by default.
+
+### Fixed
+- [ Core ] If a user joins after a video has ended, the media should now correctly seek to the end.
+- [ Core ] Tentative mitigation for some situations where a user on-join would not receive synced data within a reasonable amount of time.
+- [ Core ] Fix for late-join not properly respecting when the owner has a video selected, but the state is stopped.
+- [ Core ] Fix for late-join not always properly syncing time if the video had ended before they joined.
+  - Also fixes clicking play on a video after a user joined should properly play the video
+
+
+## 2.3.11 (2022-11-16)
+### Fixed
+- [ Core ] Calling play after media has ended should now correctly restart the video for all users when sync to owner is enabled.
+- [ Core ] Corrected some edge cases where freshly played media would instantly seek to the end of the video for non-owners.
+- [ Playlist ] The playlist should no longer glitch when the entry count fills up less than the height of the container.
+  - This issue was also made evident when doing searching, also fixed for that.
+- [ Prefab ] Hangout Prefab no longer has both queue and playlist tab both active by default.
+
+### Changed
+- [ Core ] Improved sync time when using the seek bar.
+
+## 2.3.10 (2022-11-14)
+### Fixed
+- [ Core ] TV init phase should now respect the VideoManagerV2's auto-manage flags.
+  - This will prevent custom setups on audio sources being messed with when the respective flags are unchecked.
+- [ Core ] Add missing logic to clear an internal flag related to manual looping (calling _Play after some media has ended)
+  - This caused manual looping to fail to switch to the internal paused state on the second media ending.
+  - This should also correct the seek bar not properly updating under the same conditions.
+
+## 2.3.9 (2022-11-05)
+### Fixed
+- [ Core ] Another attempt at solving the "Unexpectedly Paused on Load for NonOwners" issue.
+
+## 2.3.8 (2022-10-14)
+### Changed
+- [ Core ] Security updates
+
+## 2.3.7 (2022-10-09)
+### Added
+- [ AudioLinkAdapter ] New property to flag if the world music should be triggered if the TV is not producing audio (paused or muted)
+
+### Changed
+- [ Core ] Another tentative fix for the "Unexpectedly paused after a video loads" issue.
+- [ Core ] Moved the _TvVideoPlayerChange event from immediately in the respective UI event, to after the active manager has actually been updated.
+  - This also fixes the issue of the _TvVideoPlayerChange not being called until you actually swap video players. It should be called for the initial video player as well.
+- [ Core ] Update UIShapeFixes to take into account the RectTransform's pivot and adjust the collider accordingly.
+  - This means the given element no longer has be centered for the box to be accurate.
+- [ AudioLinkAdapter ] The speaker associated with AudioLink will now mute itself when the TV is not producing any audio.
+  - This fixes the issue where if the world has a 2D audio source for AL (typical for world-wide AL effects),
+    anytime the TV has been muted or the internal volume is 0 (effectively mute),
+    the AL AudioSource will also be muted implicitly to avoid unintentional audio leaks.
+- [ Prefabs ] Made all prefabs default paused sync threshold to Infinity to effectively disable the feature because too many people viewed it as unexpected behaviour,
+  so it should be something that the creator explicitly enables.
+
+## 2.3.6 (2202-09-22)
+### Fixed
+- [ Core ] Looping was broken due to the mediaEnded flag not being cleared properly when the loop was triggered.
+- [ Core ] _TvReady event should now correctly run once the TV has completed it initial waiting period instead of during the Start phase.
+  - This should fix the issue of not being able to play a video from within _TvReady event.
+- [ Core ] Late joiners should now properly respect the owner's play/paused state.
+- [ Queue ] Fix certain edge cases where when multiple playlists are autoplay, they would all add something to the queue, resulting in excessive queued videos.
+  - Now it should just utilize the highest priority playlist (as was the original intent of the integration)
+- [ MediaControls ] Prevent accidental div-by-0. Fixes occasional instances where the seekbar would break entirely.
+
+### Changed
+- [ Core ] Do not set autoplay offset for TVs that are disabled by default.
+  - This prevents excessive offsets when it's unnecessary as the offsets are specifically for avoiding rate-limit spam on-join.
+- [ Playlist ] Use delayed media change if TV hasn't finished initializing.
+  - This prevents improperly trying to play media before the TV is ready for it.
+
 ## 2.3.5 (2022-08-17)
 ### Fixed
 - [ Core ] Use full namespace for the Stopwatch class in build helpers script to avoid naming collisions on compilation.

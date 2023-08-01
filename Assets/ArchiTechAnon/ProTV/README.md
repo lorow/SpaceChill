@@ -4,20 +4,18 @@
 <a href='https://ko-fi.com/I3I84I3Z8' target='_blank'><img height='36' style='border:0px;height:36px;' src='https://cdn.ko-fi.com/cdn/kofi2.png?v=2' border='0' alt='Support me at ko-fi.com' /></a>
 
 ## BEFORE IMPORTING PROTV YOU MUST:
-- Ensure latest VRCSDK3 (Udon) is imported (last tested with v2022.06.03.00.03)
+- Ensure you are using the latest VCC SDK with UdonSharp (last tested with VRCSDK 3.1.10 and U# 1.1.5)
 - Ensure you have reloaded the SDK plugins (DO THIS TO AVOID ISSUES WITH URL INPUT FIELDS)
     - Open the VRCSDK unity menu and select `Reload SDK`
     - If the VRCSDK menu isn't available, then right click on the `Assets/VRCSDK/Plugins` folder and select `Reimport` (Do _NOT_ select `Reimport All`)
-- Ensure latest UdonSharp version is imported (last tested with [v0.20.3](https://github.com/vrchat-community/UdonSharp/releases/download/0.20.3/UdonSharp_v0.20.3.unitypackage) & v1.X ala VCC)
 
-- IMPORTANT NOTE: It is only recommended to import ProTV into a _brand new_ project when using UdonSharp 1.x. There are known issues with nested prefabs when UdonSharp does it's auto-upgrade-on-import thing.
-- If you _must_ upgrade an existing project, prior to begining the upgrade, either delete all ProTV stuff from the scene OR you can try unpacking all ProTV prefabs in the scene. That should allow UdonSharp to upgrade ProTV udon stuff cleanly.
+- IMPORTANT NOTE: If you are upgrading your project from U# 0.20.3 or earlier, you will need to _UNPACK ALL NESTED PREFABS_ such as the ProTV prefabs to avoid udon upgrade issues.
 
 ## Basic Usage
 - Drag a ProTV prefab (located at `Assets/ArchiTechAnon/ProTV/Prefabs`) into your scene wherever you like, rotate in-scene and customize as needed.
 - You can find plugins to customize your ProTV with in the `Assets/ArchiTechAnon/ProTV/Plugins/*/Prefabs` folders.
 
-You can find more about the ready-made TVs in the [`Prefabs Document`](./Docs/Prefabs.md).
+You can find more about the ready-made TVs in the [Prefabs Document](./Docs/Prefabs.md).
 
 ## Features
 - Full media synchronization (play/pause/stop/seek/loop)
@@ -30,7 +28,7 @@ You can find more about the ready-made TVs in the [`Prefabs Document`](./Docs/Pr
 - Near frame-perfect media looping (audio looping isn't always frame-perfect, depends on the media's codec)
 - Media autoplay URL support
 - Media autoplay delay offsets which help mitigate ratelimit issues with multiple TVs
-- Media url hash params support (t/start/end/loop/live/retry) (see [Understanding Urls](./Docs/UnderstandingURLs.md))
+- Media url hash params support (t / start / end / loop / live / retry / etc...) (see [Understanding Urls](./Docs/UnderstandingURLs.md))
 - Video player swap management for multiple video player configurations
 - Pub/Sub event system for modular extension
 - Instance owner/master/whitelist locking support (master control is configurable, instance owner is always allowed)
@@ -40,8 +38,8 @@ In addition to the standard proxy controls for video players (play/pause/stop/vo
 
 ProTV has been architected to be more modular and extensible. This is done through a pseudo pub/sub system. In essence, a behavior will pass its own reference to the TV (supports all udon compilers) and then will receive custom events (see the [`Events Document`](./Docs/Events.md)) based on the TV's activity and state. The types of events directly reflect the various supported core features of the TV, such as the standard video and audio controls, as well as the video player swap mechanism for managing multiple configurations.
 
-More details about the core architecture can be found in the [`Architecture Document`](./Docs/Architecture.md).  
-Details for ready-made plugins for the TV can be found in the [`Plugins Document`](./Docs/Plugins.md).  
+More details about the core architecture can be found in the [Architecture Document](./Docs/Architecture.md).  
+Details for ready-made plugins for the TV can be found in the [Plugins Document](./Docs/Plugins.md).  
 
 ## Core Settings
 
@@ -83,7 +81,7 @@ This option defines how many seconds to wait before attempting to resync. This a
 
 - __`Paused Resync Threshold`__  
 This is more so a visual feedback feature where if the video is paused locally but the video owner is still playing, the video will update the current playback timestamp every some number of seconds determined by this option. If you don't want the video to resync while paused, set this value to `Infinity` (yes the actual word) to have it never update until the user resumes the video.
-One way to view it is as a live slideshow of what is currently playing. This is intended to allow people to see what is visible on the TV without actually having the media actively running.  
+One way to view it is as a live slideshow of what is currently playing. This is intended to allow people to see what is visible on the TV without actually having the media actively running, like moderators running an event.  
 
 - __`Sync Video Player Selection`__  
 This setting, when combined with `Sync To Owner` will restrict the video player swap mechanism to the owner, and sync the active video player selection to other users.

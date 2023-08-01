@@ -9,7 +9,7 @@ Material:
   m_PrefabAsset: {fileID: 0}
   m_Name: ProTVModern_AVPro1080p
   m_Shader: {fileID: 4800000, guid: f5fc0554669f2d342b191998c9525e82, type: 3}
-  m_ShaderKeywords: 
+  m_ShaderKeywords: APPLY_GAMMA
   m_LightmapFlags: 1
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
